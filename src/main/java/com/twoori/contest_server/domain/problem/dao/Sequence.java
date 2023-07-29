@@ -1,16 +1,17 @@
-package com.twoori.contest_server.domain.sequence.dao;
+package com.twoori.contest_server.domain.problem.dao;
 
-import com.twoori.contest_server.domain.problem.dao.Problem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 @SQLDelete(sql = "UPDATE sequence SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
