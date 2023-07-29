@@ -1,17 +1,21 @@
 package com.twoori.contest_server.domain.contest.dao;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 @SQLDelete(sql = "UPDATE contest SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
@@ -38,9 +42,9 @@ public class Contest {
     @Column(nullable = false)
     private String hostName;
 
-    @Setter
+    @Column(nullable = false)
     private LocalDateTime runningStartDateTime;
 
-    @Setter
+    @Column(nullable = false)
     private LocalDateTime runningEndDateTime;
 }

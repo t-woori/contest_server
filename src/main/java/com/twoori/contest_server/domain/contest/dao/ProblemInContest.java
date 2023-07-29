@@ -5,10 +5,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(name = "problem_in_contest")
 public class ProblemInContest {
@@ -25,6 +27,7 @@ public class ProblemInContest {
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
@@ -32,6 +35,5 @@ public class ProblemInContest {
     private LocalDateTime deletedAt;
 
     private Integer noOfProblemInContest;
-
 
 }
