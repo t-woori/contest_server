@@ -1,6 +1,5 @@
 package com.twoori.contest_server.domain.problem.dao;
 
-import com.twoori.contest_server.domain.sequence.dao.Sequence;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
