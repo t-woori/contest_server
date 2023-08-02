@@ -24,6 +24,18 @@ pipeline {
                 sh('./gradlew clean build')
             }
         }
+        stage('SonarQube Analysis') {
+            steps{
+                withSonarQubeEnv('SonarQube') {
+                    sh "./gradlew sonar"
+                }
+            }
+        }
+        stage("Quality gate") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
         stage('Build Docker Image && Tagging to AWS ECR Repository') {
             steps {
                 sh("docker build --build-arg build/libs/contest_server-0.0.1-SNAPSHOT.jar " +
