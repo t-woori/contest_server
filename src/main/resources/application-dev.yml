@@ -15,8 +15,9 @@ spring:
     generate-ddl: true
     defer-datasource-initialization: true
   sql.init.mode: always
-jwt:
-  secret: develop
+  jackson.property-naming-strategy: SNAKE_CASE
+jwt.secret: develop
+
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.type: trace

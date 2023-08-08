@@ -2,11 +2,10 @@ package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDTO;
-import com.twoori.contest_server.domain.contest.exception.EarlyContestException;
-import com.twoori.contest_server.domain.contest.exception.ExpiredContestException;
 import com.twoori.contest_server.domain.student.dao.Student;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
+import com.twoori.contest_server.global.exception.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +51,7 @@ class ContestServiceTest {
         given(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).willReturn(Optional.of(studentInContest));
         // when & then
         assertThatThrownBy(() -> contestService.getAccessibleContest(student.getId(), contestId, enterDateTime))
-                .isInstanceOf(ExpiredContestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @DisplayName("Fail case2: 대회 대기 시간 전에 입장 시도")
@@ -72,7 +71,7 @@ class ContestServiceTest {
         // when & then
         when(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).thenReturn(Optional.of(studentInContest));
         assertThatThrownBy(() -> contestService.getAccessibleContest(student.getId(), contestId, enterDateTime))
-                .isInstanceOf(EarlyContestException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @DisplayName("Success case: 대회 시작 10분전에 입장 시도")
