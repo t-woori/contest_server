@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/contest?sslMode=REQUIRED&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/db?sslMode=REQUIRED&serverTimezone=Asia/Seoul
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -11,7 +11,12 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
     generate-ddl: true
+    defer-datasource-initialization: true
+  sql.init.mode: always
+  jackson.property-naming-strategy: SNAKE_CASE
+jwt.secret: develop
 
 logging.level:
   org.hibernate.SQL: debug
