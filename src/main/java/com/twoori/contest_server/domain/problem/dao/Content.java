@@ -12,18 +12,17 @@ import java.time.LocalDateTime;
 
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE sequence SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE content SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
-@Table(name = "sequence")
-public class Sequence {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+@Table(name = "content")
+public class Content {
 
-    @ManyToOne
-    @JoinColumn(name = "problem_id")
+    @EmbeddedId
+    private ContentID contentID;
+
+    @MapsId("problem_id")
+    @ManyToOne(optional = false)
     private Problem problem;
 
     @CreatedDate
@@ -35,7 +34,11 @@ public class Sequence {
 
     private LocalDateTime deletedAt;
 
+    private String preScript;
+    @Column(nullable = false, unique = true)
     private String question;
+    @Column(nullable = false)
     private String answer;
+    private String postScript;
 
 }

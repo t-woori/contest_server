@@ -1,5 +1,7 @@
 package com.twoori.contest_server.domain.problem.dao;
 
+import com.twoori.contest_server.domain.problem.dao.enums.GRADE;
+import com.twoori.contest_server.domain.problem.dao.enums.PROBLEM_TYPE;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.hibernate.annotations.SQLDelete;
@@ -13,7 +15,7 @@ import java.util.List;
 
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE problem SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE problem SET deleted_at = NOW() WHERE problem_id = ? AND sequence_id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
 @Table(name = "problem")
@@ -32,18 +34,15 @@ public class Problem {
 
     private LocalDateTime deletedAt;
 
-    @Column(nullable = false)
-    private String title;
+    @Column(name = "image_url")
+    private String imageURL;
 
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "chapter_name")
-    private String chapterName;
     @Column(nullable = false)
-    private Integer grade;
+    private GRADE grade;
     @Column(nullable = false)
-    private Integer type;
+    private PROBLEM_TYPE type;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "problem")
-    private List<Sequence> sequences;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "problem")
+    private List<Content> contents;
 
 }
