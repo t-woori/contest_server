@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ContestDTO(
+public record ContestDto(
         UUID id,
         String authCode,
         String name,
@@ -15,8 +15,8 @@ public record ContestDTO(
         LocalDateTime runningEndDateTime
 ) implements Serializable {
 
-    public static ContestDTO daoToDto(Contest dao) {
-        return new ContestDTO(
+    public static ContestDto daoToDto(Contest dao) {
+        return new ContestDto(
                 dao.getId(),
                 dao.getAuthCode(),
                 dao.getName(),

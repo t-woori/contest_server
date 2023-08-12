@@ -1,12 +1,12 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDTO;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.vo.EnterContestVO;
-import com.twoori.contest_server.global.exception.PermissionDenialException;
+import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
+import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.global.controller.SecurityController;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
 import com.twoori.contest_server.global.util.Utils;
-import com.twoori.contest_server.global.vo.CommonMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,33 +19,25 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-public class ContestController {
+public class ContestController extends SecurityController {
 
-    private final StudentJwtProvider studentJwtProvider;
-    private final Utils utils;
+
     private final ContestService contestService;
 
     public ContestController(StudentJwtProvider studentJwtProvider, Utils utils, ContestService contestService) {
-        this.studentJwtProvider = studentJwtProvider;
-        this.utils = utils;
+        super(utils, studentJwtProvider);
         this.contestService = contestService;
     }
 
     @GetMapping("/v1/contest/{contest_id}/enter")
-    public ResponseEntity<EnterContestVO> requestEnterContest(
+    public ResponseEntity<EnterContestVOAPI> requestEnterContest(
             @RequestHeader(name = "Authorization") String accessTokenHeader,
             @PathVariable("contest_id") UUID contestId) {
-        log.debug("access token: {}, contest_id: {}", accessTokenHeader, contestId);
-        String accessToken = utils.parseAccessTokenAboutAuthorizationHeader(accessTokenHeader);
-        if (!studentJwtProvider.validateAccessToken(accessToken)) {
-            throw new PermissionDenialException("Not Found Access Token");
-        }
-        UUID studentId = studentJwtProvider.getStudentIdByAccessToken(accessToken);
+        StudentDto studentDto = super.validateAuthorization(accessTokenHeader);
         LocalDateTime now = LocalDateTime.now();
-        ContestDTO dto = contestService.getAccessibleContest(studentId, contestId, now);
+        ContestDto dto = contestService.getAccessibleContest(studentDto.id(), contestId, now);
         return ResponseEntity.ok(
-                new EnterContestVO(
-                        CommonMessage.OK.getMessage(),
+                new EnterContestVOAPI(
                         dto.runningStartDateTime(),
                         dto.runningEndDateTime()
                 )

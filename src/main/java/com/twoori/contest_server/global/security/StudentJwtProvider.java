@@ -21,6 +21,9 @@ public class StudentJwtProvider {
     private final StudentService studentService;
     private final long ACCESS_TOKEN_EXP = 10 * 60 * 1000L;
     private final long REFRESH_TOKEN_EXP = 14 * 24 * 60 * 60 * 1000L;
+    private final String CLAIM_STUDENT_ID = "student_id";
+    private final String CLAIM_ACCESS_TOKEN = "access_token";
+    private final String MESSAGE_INVALIDATE_ACCESS_TOKEN = "invalidate access token";
     private final Algorithm jwtAlgorithm;
     private final JWTVerifier verifier;
 
@@ -38,7 +41,7 @@ public class StudentJwtProvider {
 
     private String createAccessToken(StudentDto studentDto) {
         return JWT.create()
-                .withClaim("id", studentDto.id().toString())
+                .withClaim(CLAIM_STUDENT_ID, studentDto.id().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
                 .withJWTId(UUID.randomUUID().toString())
@@ -47,44 +50,40 @@ public class StudentJwtProvider {
 
     private String createRefreshToken(StudentDto studentDto, String accessToken) {
         return JWT.create()
-                .withClaim("id", studentDto.id().toString())
+                .withClaim(CLAIM_STUDENT_ID, studentDto.id().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
-                .withClaim("accessToken", accessToken)
+                .withClaim(CLAIM_ACCESS_TOKEN, accessToken)
                 .sign(jwtAlgorithm);
     }
 
-    public boolean validateAccessToken(String accessToken) {
+    public StudentDto validateAccessToken(String accessToken) {
         try {
             DecodedJWT decodedJWT = verifier.verify(accessToken);
             if (decodedJWT.getExpiresAt().before(new Date())) {
-                return false;
+                throw new PermissionDenialException(MESSAGE_INVALIDATE_ACCESS_TOKEN);
             }
-            UUID studentID = UUID.fromString(decodedJWT.getClaim("id").asString());
-            return validateStudentID(studentID);
+            return getStudentByDecodedJWT(decodedJWT);
         } catch (JWTVerificationException e) {
-            throw new PermissionDenialException(e, "invalidate access token");
+            throw new PermissionDenialException(e, MESSAGE_INVALIDATE_ACCESS_TOKEN);
         }
     }
 
-    public boolean validateRefreshToken(String accessToken, String refreshToken) {
+    public StudentDto validateRefreshToken(String accessToken, String refreshToken) {
         DecodedJWT decodedJWT = verifier.verify(refreshToken);
         if (decodedJWT.getExpiresAt().before(new Date())
-                || !decodedJWT.getClaim("accessToken").asString().equals(accessToken)) {
-            return false;
+                || !decodedJWT.getClaim(CLAIM_ACCESS_TOKEN).asString().equals(accessToken)) {
+            throw new PermissionDenialException(MESSAGE_INVALIDATE_ACCESS_TOKEN);
         }
-        UUID studentID = UUID.fromString(decodedJWT.getClaim("accessToken").asString());
-        return validateStudentID(studentID);
+        UUID studentID = UUID.fromString(decodedJWT.getClaim(CLAIM_STUDENT_ID).asString());
+        return studentService.getStudentByID(studentID);
     }
 
-    private boolean validateStudentID(UUID studentID) {
-        StudentDto studentDto = studentService.getStudentByID(studentID);
-        return studentDto.id().equals(studentID);
-    }
-
-
-    public UUID getStudentIdByAccessToken(String accessToken) {
-        DecodedJWT decodedJWT = verifier.verify(accessToken);
-        return UUID.fromString(decodedJWT.getClaim("id").asString());
+    public StudentDto getStudentByDecodedJWT(DecodedJWT decodedJWT) {
+        if (!decodedJWT.getClaims().containsKey(CLAIM_STUDENT_ID)) {
+            throw new PermissionDenialException(MESSAGE_INVALIDATE_ACCESS_TOKEN);
+        }
+        UUID studentID = UUID.fromString(decodedJWT.getClaim(CLAIM_STUDENT_ID).asString());
+        return studentService.getStudentByID(studentID);
     }
 }

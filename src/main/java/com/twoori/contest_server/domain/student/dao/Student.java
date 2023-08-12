@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -21,7 +22,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "student")
 public class Student {
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Id
     private UUID id;
 
@@ -45,4 +45,16 @@ public class Student {
 
     private String refreshToken;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return Objects.equals(id, student.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
