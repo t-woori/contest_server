@@ -4,14 +4,14 @@ import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.problem.vo.ContentVO;
 import com.twoori.contest_server.domain.problem.vo.ProblemVO;
+import com.twoori.contest_server.domain.problem.vo.UpdateRequestStatusVO;
+import com.twoori.contest_server.domain.problem.vo.UpdateResponseStatusVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.controller.SecurityController;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
 import com.twoori.contest_server.global.util.Utils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -42,5 +42,12 @@ public class ProblemController extends SecurityController {
                                 contentDto.answer(),
                                 contentDto.postScript())).toList()
         );
+    }
+
+    @PutMapping("/v1/contest/{contest_id}/student/{student_id}/status")
+    public ResponseEntity<UpdateResponseStatusVO> updateQuizStatus(@PathVariable("contest_id") UUID contestId, @PathVariable("student_id") UUID studentId,
+                                                                   @RequestBody UpdateRequestStatusVO requestStatusVO) {
+        problemService.updateQuizStatus(contestId, studentId, requestStatusVO.problemId());
+        return ResponseEntity.ok(new UpdateResponseStatusVO(200, "ok"));
     }
 }

@@ -1,6 +1,8 @@
 package com.twoori.contest_server.domain.problem.service;
 
 import com.twoori.contest_server.domain.problem.dao.Problem;
+import com.twoori.contest_server.domain.problem.dao.ProblemInContest;
+import com.twoori.contest_server.domain.problem.dao.ProblemInContestId;
 import com.twoori.contest_server.domain.problem.dto.ContentDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemInContestDto;
@@ -82,5 +84,17 @@ public class ProblemService {
                 new LogStudentInProblemID(contestId, studentId, nextProblemNo),
                 LocalDateTime.now()
         ));
+    }
+
+    public void updateQuizStatus(UUID contestId, UUID studentId, Long problemId) {
+        long noOfProblemInContest = problemInContestRepository.findById(new ProblemInContestId(problemId, contestId))
+                .map(ProblemInContest::getNoOfProblemInContest).orElseThrow(() -> new IllegalArgumentException("not found problem"));
+        logStudentInProblemRepository.findById(
+                new LogStudentInProblemID(contestId, studentId, noOfProblemInContest)
+        ).ifPresent(log -> {
+                    log.setEndSolveProblemDateTime(LocalDateTime.now());
+                    logStudentInProblemRepository.save(log);
+                }
+        );
     }
 }

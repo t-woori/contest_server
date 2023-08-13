@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProblemInContestRepository extends JpaRepository<ProblemInContest, ProblemInContestId> {
-    List<ProblemInContest> findById_ContestIdOrderByNoOfProblemInContestDesc(UUID contestId);
+
 
     List<ProblemInContest> findById_ContestIdOrderByNoOfProblemInContestAsc(UUID contestId);
-
 
 }
