@@ -1,7 +1,7 @@
 package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
-import com.twoori.contest_server.domain.contest.dto.ContestDTO;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.BadRequestException;
@@ -20,7 +20,7 @@ public class ContestService {
         this.studentInContestRepository = studentInContestRepository;
     }
 
-    public ContestDTO getAccessibleContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
+    public ContestDto getAccessibleContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
         StudentInContest studentInContest = studentInContestRepository.findByContest_IdAndStudent_Id(contestId, studentId)
                 .orElseThrow(() -> new NotFoundException("not register contest"));
         Contest contest = studentInContest.getContest();
@@ -30,7 +30,7 @@ public class ContestService {
         if (enterDateTime.isBefore(contest.getRunningStartDateTime().minusMinutes(ENTER_TIME))) {
             throw new BadRequestException("early contest");
         }
-        return ContestDTO.daoToDto(contest);
+        return ContestDto.daoToDto(contest);
     }
 
 }

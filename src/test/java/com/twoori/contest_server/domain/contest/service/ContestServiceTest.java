@@ -1,7 +1,7 @@
 package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
-import com.twoori.contest_server.domain.contest.dto.ContestDTO;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.student.dao.Student;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
@@ -91,7 +91,7 @@ class ContestServiceTest {
         given(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).willReturn(Optional.of(studentInContest));
 
         // when
-        ContestDTO contestDTO = contestService.getAccessibleContest(student.getId(), contestId, enterDateTime);
+        ContestDto contestDTO = contestService.getAccessibleContest(student.getId(), contestId, enterDateTime);
 
         // then
         assertThat(contestDTO)

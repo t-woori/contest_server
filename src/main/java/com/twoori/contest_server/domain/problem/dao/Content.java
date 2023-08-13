@@ -9,21 +9,22 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE sequence SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE content SET deleted_at = NOW() WHERE problem_id = ? AND content_id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
-@Table(name = "sequence")
-public class Sequence {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Long id;
+@Table(name = "content")
+public class Content {
 
-    @ManyToOne
+    @EmbeddedId
+    private ContentCompositeID contentCompositeId;
+
+    @ManyToOne(optional = false)
     @JoinColumn(name = "problem_id")
+    @MapsId("problem_id")
     private Problem problem;
 
     @CreatedDate
@@ -35,7 +36,26 @@ public class Sequence {
 
     private LocalDateTime deletedAt;
 
+    private String preScript;
+
+    @Column(nullable = false)
     private String question;
+
+    @Column(nullable = false)
     private String answer;
 
+    private String postScript;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Content content = (Content) o;
+        return Objects.equals(contentCompositeId, content.contentCompositeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(contentCompositeId);
+    }
 }
