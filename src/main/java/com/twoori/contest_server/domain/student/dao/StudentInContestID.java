@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.student.dao;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -10,12 +11,18 @@ import java.util.UUID;
 
 
 @Getter
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Embeddable
 public class StudentInContestID implements Serializable {
     @Column(name = "student_id")
     private UUID studentID;
     @Column(name = "contest_id")
     private UUID contestID;
+
+    public StudentInContestID(UUID studentID, UUID contestID) {
+        this.studentID = studentID;
+        this.contestID = contestID;
+    }
 
     @Override
     public boolean equals(Object o) {
