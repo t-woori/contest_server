@@ -2,19 +2,22 @@ package com.twoori.contest_server.domain.contest.controller;
 
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.contest.vo.ContestVO;
+import com.twoori.contest_server.domain.contest.vo.ContestsVo;
 import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
+import com.twoori.contest_server.domain.contest.vo.RegisterContestVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.controller.SecurityController;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
 import com.twoori.contest_server.global.util.Utils;
+import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -44,4 +47,32 @@ public class ContestController extends SecurityController {
         );
     }
 
+    @GetMapping("/v1/contest")
+    public ResponseEntity<ContestsVo> searchContests(@RequestParam("search") String parameter) {
+        List<ContestDto> dtos = contestService.searchContests(parameter);
+        return ResponseEntity.ok(
+                new ContestsVo(dtos.stream()
+                        .map(dto -> new ContestVO(
+                                dto.id(),
+                                dto.name(),
+                                dto.hostName(),
+                                dto.runningStartDateTime(),
+                                dto.runningEndDateTime()
+                        )).toList())
+        );
+    }
+
+    @PostMapping("/v1/contest/{contest_id}/register")
+    public ResponseEntity<CommonAPIResponseVO> registerContest(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @RequestBody RegisterContestVO registerContestVo,
+            @PathVariable("contest_id") UUID contestId
+    ) {
+        StudentDto studentDto = super.validateAuthorization(accessToken);
+        contestService.registerContestByUser(contestId, studentDto, registerContestVo.authCode());
+        return ResponseEntity.ok(new CommonAPIResponseVO(
+                HttpStatus.OK.value(),
+                "ok"
+        ));
+    }
 }
