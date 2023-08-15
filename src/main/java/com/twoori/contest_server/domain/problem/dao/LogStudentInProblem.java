@@ -1,6 +1,7 @@
-package com.twoori.contest_server.domain.student.dao;
+package com.twoori.contest_server.domain.problem.dao;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
+import com.twoori.contest_server.domain.student.dao.Student;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

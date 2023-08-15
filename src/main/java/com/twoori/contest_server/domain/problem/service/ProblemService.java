@@ -1,16 +1,12 @@
 package com.twoori.contest_server.domain.problem.service;
 
-import com.twoori.contest_server.domain.problem.dao.Problem;
-import com.twoori.contest_server.domain.problem.dao.ProblemInContest;
-import com.twoori.contest_server.domain.problem.dao.ProblemInContestId;
+import com.twoori.contest_server.domain.problem.dao.*;
 import com.twoori.contest_server.domain.problem.dto.ContentDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemInContestDto;
+import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
-import com.twoori.contest_server.domain.student.dao.LogStudentInProblem;
-import com.twoori.contest_server.domain.student.dao.LogStudentInProblemID;
-import com.twoori.contest_server.domain.student.dao.LogStudentInProblemRepository;
 import com.twoori.contest_server.global.exception.OKException;
 import org.springframework.stereotype.Service;
 

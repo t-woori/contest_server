@@ -1,4 +1,4 @@
-package com.twoori.contest_server.domain.student.dao;
+package com.twoori.contest_server.domain.problem.dao;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
