@@ -14,20 +14,23 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
 public class LogStudentInProblemID implements Serializable {
+    @Column(name = "contest_id")
+    private UUID contestId;
 
     @Column(name = "student_id")
     private UUID studentId;
 
-    @Column(name = "no_of_problem_in_contest")
-    private Long noOfProblemInContest;
+    @Column(name = "problem_id")
+    private Long problemId;
 
-    @Column(name = "contest_id")
-    private UUID contestId;
+    @Column(name = "content_id")
+    private Long contentId;
 
-    public LogStudentInProblemID(UUID contestId, UUID studentId, Long noOfProblemInContest) {
+    public LogStudentInProblemID(UUID contestId, UUID studentId, Long problemId, Long contentId) {
         this.contestId = contestId;
         this.studentId = studentId;
-        this.noOfProblemInContest = noOfProblemInContest;
+        this.problemId = problemId;
+        this.contentId = contentId;
     }
 
     @Override
@@ -35,11 +38,11 @@ public class LogStudentInProblemID implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LogStudentInProblemID that = (LogStudentInProblemID) o;
-        return Objects.equals(studentId, that.studentId) && Objects.equals(noOfProblemInContest, that.noOfProblemInContest) && Objects.equals(contestId, that.contestId);
+        return Objects.equals(contestId, that.contestId) && Objects.equals(studentId, that.studentId) && Objects.equals(problemId, that.problemId) && Objects.equals(contentId, that.contentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(studentId, noOfProblemInContest, contestId);
+        return Objects.hash(contestId, studentId, problemId, contentId);
     }
 }
