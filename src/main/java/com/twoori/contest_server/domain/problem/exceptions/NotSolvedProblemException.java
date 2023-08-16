@@ -1,4 +1,4 @@
-package com.twoori.contest_server.domain.problem.service;
+package com.twoori.contest_server.domain.problem.exceptions;
 
 import lombok.Getter;
 
