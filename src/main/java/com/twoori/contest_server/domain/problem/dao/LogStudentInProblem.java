@@ -62,7 +62,7 @@ public class LogStudentInProblem {
     @PositiveOrZero
     @ColumnDefault("0")
     @Column(nullable = false)
-    private Double score;
+    private Double score = 0.0;
 
     public LogStudentInProblem(LogStudentInProblemID logStudentInProblemId, LocalDateTime startSolveProblemDateTime) {
         this.logStudentInProblemId = logStudentInProblemId;

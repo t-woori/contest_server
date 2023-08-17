@@ -9,16 +9,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface LogStudentInProblemRepository extends JpaRepository<LogStudentInProblem, LogStudentInProblemID> {
+public interface LogStudentInProblemRepository extends JpaRepository<LogStudentInProblem, LogStudentInProblemID>
+        , LogStudentInProblemRepositoryCustom {
     @Query("SELECT l FROM LogStudentInProblem l " +
             "WHERE l.logStudentInProblemId.contestId = :contestId " +
-            "AND l.logStudentInProblemId.studentId = :studentId " +
-            "AND l.logStudentInProblemId.noOfProblemInContest = " +
-            "(" +
-            "SELECT MAX(l.logStudentInProblemId.noOfProblemInContest)" +
-            " FROM LogStudentInProblem l WHERE " +
-            "l.logStudentInProblemId.contestId = :contestId " +
-            "AND l.logStudentInProblemId.studentId = :studentId)")
+            "AND l.logStudentInProblemId.studentId = :studentId ")
     Optional<LogStudentInProblem> findLastNoOfProblemInContest(
             @Param("contestId") UUID contestId,
             @Param("studentId") UUID studentId);
