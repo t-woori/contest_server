@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record ContentVO(
         String preScript,
         String question,
-        String answer,
         String postScript
 ) {
 }

@@ -5,8 +5,8 @@ import java.util.UUID;
 public record LogStudentInProblemIdDto(
         UUID contestId,
         UUID studentId,
-        long problemId,
-        long contentId
+        Long problemId,
+        Long contentId
 ) {
 
 }

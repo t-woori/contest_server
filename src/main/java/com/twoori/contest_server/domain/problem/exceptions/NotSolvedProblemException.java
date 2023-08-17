@@ -1,14 +1,14 @@
 package com.twoori.contest_server.domain.problem.exceptions;
 
+import com.twoori.contest_server.domain.problem.dto.MinInfoLatestProblemDto;
 import lombok.Getter;
 
 @Getter
 
 public class NotSolvedProblemException extends RuntimeException {
-    private final long noSolvedProblemNo;
+    private final MinInfoLatestProblemDto latestProblemInfoDto;
 
-    public NotSolvedProblemException(long noSolvedProblemNo) {
-        super();
-        this.noSolvedProblemNo = noSolvedProblemNo;
+    public NotSolvedProblemException(MinInfoLatestProblemDto latestProblemInfoDto) {
+        this.latestProblemInfoDto = latestProblemInfoDto;
     }
 }
