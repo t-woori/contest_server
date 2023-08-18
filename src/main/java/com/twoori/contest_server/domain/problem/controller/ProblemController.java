@@ -4,10 +4,7 @@ import com.twoori.contest_server.domain.problem.dto.ContentDtoForController;
 import com.twoori.contest_server.domain.problem.dto.MinInfoAboutStudentAndContestDto;
 import com.twoori.contest_server.domain.problem.dto.QuizScoreDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
-import com.twoori.contest_server.domain.problem.vo.ContentVO;
-import com.twoori.contest_server.domain.problem.vo.ProblemVO;
-import com.twoori.contest_server.domain.problem.vo.RequestUpdateStatusVO;
-import com.twoori.contest_server.domain.problem.vo.ResponseUpdateStatusVO;
+import com.twoori.contest_server.domain.problem.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.controller.SecurityController;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
@@ -16,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -28,6 +26,7 @@ public class ProblemController extends SecurityController {
         super(utils, studentJwtProvider);
         this.problemService = problemService;
     }
+
     @PostMapping("/v1/contest/{contest_id}/quiz")
     public ProblemVO getProblemByStudent(
             @RequestHeader(name = "Authorization") String accessTokenHeader,
@@ -64,5 +63,16 @@ public class ProblemController extends SecurityController {
         ));
         log.info("[Controller] response update quiz status : {}", ids);
         return ResponseEntity.ok(new ResponseUpdateStatusVO(200, "ok"));
+    }
+
+    @GetMapping("/v1/contest/{contest_id}/total_status")
+    public ResponseEntity<ResponseTotalStatusVO> getTotalStatus(@RequestHeader(name = "Authorization") String accessTokenHeader,
+                                                                @PathVariable("contest_id") UUID contestId) {
+        StudentDto studentDto = super.validateAuthorization(accessTokenHeader);
+        log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
+        List<Long> statues = problemService.getTotalStatus();
+
+        log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
+        return ResponseEntity.ok(new ResponseTotalStatusVO(statues, 200, "ok"));
     }
 }

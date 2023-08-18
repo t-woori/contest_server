@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -25,6 +28,7 @@ public class ProblemService {
 
     private final long INIT_NO_OF_PROBLEM_IN_CONTEST = 0L;
     private final long INIT_CONTENT_ID = 0L;
+    private final Map<Long, Long> totalStatus = new HashMap<>();
 
     public ProblemService(LogStudentInProblemRepository logStudentInProblemRepository,
                           ProblemInContestRepository problemInContestRepository,
@@ -32,8 +36,14 @@ public class ProblemService {
         this.logStudentInProblemRepository = logStudentInProblemRepository;
         this.problemInContestRepository = problemInContestRepository;
         this.contentRepository = contentRepository;
+        initTotalStatus();
     }
 
+    private void initTotalStatus() {
+        for (long i = 0; i <= LAST_PROBLEM_NO_IN_CONTEST; i++) {
+            totalStatus.put(i, 0L);
+        }
+    }
     public ContentDtoForController getNotSolvedProblemByStudent(MinInfoAboutStudentAndContestDto idInContest) {
         log.info("[Service] get not solved problem contestId : {}, studentId : {}", idInContest.contestId(), idInContest.studentId());
         try {
@@ -47,19 +57,24 @@ public class ProblemService {
             return getDetailLatestProblemInContent(notSolvedProblemInfo.getProblemId(),
                     notSolvedProblemInfo.getContentId());
         } catch (FirstSolveException e) {
-            log.info("[Service] first solved problem contestId : {}, studentId : {}", idInContest.contestId(), idInContest.studentId());
-            ProblemInContestDto problemInContestDto = problemInContestRepository.findById_ContestIdAndNoOfProblemInContest(
-                    idInContest.contestId(),
-                    0L
-            ).orElseThrow(() -> new NotFoundException("not found problem in contest"));
-            saveNewLogProblemInContent(idInContest, MinInfoLatestProblemDto.of(
-                    problemInContestDto.problemId(), INIT_CONTENT_ID, INIT_NO_OF_PROBLEM_IN_CONTEST
-            ));
-            return getDetailLatestProblemInContent(problemInContestDto.problemId(), INIT_CONTENT_ID);
+            return addNewStudentInProblem(idInContest);
         } catch (AllSolvedException e) {
             log.info("[Service] all solved problem contestId : {}, studentId : {}", idInContest.contestId(), idInContest.studentId());
             throw new OKException("end contest");
         }
+    }
+
+    private ContentDtoForController addNewStudentInProblem(MinInfoAboutStudentAndContestDto idInContest) {
+        log.info("[Service] first solved problem contestId : {}, studentId : {}", idInContest.contestId(), idInContest.studentId());
+        totalStatus.put(0L, totalStatus.get(0L) + 1);
+        ProblemInContestDto problemInContestDto = problemInContestRepository.findById_ContestIdAndNoOfProblemInContest(
+                idInContest.contestId(),
+                0L
+        ).orElseThrow(() -> new NotFoundException("not found problem in contest"));
+        saveNewLogProblemInContent(idInContest, MinInfoLatestProblemDto.of(
+                problemInContestDto.problemId(), INIT_CONTENT_ID, INIT_NO_OF_PROBLEM_IN_CONTEST
+        ));
+        return getDetailLatestProblemInContent(problemInContestDto.problemId(), INIT_CONTENT_ID);
     }
 
     private InfoLatestProblemDto getLatestSolvedProblem(MinInfoAboutStudentAndContestDto idInContest) {
@@ -95,13 +110,18 @@ public class ProblemService {
                 idInContest.contestId(),
                 latestProblemMinInfo.getNoOfProblemInContest() + 1
         ).orElseThrow(AllSolvedException::new);
-
+        updateTotalStatus(latestProblemMinInfo.getNoOfProblemInContest(), problemInContestDto.noOfProblemInContest());
 
         return new MinInfoLatestProblemDto(
                 problemInContestDto.problemId(),
                 INIT_CONTENT_ID,
                 latestProblemMinInfo.getNoOfProblemInContest()
         );
+    }
+
+    private void updateTotalStatus(Long beforeNoOfProblemInContest, Long afterNoOfProblemInContest) {
+        totalStatus.put(beforeNoOfProblemInContest, totalStatus.get(beforeNoOfProblemInContest) - 1);
+        totalStatus.put(afterNoOfProblemInContest, totalStatus.get(afterNoOfProblemInContest) + 1);
     }
 
 
@@ -165,5 +185,9 @@ public class ProblemService {
             logStudentInProblem.setScore(quizScoreDto.score());
             logStudentInProblemRepository.save(logStudentInProblem);
         });
+    }
+
+    public List<Long> getTotalStatus() {
+        return List.copyOf(totalStatus.values());
     }
 }
