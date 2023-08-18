@@ -27,7 +27,7 @@ public class StudentJwtProvider {
     private final Algorithm jwtAlgorithm;
     private final JWTVerifier verifier;
 
-    public StudentJwtProvider(StudentService studentService, @Value("{jwt.secret}") String jwtSecretKey) {
+    public StudentJwtProvider(StudentService studentService, @Value("${jwt.secret}") String jwtSecretKey) {
         this.studentService = studentService;
         this.jwtAlgorithm = Algorithm.HMAC512(jwtSecretKey);
         this.verifier = JWT.require(jwtAlgorithm).build();
@@ -44,7 +44,6 @@ public class StudentJwtProvider {
                 .withClaim(CLAIM_STUDENT_ID, studentDto.id().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
-                .withJWTId(UUID.randomUUID().toString())
                 .sign(jwtAlgorithm);
     }
 
