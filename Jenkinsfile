@@ -5,6 +5,8 @@ pipeline {
     environment {
         aws_ecr_uri = credentials('AWS-ECR-URI')
         aws_region = credentials('AWS-REGION')
+        build_filename = credentials('BUILD-FILENAME')
+        spring_active_file = credentials('SPRING-ACTIVE-FILE')
     }
     stages {
         stage('Clean Workspace') {
@@ -38,7 +40,7 @@ pipeline {
         }
         stage('Build Docker Image && Tagging to AWS ECR Repository') {
             steps {
-                sh("docker build --build-arg build/libs/contest_server-0.0.1-SNAPSHOT.jar " +
+                sh("docker build --build-arg JAR_FILE=$build_filename --build-arg SPRING_ACTIVE_PROFILE=$spring_active_file" + " " +
                         "-t $image_name:${currentBuild.number} $main_dir")
                 sh("docker tag $image_name:${currentBuild.number} " +
                         "$aws_ecr_uri" + "/" + "$image_name:${currentBuild.number}")
