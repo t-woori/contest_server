@@ -77,23 +77,23 @@ VALUES (9, now(), now(), null,
 
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (0, 0, now(), now(), null, null, '기프티콘으로 다른 __로 변경 가능한가요?', '메뉴', '네 대신 기프티콘 금액보다 적은 건 안되세요');
+                    post_script, hint)
+VALUES (0, 0, now(), now(), null, null, '기프티콘으로 다른 __로 변경 가능한가요?', '메뉴', '네 대신 기프티콘 금액보다 적은 건 안되세요', 'ㅁㄴ');
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (0, 1, now(), now(), null, null, '레몬에이드 한 _은 얼마에요?', '잔', '4,000원입니다');
+                    post_script, hint)
+VALUES (0, 1, now(), now(), null, null, '레몬에이드 한 _은 얼마에요?', '잔', '4,000원입니다', 'ㅈ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
                     post_script)
 VALUES (1, 0, now(), now(), null, null, '어떤 걸로 주문하시겠어요?', '아메리카노 주세요', null);
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (2, 0, now(), now(), null, null, '감기_있나요?', '약', '어떻게 아프신가요.');
+                    post_script, hint)
+VALUES (2, 0, now(), now(), null, null, '감기_있나요?', '약', '어떻게 아프신가요.', 'ㅇ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (2, 1, now(), now(), null, null, '기침하고 _가 막힙니다.', '코', '종합감기약으로 드리겠습니다');
+                    post_script, hint)
+VALUES (2, 1, now(), now(), null, null, '기침하고 _가 막힙니다.', '코', '종합감기약으로 드리겠습니다', 'ㅋ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
                     post_script)
@@ -104,12 +104,12 @@ INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, 
 VALUES (3, 1, now(), now(), null, null, '약은 짜먹는 약, 알약중 원하는 타입있으신가요?', '짜먹는 약으로 주세요', null);
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (4, 0, now(), now(), null, null, '__ 좀 하려고 왔는데요', '염색', '어떤색 하실거에요');
+                    post_script, hint)
+VALUES (4, 0, now(), now(), null, null, '__ 좀 하려고 왔는데요', '염색', '어떤색 하실거에요', 'ㅇㅅ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (4, 1, now(), now(), null, null, '애쉬그레이로 염색하려고 하는데 __을 몇 번 해야 될까요?', '탈색', '지금 모발에서 3번은 들어가야 될 것 같아요');
+                    post_script, hint)
+VALUES (4, 1, now(), now(), null, null, '애쉬그레이로 염색하려고 하는데 __을 몇 번 해야 될까요?', '탈색', '지금 모발에서 3번은 들어가야 될 것 같아요', 'ㅌㅅ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
                     post_script)
@@ -120,12 +120,12 @@ INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, 
 VALUES (5, 1, now(), now(), null, null, '지금 예약 손님들 먼저 해드리고 있어서 15분 정도 기다리셔야 하는데 괜찮으신가요?', '네 괜찮습니다', null);
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (6, 0, now(), now(), null, null, '한 시간 __은 얼마인가요?', '요금', '1,500원이요');
+                    post_script, hint)
+VALUES (6, 0, now(), now(), null, null, '한 시간 __은 얼마인가요?', '요금', '1,500원이요', 'ㅇㄱ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (6, 1, now(), now(), null, null, '세 명이 나란히 앉을 __ 있나요?', '자리', '네 저쪽에 있습니다');
+                    post_script, hint)
+VALUES (6, 1, now(), now(), null, null, '세 명이 나란히 앉을 __ 있나요?', '자리', '네 저쪽에 있습니다', 'ㅈㄹ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
                     post_script)
@@ -136,12 +136,12 @@ INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, 
 VALUES (7, 1, now(), now(), null, null, '무인 충전기 사용 시 카드 결제도 가능합니다', '무인결제기 사용 방법을 모르는데 도와주실 수 있나요', null);
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (8, 0, now(), now(), null, null, '혼자 __ 가능해요?', '식사', '네 앉으세요');
+                    post_script, hint)
+VALUES (8, 0, now(), now(), null, null, '혼자 __ 가능해요?', '식사', '네 앉으세요', 'ㅅㅅ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
-                    post_script)
-VALUES (8, 1, now(), now(), null, null, '왕돈가스 _은 어느 정도 돼요?', '앵', '딱 1인분 정도예요');
+                    post_script, hint)
+VALUES (8, 1, now(), now(), null, null, '왕돈가스 _은 어느 정도 돼요?', '양', '딱 1인분 정도예요', 'ㅇ');
 
 INSERT INTO content(problem_id, content_id, created_at, updated_at, deleted_at, pre_script, question, answer,
                     post_script)
@@ -169,5 +169,6 @@ INSERT INTO problem_in_contest(problem_id, contest_id, created_at, updated_at, d
 VALUES (8, 0x53A703531F964B3984F922704218627F, now(), now(), null, 8);
 INSERT INTO problem_in_contest(problem_id, contest_id, created_at, updated_at, deleted_at, no_of_problem_in_contest)
 VALUES (9, 0x53A703531F964B3984F922704218627F, now(), now(), null, 9);
+
 
 
