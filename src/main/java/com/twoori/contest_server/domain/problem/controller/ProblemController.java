@@ -42,6 +42,7 @@ public class ProblemController extends SecurityController {
                 dto.problemDtoForController().grade(),
                 dto.problemDtoForController().imageURL(),
                 new ContentVO(
+                        dto.answer(),
                         dto.preScript(),
                         dto.question(),
                         dto.postScript()

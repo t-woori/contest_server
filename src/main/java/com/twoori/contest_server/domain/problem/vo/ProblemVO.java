@@ -25,8 +25,7 @@ public class ProblemVO extends APIOkMessageVO {
                      PROBLEM_TYPE problemType,
                      CHAPTER_TYPE chapterType,
                      GRADE grade,
-                     String imageURL,
-                     ContentVO content,
+                     String imageURL, ContentVO content,
                      Long contentId) {
         this.problemId = problemId;
         this.problemType = problemType;
