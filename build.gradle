@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.1.2'
     id 'io.spring.dependency-management' version '1.1.2'
     id "org.sonarqube" version "4.3.0.3225"
+    id 'jacoco'
 }
 
 group = 'com.t-woori'
@@ -48,5 +49,23 @@ tasks.named('test') {
 sonar {
     properties {
         property "sonar.projectKey", "contest-server"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests.url", "src/test/java"
     }
 }
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+jacocoTestReport {
+    reports {
+        html.required = true
+        csv.required = true
+        xml.required = true
+        xml.destination(new File("${buildDir}/reports/jacoco/test/jacocoTestReport.xml"))
+    }
+}
+
+test.finalizedBy jacocoTestReport
