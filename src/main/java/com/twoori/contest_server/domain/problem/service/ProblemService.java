@@ -1,9 +1,14 @@
 package com.twoori.contest_server.domain.problem.service;
 
-import com.twoori.contest_server.domain.problem.dao.*;
+import com.twoori.contest_server.domain.problem.dao.Content;
+import com.twoori.contest_server.domain.problem.dao.ContentCompositeID;
+import com.twoori.contest_server.domain.problem.dao.LogStudentInProblem;
+import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dto.*;
+import com.twoori.contest_server.domain.problem.exceptions.AllSolvedException;
 import com.twoori.contest_server.domain.problem.exceptions.FirstSolveException;
 import com.twoori.contest_server.domain.problem.exceptions.NotSolvedProblemException;
+import com.twoori.contest_server.domain.problem.repository.ContentRepository;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
 import com.twoori.contest_server.global.exception.NotFoundException;
@@ -151,7 +156,8 @@ public class ProblemService {
                 content.getPreScript(),
                 content.getQuestion(),
                 content.getAnswer(),
-                content.getPostScript()
+                content.getPostScript(),
+                content.getHint()
         );
     }
 

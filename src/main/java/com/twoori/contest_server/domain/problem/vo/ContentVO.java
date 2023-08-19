@@ -8,6 +8,7 @@ public record ContentVO(
         String answer,
         String preScript,
         String question,
-        String postScript
+        String postScript,
+        String hint
 ) {
 }

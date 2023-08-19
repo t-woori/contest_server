@@ -8,6 +8,7 @@ public record ContentDtoForController(
         String preScript,
         String question,
         String answer,
-        String postScript
+        String postScript,
+        String hint
 ) implements Serializable {
 }

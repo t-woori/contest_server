@@ -45,7 +45,8 @@ public class ProblemController extends SecurityController {
                         dto.answer(),
                         dto.preScript(),
                         dto.question(),
-                        dto.postScript()
+                        dto.postScript(),
+                        dto.hint()
                 ),
                 dto.contentID()
         );
