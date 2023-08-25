@@ -46,6 +46,8 @@ public class Content {
 
     private String postScript;
 
+    private String hint;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

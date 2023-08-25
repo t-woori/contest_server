@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://192.168.254.212:3306/db?sslMode=REQUIRED&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://192.168.0.112:3306/db?sslMode=REQUIRED&serverTimezone=Asia/Seoul
     username: user
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver

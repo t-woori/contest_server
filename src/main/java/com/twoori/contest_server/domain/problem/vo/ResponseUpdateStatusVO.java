@@ -1,5 +1,5 @@
 package com.twoori.contest_server.domain.problem.vo;
 
-public record UpdateResponseStatusVO
+public record ResponseUpdateStatusVO
         (Integer status, String message) {
 }

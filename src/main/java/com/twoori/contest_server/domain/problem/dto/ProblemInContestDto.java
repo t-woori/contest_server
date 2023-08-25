@@ -1,13 +1,8 @@
 package com.twoori.contest_server.domain.problem.dto;
 
-import com.twoori.contest_server.domain.problem.dao.ProblemInContest;
-
 import java.io.Serializable;
 import java.util.UUID;
 
-/**
- * DTO for {@link ProblemInContest}
- */
-public record ProblemInContestDto(Long problemID, UUID contestID,
+public record ProblemInContestDto(Long problemId, UUID contestId,
                                   Long noOfProblemInContest) implements Serializable {
 }
