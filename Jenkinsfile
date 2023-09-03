@@ -47,10 +47,11 @@ pipeline {
             }
         }
         stage("Push to AWS ECR Repository") {
-            steps {
-                sh("aws ecr get-login-password --region $aws_region" +
-                        " | docker login --username AWS --password-stdin $aws_ecr_uri")
-                sh("docker push " + "$aws_ecr_uri" + "/" + "$image_name:${currentBuild.number}")
+            steps{
+                withAWS(region: "$aws_region", credentials: 'ci-user') {
+                    sh("aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin $aws_ecr_uri")
+                    sh("docker push " + "$aws_ecr_uri" + "/" + "$image_name:${currentBuild.number}")
+                }
             }
         }
     }
