@@ -13,7 +13,7 @@ spring:
         format_sql: true
     generate-ddl: true
     defer-datasource-initialization: true
-
+jwt.secret: test
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.type: trace
