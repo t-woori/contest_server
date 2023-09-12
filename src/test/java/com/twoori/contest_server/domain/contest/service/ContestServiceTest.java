@@ -1,11 +1,11 @@
 package com.twoori.contest_server.domain.contest.service;
 
-import com.twoori.contest_server.domain.contest.dao.Contest;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.excpetion.EarlyEnterTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.ExpiredTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.ResignedContestException;
+import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
-import com.twoori.contest_server.domain.student.dao.StudentInContest;
-import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
-import com.twoori.contest_server.global.exception.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,13 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class ContestServiceTest {
@@ -31,8 +29,92 @@ class ContestServiceTest {
     private final Student student = Student.builder()
             .id(UUID.randomUUID())
             .build();
+
     @Mock
-    private StudentInContestRepository studentInContestRepository;
+    private ContestRepository contestRepository;
+
+    @DisplayName("Success case1: 대회 시작 10분전에 입장 시도")
+    @Test
+    void givenContestWhenEnterStudentInContestThenContestDTO() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
+        LocalDateTime enterDateTime = startDateTime.minusMinutes(ENTER_TIME);
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
+
+        // when
+        EnterContestDtoForController actual = contestService.enterStudentInContest(student.getId(), contestId, enterDateTime);
+
+        // then
+        assertThat(actual)
+                .extracting("id", "runningStartDateTime", "runningEndDateTime")
+                .doesNotContainNull()
+                .containsExactly(contestId, startDateTime, endDateTime);
+    }
+
+    @DisplayName("Success case2: 대회 기간 내에 재진입 허용")
+    @Test
+    void givenReEnterStatusWhenEnterStudentInContestThenSuccess() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
+        LocalDateTime enterDateTime = startDateTime.plusMinutes(ENTER_TIME);
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
+        given(contestRepository.isResigned(contestId, student.getId())).willReturn(false);
+
+        // when
+        EnterContestDtoForController actual = contestService.enterStudentInContest(student.getId(), contestId, enterDateTime);
+
+        // then
+        assertThat(actual)
+                .extracting("id", "runningStartDateTime", "runningEndDateTime")
+                .doesNotContainNull()
+                .containsExactly(contestId, startDateTime, endDateTime);
+
+    }
+
+    @DisplayName("Success case3: 대회 시작 1분후에 입장 시도")
+    @Test
+    void givenEnterContestWhenEnterStudentInContestThenFail() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
+        LocalDateTime enterDateTime = startDateTime.plusMinutes(1);
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
+        given(contestRepository.isResigned(contestId, student.getId())).willReturn(false);
+
+        // when
+        EnterContestDtoForController actual = contestService.enterStudentInContest(student.getId(), contestId, enterDateTime);
+
+        // then
+        assertThat(actual)
+                .extracting("id", "runningStartDateTime", "runningEndDateTime")
+                .doesNotContainNull()
+                .containsExactly(contestId, startDateTime, endDateTime);
+
+    }
 
     @DisplayName("Fail case1: 대회가 종료된 후 입장 시도")
     @Test
@@ -42,16 +124,16 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = endDateTime.plusMinutes(1);
-        Contest endContest = Contest.builder()
-                .id(contestId)
-                .runningStartDateTime(startDateTime)
-                .runningEndDateTime(endDateTime)
-                .build();
-        StudentInContest studentInContest = StudentInContest.builder().student(student).contest(endContest).build();
-        given(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).willReturn(Optional.of(studentInContest));
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
         // when & then
-        assertThatThrownBy(() -> contestService.getAccessibleContest(student.getId(), contestId, enterDateTime))
-                .isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+                .isInstanceOf(ExpiredTimeException.class);
     }
 
     @DisplayName("Fail case2: 대회 대기 시간 전에 입장 시도")
@@ -62,41 +144,37 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.minusMinutes(ENTER_TIME + 1);
-        Contest earlyContest = Contest.builder()
-                .id(contestId)
-                .runningStartDateTime(startDateTime)
-                .runningEndDateTime(endDateTime)
-                .build();
-        StudentInContest studentInContest = StudentInContest.builder().student(student).contest(earlyContest).build();
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
         // when & then
-        when(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).thenReturn(Optional.of(studentInContest));
-        assertThatThrownBy(() -> contestService.getAccessibleContest(student.getId(), contestId, enterDateTime))
-                .isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+                .isInstanceOf(EarlyEnterTimeException.class);
     }
 
-    @DisplayName("Success case: 대회 시작 10분전에 입장 시도")
+    @DisplayName("Fail case3: 대회 자진 포기 후 재입장 시도")
     @Test
-    void givenContestWhenGetAccessibleContestInformationThenContestDTO() {
+    void givenResignedContestWhenGetAccessibleContestInformationThenThrowEarlyContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
-        LocalDateTime enterDateTime = startDateTime.minusMinutes(ENTER_TIME);
-        Contest contest = Contest.builder()
-                .id(contestId)
-                .runningStartDateTime(startDateTime)
-                .runningEndDateTime(endDateTime)
-                .build();
-        StudentInContest studentInContest = StudentInContest.builder().student(student).contest(contest).build();
-        given(studentInContestRepository.findByContest_IdAndStudent_Id(contestId, student.getId())).willReturn(Optional.of(studentInContest));
-
-        // when
-        ContestDto contestDTO = contestService.getAccessibleContest(student.getId(), contestId, enterDateTime);
-
-        // then
-        assertThat(contestDTO)
-                .extracting("id", "runningStartDateTime", "runningEndDateTime")
-                .doesNotContainNull()
-                .containsExactly(contestId, startDateTime, endDateTime);
+        LocalDateTime enterDateTime = startDateTime.plusMinutes(3);
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
+                contestId,
+                "name",
+                "hostName",
+                startDateTime,
+                endDateTime
+        ));
+        given(contestRepository.isResigned(contestId, student.getId())).willReturn(true);
+        // when & then
+        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+                .isInstanceOf(ResignedContestException.class);
     }
+
 }

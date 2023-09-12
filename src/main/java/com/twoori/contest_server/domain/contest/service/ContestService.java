@@ -26,7 +26,7 @@ public class ContestService {
         this.contestRepository = contestRepository;
     }
 
-    public ContestDto getAccessibleContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
+    public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
         StudentInContest studentInContest = studentInContestRepository.findByContest_IdAndStudent_Id(contestId, studentId)
                 .orElseThrow(() -> new NotFoundException("not register contest"));
         Contest contest = studentInContest.getContest();
@@ -36,7 +36,7 @@ public class ContestService {
         if (enterDateTime.isBefore(contest.getRunningStartDateTime().minusMinutes(ENTER_TIME))) {
             throw new BadRequestException("early contest");
         }
-        return ContestDto.daoToDto(contest);
+        return null;
     }
 
     public List<ContestDto> searchContests(String parameter) {

@@ -2,6 +2,7 @@ package com.twoori.contest_server.domain.contest.controller;
 
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.contest.service.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.vo.ContestVO;
 import com.twoori.contest_server.domain.contest.vo.ContestsVo;
 import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
@@ -38,11 +39,11 @@ public class ContestController extends SecurityController {
             @PathVariable("contest_id") UUID contestId) {
         StudentDto studentDto = super.validateAuthorization(accessTokenHeader);
         LocalDateTime now = LocalDateTime.now();
-        ContestDto dto = contestService.getAccessibleContest(studentDto.id(), contestId, now);
+        EnterContestDtoForController result = contestService.enterStudentInContest(studentDto.id(), contestId, now);
         return ResponseEntity.ok(
                 new EnterContestVOAPI(
-                        dto.runningStartDateTime(),
-                        dto.runningEndDateTime()
+                        result.startDateTime(),
+                        result.endDateTime()
                 )
         );
     }
