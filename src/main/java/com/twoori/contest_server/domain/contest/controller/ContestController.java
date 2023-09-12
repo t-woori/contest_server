@@ -25,7 +25,6 @@ import java.util.UUID;
 @RestController
 public class ContestController extends SecurityController {
 
-
     private final ContestService contestService;
 
     public ContestController(StudentJwtProvider studentJwtProvider, Utils utils, ContestService contestService) {
@@ -42,8 +41,8 @@ public class ContestController extends SecurityController {
         EnterContestDtoForController result = contestService.enterStudentInContest(studentDto.id(), contestId, now);
         return ResponseEntity.ok(
                 new EnterContestVOAPI(
-                        result.startDateTime(),
-                        result.endDateTime()
+                        result.runningStartDateTime(),
+                        result.runningEndDateTime()
                 )
         );
     }

@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.student.dao;
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
@@ -43,6 +44,9 @@ public class StudentInContest {
 
     private LocalDateTime deletedAt;
 
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private Boolean isResigned;
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

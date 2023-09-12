@@ -2,6 +2,10 @@ package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.excpetion.EarlyEnterTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.ExpiredTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.ResignedContestException;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -27,16 +31,25 @@ public class ContestService {
     }
 
     public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
-        StudentInContest studentInContest = studentInContestRepository.findByContest_IdAndStudent_Id(contestId, studentId)
-                .orElseThrow(() -> new NotFoundException("not register contest"));
-        Contest contest = studentInContest.getContest();
-        if (enterDateTime.isAfter(contest.getRunningEndDateTime())) {
-            throw new BadRequestException("expired contest");
+        EnterContestDto contest = contestRepository.getRegisteredStudentAboutStudent(contestId, studentId);
+        checkEnterTimeInContest(studentId, enterDateTime, contest);
+        if (contestRepository.isResigned(contestId, studentId)) {
+            throw new ResignedContestException(studentId, contest);
         }
-        if (enterDateTime.isBefore(contest.getRunningStartDateTime().minusMinutes(ENTER_TIME))) {
-            throw new BadRequestException("early contest");
+        return new EnterContestDtoForController(
+                contest.contestId(),
+                contest.startDateTime(),
+                contest.endDateTime()
+        );
+    }
+
+    private void checkEnterTimeInContest(UUID studentId, LocalDateTime enterDateTime, EnterContestDto contest) {
+        if (enterDateTime.isAfter(contest.endDateTime())) {
+            throw new ExpiredTimeException(studentId, contest);
         }
-        return null;
+        if (enterDateTime.isBefore(contest.startDateTime().minusMinutes(ENTER_TIME))) {
+            throw new EarlyEnterTimeException(studentId, contest);
+        }
     }
 
     public List<ContestDto> searchContests(String parameter) {
