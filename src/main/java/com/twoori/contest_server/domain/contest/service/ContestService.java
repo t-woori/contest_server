@@ -3,10 +3,7 @@ package com.twoori.contest_server.domain.contest.service;
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.excpetion.EarlyEnterTimeException;
-import com.twoori.contest_server.domain.contest.excpetion.ExpiredTimeException;
-import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
-import com.twoori.contest_server.domain.contest.excpetion.ResignedContestException;
+import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -38,6 +35,11 @@ public class ContestService {
         if (contestRepository.isResigned(contestId, studentId)) {
             throw new ResignedContestException(studentId, contest);
         }
+        if (enterDateTime.isAfter(contest.startDateTime().plusMinutes(1).plusSeconds(1)) &&
+                !contestRepository.isEnteredStudentInContest(studentId, contestId)) {
+            throw new ExpiredTimeException(studentId, contest);
+        }
+        contestRepository.updateEnterStudentInContest(studentId, contestId);
         return new EnterContestDtoForController(
                 contest.contestId(),
                 contest.startDateTime(),
@@ -47,7 +49,7 @@ public class ContestService {
 
     private void checkEnterTimeInContest(UUID studentId, LocalDateTime enterDateTime, EnterContestDto contest) {
         if (enterDateTime.isAfter(contest.endDateTime())) {
-            throw new ExpiredTimeException(studentId, contest);
+            throw new EndContestException(studentId, contest);
         }
         if (enterDateTime.isBefore(contest.startDateTime().minusMinutes(ENTER_TIME))) {
             throw new EarlyEnterTimeException(studentId, contest);

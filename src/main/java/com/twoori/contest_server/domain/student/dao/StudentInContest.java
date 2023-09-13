@@ -47,6 +47,11 @@ public class StudentInContest {
     @ColumnDefault("false")
     @Column(nullable = false)
     private Boolean isResigned;
+
+    @ColumnDefault("false")
+    @Column(nullable = false)
+    private Boolean isEntered;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

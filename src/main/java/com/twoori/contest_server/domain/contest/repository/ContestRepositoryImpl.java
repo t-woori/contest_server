@@ -1,11 +1,13 @@
 package com.twoori.contest_server.domain.contest.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -47,5 +49,24 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                         QStudentInContest.studentInContest.id.studentID.eq(studentId),
                         QStudentInContest.studentInContest.isResigned.eq(true))
                 .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean isEnteredStudentInContest(UUID id, UUID contestId) {
+        return queryFactory.selectOne().from(QStudentInContest.studentInContest)
+                .where(QStudentInContest.studentInContest.id.contestID.eq(id),
+                        QStudentInContest.studentInContest.id.contestID.eq(contestId))
+                .limit(1)
+                .fetchFirst() != null;
+    }
+
+    @Transactional
+    @Override
+    public void updateEnterStudentInContest(UUID studentId, UUID contestId) {
+        queryFactory.update(QStudentInContest.studentInContest)
+                .set(QStudentInContest.studentInContest.isEntered, Expressions.asBoolean(true).isTrue())
+                .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
+                        QStudentInContest.studentInContest.id.studentID.eq(studentId))
+                .execute();
     }
 }
