@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.contest.service;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.EarlyEnterTimeException;
 import com.twoori.contest_server.domain.contest.excpetion.ExpiredTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
 import com.twoori.contest_server.domain.contest.excpetion.ResignedContestException;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,12 +43,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.minusMinutes(ENTER_TIME);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
 
         // when
@@ -67,12 +65,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.plusMinutes(ENTER_TIME);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         given(contestRepository.isResigned(contestId, student.getId())).willReturn(false);
 
@@ -96,12 +90,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.plusMinutes(1);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         given(contestRepository.isResigned(contestId, student.getId())).willReturn(false);
 
@@ -124,12 +114,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = endDateTime.plusMinutes(1);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         // when & then
         assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
@@ -144,12 +130,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.minusMinutes(ENTER_TIME + 1);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         // when & then
         assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
@@ -164,12 +146,8 @@ class ContestServiceTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
         LocalDateTime enterDateTime = startDateTime.plusMinutes(3);
-        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(new EnterContestDto(
-                contestId,
-                "name",
-                "hostName",
-                startDateTime,
-                endDateTime
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
+                new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         given(contestRepository.isResigned(contestId, student.getId())).willReturn(true);
         // when & then
@@ -177,4 +155,15 @@ class ContestServiceTest {
                 .isInstanceOf(ResignedContestException.class);
     }
 
+    @DisplayName("Fail case4: 대회 자진 포기 후 재입장 시도")
+    @Test
+    void givenHasNotContestWhenEnterStudentInContestThenThrowResignedContestException() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime enterDateTime = LocalDateTime.now();
+        given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.empty());
+        // when & then
+        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+                .isInstanceOf(NotFoundContestException.class);
+    }
 }
