@@ -7,6 +7,7 @@ import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class ContestRepositoryImpl implements ContestRepositoryCustom {
@@ -18,8 +19,8 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public EnterContestDto getRegisteredStudentAboutStudent(UUID contestId, UUID studentId) {
-        return queryFactory.select(
+    public Optional<EnterContestDto> getRegisteredStudentAboutStudent(UUID contestId, UUID studentId) {
+        EnterContestDto contestDto = queryFactory.select(
                         Projections.constructor(
                                 EnterContestDto.class,
                                 QContest.contest.id.as("contestId"),
@@ -33,6 +34,10 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
                         QStudentInContest.studentInContest.id.studentID.eq(studentId))
                 .fetchOne();
+        if (contestDto == null) {
+            return Optional.empty();
+        }
+        return Optional.of(contestDto);
     }
 
     @Override

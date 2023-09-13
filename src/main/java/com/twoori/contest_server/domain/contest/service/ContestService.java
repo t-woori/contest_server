@@ -5,6 +5,7 @@ import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.EarlyEnterTimeException;
 import com.twoori.contest_server.domain.contest.excpetion.ExpiredTimeException;
+import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
 import com.twoori.contest_server.domain.contest.excpetion.ResignedContestException;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
@@ -31,7 +32,8 @@ public class ContestService {
     }
 
     public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
-        EnterContestDto contest = contestRepository.getRegisteredStudentAboutStudent(contestId, studentId);
+        EnterContestDto contest = contestRepository.getRegisteredStudentAboutStudent(contestId, studentId)
+                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
         checkEnterTimeInContest(studentId, enterDateTime, contest);
         if (contestRepository.isResigned(contestId, studentId)) {
             throw new ResignedContestException(studentId, contest);
