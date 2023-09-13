@@ -7,11 +7,16 @@ import java.util.UUID;
 
 public class ResignedContestException extends PermissionDenialException {
     private final UUID studentId;
-    private final EnterContestDto contestDto;
+    private final EnterContestDto contest;
 
-    public ResignedContestException(UUID studentId, EnterContestDto contestDto) {
+    public ResignedContestException(UUID studentId, EnterContestDto contest) {
         super("resigned contest");
         this.studentId = studentId;
-        this.contestDto = contestDto;
+        this.contest = contest;
+    }
+
+    @Override
+    public String getParamsInfo() {
+        return "studentId[" + studentId + "] ," + contest;
     }
 }

@@ -7,12 +7,16 @@ import java.util.UUID;
 
 public class ExpiredTimeException extends PermissionDenialException {
     private final UUID studentId;
-    private final EnterContestDto contestInfo;
+    private final EnterContestDto contest;
 
-    public ExpiredTimeException(UUID studentId, EnterContestDto contestInfo) {
+    public ExpiredTimeException(UUID studentId, EnterContestDto contest) {
         super("expired contest");
         this.studentId = studentId;
-        this.contestInfo = contestInfo;
+        this.contest = contest;
     }
 
+    @Override
+    public String getParamsInfo() {
+        return "studentId[" + studentId + "] ," + contest;
+    }
 }

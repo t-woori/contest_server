@@ -6,13 +6,17 @@ import com.twoori.contest_server.global.exception.PermissionDenialException;
 import java.util.UUID;
 
 public class EarlyEnterTimeException extends PermissionDenialException {
-
     private final UUID studentId;
-    private final EnterContestDto contestInfo;
+    private final EnterContestDto contest;
 
-    public EarlyEnterTimeException(UUID studentId, EnterContestDto contestInfo) {
+    public EarlyEnterTimeException(UUID studentId, EnterContestDto contest) {
         super("early contest");
         this.studentId = studentId;
-        this.contestInfo = contestInfo;
+        this.contest = contest;
+    }
+
+    @Override
+    public String getParamsInfo() {
+        return "studentId[" + studentId + "] ," + contest;
     }
 }

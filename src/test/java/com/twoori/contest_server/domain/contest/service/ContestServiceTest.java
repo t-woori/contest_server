@@ -35,7 +35,7 @@ class ContestServiceTest {
 
     @DisplayName("Success case1: 대회 시작 10분전에 입장 시도")
     @Test
-    void givenContestWhenEnterStudentInContestThenContestDTO() {
+    void givenContestWhenEnterStudentInContestThenSuccess() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -89,7 +89,7 @@ class ContestServiceTest {
 
     @DisplayName("Success case3: 대회 시작 1분후에 입장 시도")
     @Test
-    void givenEnterContestWhenEnterStudentInContestThenFail() {
+    void givenEnterContestWhenEnterStudentInContestThenSuccess() {
         // given
         UUID studentId = UUID.randomUUID();
         UUID contestId = UUID.randomUUID();
@@ -118,7 +118,7 @@ class ContestServiceTest {
 
     @DisplayName("Fail case1: 대회가 종료된 후 입장 시도")
     @Test
-    void givenEndContestWhenGetAccessibleContestInformationThenThrowExpiredContestException() {
+    void givenEndContestWhenEnterStudentInContestThenThrowExpiredContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -138,7 +138,7 @@ class ContestServiceTest {
 
     @DisplayName("Fail case2: 대회 대기 시간 전에 입장 시도")
     @Test
-    void givenEarlyContestWhenGetAccessibleContestInformationThenThrowEarlyContestException() {
+    void givenNotStartContestWhenEnterStudentInContestThenThrowEarlyContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -158,7 +158,7 @@ class ContestServiceTest {
 
     @DisplayName("Fail case3: 대회 자진 포기 후 재입장 시도")
     @Test
-    void givenResignedContestWhenGetAccessibleContestInformationThenThrowEarlyContestException() {
+    void givenResignedContestWhenEnterStudentInContestThenThrowResignedContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();

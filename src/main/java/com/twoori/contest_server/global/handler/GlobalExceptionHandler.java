@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(APIException.class)
     public ResponseEntity<CommonAPIResponseVO> handleAPIException(APIException e) {
-        log.error("API Exception", e);
+        log.error("API Exception {}\nParameters: {}", e, e.getParamsInfo());
         return ResponseEntity.status(e.getHttpStatus())
                 .body(new CommonAPIResponseVO(e.getHttpStatus().value(), e.getMessage()));
     }
