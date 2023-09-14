@@ -164,7 +164,7 @@ class ContestServiceTest {
                 .isInstanceOf(ResignedContestException.class);
     }
 
-    @DisplayName("Fail case4: 대회 자진 포기 후 재입장 시도")
+    @DisplayName("Fail case4: 존재 하지 않는 대회 진 ")
     @Test
     void givenHasNotContestWhenEnterStudentInContestThenThrowResignedContestException() {
         // given
