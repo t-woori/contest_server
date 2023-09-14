@@ -2,6 +2,8 @@ package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.*;
+import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
+import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
 import org.junit.jupiter.api.DisplayName;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,8 @@ class ContestServiceTest {
 
     @Mock
     private ContestRepository contestRepository;
+    @Spy
+    private ContestDtoForControllerMapper mapper = new ContestDtoForControllerMapperImpl();
 
     @DisplayName("Success case1: 대회 시작 10분전에 입장 시도")
     @Test

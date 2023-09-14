@@ -4,6 +4,7 @@ import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.*;
+import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -22,10 +23,14 @@ public class ContestService {
     private static final int ENTER_TIME = 10;
     private final StudentInContestRepository studentInContestRepository;
     private final ContestRepository contestRepository;
+    private final ContestDtoForControllerMapper mapper;
 
-    public ContestService(StudentInContestRepository studentInContestRepository, ContestRepository contestRepository) {
+    public ContestService(StudentInContestRepository studentInContestRepository,
+                          ContestRepository contestRepository,
+                          ContestDtoForControllerMapper mapper) {
         this.studentInContestRepository = studentInContestRepository;
         this.contestRepository = contestRepository;
+        this.mapper = mapper;
     }
 
     public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
@@ -40,11 +45,7 @@ public class ContestService {
             throw new ExpiredTimeException(studentId, contest);
         }
         contestRepository.updateEnterStudentInContest(studentId, contestId);
-        return new EnterContestDtoForController(
-                contest.contestId(),
-                contest.startDateTime(),
-                contest.endDateTime()
-        );
+        return mapper.toEnterContestDtoForController(contest);
     }
 
     private void checkEnterTimeInContest(UUID studentId, LocalDateTime enterDateTime, EnterContestDto contest) {
