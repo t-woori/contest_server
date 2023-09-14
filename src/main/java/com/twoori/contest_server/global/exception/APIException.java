@@ -18,4 +18,12 @@ public class APIException extends RuntimeException {
         this.httpStatus = httpStatus;
         this.message = message;
     }
+
+    public String getParamsInfo() {
+        return "APIException{" +
+                "httpStatus=" + httpStatus +
+                ", message='" + message + '\'' +
+                '}';
+    }
+
 }

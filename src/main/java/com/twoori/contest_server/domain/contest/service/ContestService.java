@@ -2,6 +2,9 @@ package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.excpetion.*;
+import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -20,23 +23,38 @@ public class ContestService {
     private static final int ENTER_TIME = 10;
     private final StudentInContestRepository studentInContestRepository;
     private final ContestRepository contestRepository;
+    private final ContestDtoForControllerMapper mapper;
 
-    public ContestService(StudentInContestRepository studentInContestRepository, ContestRepository contestRepository) {
+    public ContestService(StudentInContestRepository studentInContestRepository,
+                          ContestRepository contestRepository,
+                          ContestDtoForControllerMapper mapper) {
         this.studentInContestRepository = studentInContestRepository;
         this.contestRepository = contestRepository;
+        this.mapper = mapper;
     }
 
-    public ContestDto getAccessibleContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
-        StudentInContest studentInContest = studentInContestRepository.findByContest_IdAndStudent_Id(contestId, studentId)
-                .orElseThrow(() -> new NotFoundException("not register contest"));
-        Contest contest = studentInContest.getContest();
-        if (enterDateTime.isAfter(contest.getRunningEndDateTime())) {
-            throw new BadRequestException("expired contest");
+    public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
+        EnterContestDto contest = contestRepository.getRegisteredStudentAboutStudent(contestId, studentId)
+                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+        checkEnterTimeInContest(studentId, enterDateTime, contest);
+        if (contestRepository.isResigned(contestId, studentId)) {
+            throw new ResignedContestException(studentId, contest);
         }
-        if (enterDateTime.isBefore(contest.getRunningStartDateTime().minusMinutes(ENTER_TIME))) {
-            throw new BadRequestException("early contest");
+        if (enterDateTime.isAfter(contest.startDateTime().plusMinutes(1).plusSeconds(1)) &&
+                !contestRepository.isEnteredStudentInContest(studentId, contestId)) {
+            throw new ExpiredTimeException(studentId, contest);
         }
-        return ContestDto.daoToDto(contest);
+        contestRepository.updateEnterStudentInContest(studentId, contestId);
+        return mapper.toEnterContestDtoForController(contest);
+    }
+
+    private void checkEnterTimeInContest(UUID studentId, LocalDateTime enterDateTime, EnterContestDto contest) {
+        if (enterDateTime.isAfter(contest.endDateTime())) {
+            throw new EndContestException(studentId, contest);
+        }
+        if (enterDateTime.isBefore(contest.startDateTime().minusMinutes(ENTER_TIME))) {
+            throw new EarlyEnterTimeException(studentId, contest);
+        }
     }
 
     public List<ContestDto> searchContests(String parameter) {
