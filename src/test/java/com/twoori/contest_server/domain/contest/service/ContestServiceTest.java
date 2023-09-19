@@ -1,6 +1,8 @@
 package com.twoori.contest_server.domain.contest.service;
 
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
@@ -14,13 +16,19 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith({MockitoExtension.class})
@@ -109,7 +117,6 @@ class ContestServiceTest {
                 .extracting("id", "runningStartDateTime", "runningEndDateTime")
                 .doesNotContainNull()
                 .containsExactly(contestId, startDateTime, endDateTime);
-
     }
 
     @DisplayName("Fail case1: 대회가 종료된 후 입장 시도")
@@ -195,4 +202,136 @@ class ContestServiceTest {
         assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
                 .isInstanceOf(ExpiredTimeException.class);
     }
+
+    @DisplayName("대회 검색|Success|현시점부터 3개월간의 대회 데이터를 모두 조회")
+    @Test
+    void givenNonParamWhenSearchContestThenGetContestsIn3Month() {
+        // given
+        String parameter = "";
+        List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
+        LocalDate from = LocalDate.now();
+        LocalDate to = from.plusMonths(3);
+        given(contestRepository.getContestsHasParameterInName(eq(parameter),
+                isA(LocalDateTime.class),
+                isA(LocalDateTime.class))).willReturn(
+                IntStream.range(0, 100).mapToObj(i -> new ContestDto(
+                                contestIds.get(i),
+                                "test" + i,
+                                "hostName" + i,
+                                from.atStartOfDay().plusDays(1),
+                                from.atStartOfDay().plusDays(2)
+                        )
+                ).toList()
+        );
+
+        // when
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+
+        // then
+        assertThat(contests)
+                .doesNotContainNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
+                        .thenComparing(ContestDto::runningEndDateTime))
+                .extracting("id").containsExactlyElementsOf(contestIds);
+
+    }
+
+
+    @DisplayName("대회 검색|Success|현시점부터 대회 이름으로 1개월간 데이터 검색")
+    @Test
+    void givenDueTo1MonthWhenSearchContestsThen70OfSortedContestIn100Contests() {
+        // given
+        String parameter = "search_param";
+        List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
+        LocalDate from = LocalDate.now();
+        LocalDate to = from.plusMonths(1);
+        given(contestRepository.getContestsHasParameterInName(eq(parameter),
+                isA(LocalDateTime.class),
+                isA(LocalDateTime.class))).willReturn(
+                IntStream.range(0, 100).mapToObj(i -> new ContestDto(
+                        contestIds.get(i),
+                        "contest" + i,
+                        "hostName" + i,
+                        from.atStartOfDay().plusDays(1),
+                        from.atStartOfDay().plusDays(2)
+                )).toList()
+        );
+        // when
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+
+        // then
+        assertThat(contests)
+                .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
+                        .thenComparing(ContestDto::runningEndDateTime))
+                .extracting("id").containsExactlyElementsOf(contestIds);
+    }
+
+    @DisplayName("대회 검색|Success|현시점부터 1개월 이상, 2개월 미만인 모든 대회 검색")
+    @Test
+    void givenDueTo1To2MonthWhenSearchContestsThen60OfSortedContests() {
+        //given
+        String parameter = "";
+        List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
+        LocalDate from = LocalDate.now().plusMonths(1);
+        LocalDate to = from.plusMonths(2);
+        given(contestRepository.getContestsHasParameterInName(eq(parameter),
+                isA(LocalDateTime.class),
+                isA(LocalDateTime.class))).willReturn(
+                IntStream.range(0, 100).mapToObj(i -> {
+                            LocalDateTime startedAt = LocalDateTime.now().plusDays(1);
+                            return new ContestDto(
+                                    contestIds.get(i),
+                                    "contest" + i,
+                                    "hostName" + i,
+                                    startedAt,
+                                    startedAt.plusMinutes(CONTEST_TIME)
+                            );
+                        }
+                ).toList()
+        );
+        //when
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+
+        //then
+        assertThat(contests)
+                .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
+                        .thenComparing(ContestDto::runningEndDateTime))
+                .extracting("id").containsExactlyElementsOf(contestIds);
+
+    }
+
+    @DisplayName("대회 검색|Success|from이 to보다 큰 검색")
+    @Test
+    void givenFromAfterToWhenSearchContestsThenListSizeOfZero() {
+        // given
+        String parameter = "";
+        LocalDate from = LocalDate.now().plusMonths(1);
+        LocalDate to = from.minusMonths(1);
+
+        // when
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+
+        // then
+        verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
+        assertThat(contests).isNotNull().isEmpty();
+    }
+
+    @DisplayName("대회 검색|Success|from이 현재보다 작은 검색")
+    @Test
+    void givenFromBeforeNowWhenSearchContestsThenListSizeOfZero() {
+        // given
+        String parameter = "";
+        LocalDate from = LocalDate.now().minusDays(1);
+        LocalDate to = from.plusMonths(1);
+
+        // when
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+
+        // then
+        verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
+        assertThat(contests).isNotNull().isEmpty();
+    }
+
 }
