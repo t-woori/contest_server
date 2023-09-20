@@ -1,12 +1,11 @@
 package com.twoori.contest_server.domain.contest.controller;
 
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.service.EnterContestDtoForController;
-import com.twoori.contest_server.domain.contest.vo.ContestVO;
-import com.twoori.contest_server.domain.contest.vo.ContestsVo;
 import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
 import com.twoori.contest_server.domain.contest.vo.RegisterContestVO;
+import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.controller.SecurityController;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
@@ -17,8 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -48,17 +49,22 @@ public class ContestController extends SecurityController {
     }
 
     @GetMapping("/v1/contest")
-    public ResponseEntity<ContestsVo> searchContests(@RequestParam("search") String parameter) {
-        List<ContestDto> dtos = contestService.searchContests(parameter);
+    public ResponseEntity<List<SearchContestVO>> searchContests(
+            @RequestParam("student_id") UUID studentId,
+            @RequestParam("search") String parameter,
+            @RequestParam("from") LocalDate from,
+            @RequestParam("to") LocalDate to) {
+        Set<UUID> registeredIdSets = contestService.getRegisteredContestIdsInFromTo(studentId, from, to);
+        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
         return ResponseEntity.ok(
-                new ContestsVo(dtos.stream()
-                        .map(dto -> new ContestVO(
-                                dto.id(),
-                                dto.name(),
-                                dto.hostName(),
-                                dto.runningStartDateTime(),
-                                dto.runningEndDateTime()
-                        )).toList())
+                contests.stream()
+                        .map(contest -> new SearchContestVO(
+                                contest.id(),
+                                contest.name(),
+                                contest.runningStartDateTime(),
+                                contest.runningEndDateTime(),
+                                registeredIdSets.contains(contest.id())
+                        )).toList()
         );
     }
 

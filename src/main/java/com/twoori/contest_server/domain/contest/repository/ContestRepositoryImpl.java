@@ -4,12 +4,17 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class ContestRepositoryImpl implements ContestRepositoryCustom {
@@ -68,5 +73,41 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
                         QStudentInContest.studentInContest.id.studentID.eq(studentId))
                 .execute();
+    }
+
+    @Override
+    public List<ContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to) {
+        QContest contest = QContest.contest;
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                ContestDto.class,
+                                contest.id.as("contestId"),
+                                contest.name.as("name"),
+                                contest.hostName.as("hostName"),
+                                contest.runningStartDateTime.as("startDateTime"),
+                                contest.runningEndDateTime.as("endDateTime")
+                        )
+                ).from(contest)
+                .where(contest.name.contains(parameter),
+                        contest.runningStartDateTime.between(from, to))
+                .fetch();
+    }
+
+    @Override
+    public Set<UUID> getContestIdSetAboutRegisteredStudent(UUID id, LocalDate from, LocalDate to) {
+        QStudentInContest studentInContest = QStudentInContest.studentInContest;
+        QContest contest = QContest.contest;
+        List<UUID> sets = queryFactory
+                .select(studentInContest.id.contestID)
+                .from(studentInContest)
+                .join(contest)
+                .on(studentInContest.id.contestID.eq(contest.id))
+                .where(
+                        studentInContest.id.studentID.eq(id),
+                        contest.runningStartDateTime.between(from.atStartOfDay(), to.atStartOfDay()),
+                        contest.runningEndDateTime.between(from.atStartOfDay(), to.atStartOfDay())
+                ).fetch();
+        return Set.copyOf(sets);
     }
 }

@@ -1,7 +1,7 @@
 package com.twoori.contest_server.domain.contest.mapper;
 
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.service.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
