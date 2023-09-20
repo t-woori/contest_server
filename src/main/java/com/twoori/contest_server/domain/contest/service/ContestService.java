@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.contest.service;
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
@@ -14,9 +15,9 @@ import com.twoori.contest_server.global.exception.BadRequestException;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ContestService {
@@ -57,9 +58,23 @@ public class ContestService {
         }
     }
 
-    public List<ContestDto> searchContests(String parameter) {
-        return contestRepository.findByNameContains(parameter)
-                .stream().map(ContestDto::daoToDto).toList();
+    public List<ContestDto> searchContests(String parameter, LocalDate from, LocalDate to) {
+        LocalDateTime now = LocalDateTime.now();
+        if (from.isAfter(to) || from.isBefore(now.toLocalDate())) {
+            return new ArrayList<>();
+        }
+
+        return contestRepository.getContestsHasParameterInName(parameter,
+                        from.atTime(now.toLocalTime()),
+                        to.atTime(now.toLocalTime()))
+                .stream().sorted(
+                        Comparator.comparing(ContestDto::runningStartDateTime)
+                                .thenComparing(ContestDto::runningEndDateTime)
+                ).toList();
+    }
+
+    public Set<UUID> getRegisteredContestIdsInFromTo(UUID studentId, LocalDate from, LocalDate to) {
+        return contestRepository.getContestIdSetAboutRegisteredStudent(studentId, from, to);
     }
 
     public void registerContestByUser(UUID contestId, StudentDto studentDto, String authCode) {
