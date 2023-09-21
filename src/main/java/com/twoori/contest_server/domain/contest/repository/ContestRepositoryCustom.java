@@ -1,13 +1,8 @@
 package com.twoori.contest_server.domain.contest.repository;
 
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public interface ContestRepositoryCustom {
@@ -19,8 +14,4 @@ public interface ContestRepositoryCustom {
     void updateEnterStudentInContest(UUID studentId, UUID contestId);
 
     boolean isEnteredStudentInContest(UUID studentId, UUID contestId);
-
-    List<SearchContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to);
-
-    Set<UUID> getContestIdSetAboutRegisteredStudent(UUID id, LocalDate from, LocalDate to);
 }
