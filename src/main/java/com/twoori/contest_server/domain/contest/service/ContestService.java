@@ -1,9 +1,10 @@
 package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
@@ -58,19 +59,18 @@ public class ContestService {
         }
     }
 
-    public List<ContestDto> searchContests(String parameter, LocalDate from, LocalDate to) {
+    public List<SearchContestDtoForController> searchContests(String parameter, LocalDate from, LocalDate to) {
         LocalDateTime now = LocalDateTime.now();
         if (from.isAfter(to) || from.isBefore(now.toLocalDate())) {
             return new ArrayList<>();
         }
-
         return contestRepository.getContestsHasParameterInName(parameter,
                         from.atTime(now.toLocalTime()),
                         to.atTime(now.toLocalTime()))
                 .stream().sorted(
-                        Comparator.comparing(ContestDto::runningStartDateTime)
-                                .thenComparing(ContestDto::runningEndDateTime)
-                ).toList();
+                        Comparator.comparing(SearchContestDto::runningStartDateTime)
+                                .thenComparing(SearchContestDto::runningEndDateTime)
+                ).map(mapper::toSearchDtoForController).toList();
     }
 
     public Set<UUID> getRegisteredContestIdsInFromTo(UUID studentId, LocalDate from, LocalDate to) {
