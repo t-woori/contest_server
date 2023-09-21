@@ -2,10 +2,11 @@ package com.twoori.contest_server.domain.contest.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -76,12 +77,15 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public List<ContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to) {
+    public List<SearchContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to) {
         QContest contest = QContest.contest;
-        return queryFactory
+        if (parameter == "") {
+
+        }
+        JPAQuery<SearchContestDto> query = queryFactory
                 .select(
                         Projections.constructor(
-                                ContestDto.class,
+                                SearchContestDto.class,
                                 contest.id.as("contestId"),
                                 contest.name.as("name"),
                                 contest.hostName.as("hostName"),
@@ -90,8 +94,8 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                         )
                 ).from(contest)
                 .where(contest.name.contains(parameter),
-                        contest.runningStartDateTime.between(from, to))
-                .fetch();
+                        contest.runningStartDateTime.between(from, to));
+        return query.fetch();
     }
 
     @Override

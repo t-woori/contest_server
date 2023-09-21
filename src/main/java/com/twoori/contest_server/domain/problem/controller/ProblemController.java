@@ -6,9 +6,7 @@ import com.twoori.contest_server.domain.problem.dto.QuizScoreDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.problem.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
-import com.twoori.contest_server.global.controller.SecurityController;
-import com.twoori.contest_server.global.security.StudentJwtProvider;
-import com.twoori.contest_server.global.util.Utils;
+import com.twoori.contest_server.global.security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,20 +16,21 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-public class ProblemController extends SecurityController {
+public class ProblemController {
 
     private final ProblemService problemService;
+    private final SecurityUtil securityUtil;
 
-    public ProblemController(Utils utils, StudentJwtProvider studentJwtProvider, ProblemService problemService) {
-        super(utils, studentJwtProvider);
+    public ProblemController(ProblemService problemService, SecurityUtil securityUtil) {
         this.problemService = problemService;
+        this.securityUtil = securityUtil;
     }
 
     @PostMapping("/v1/contest/{contest_id}/quiz")
     public ProblemVO getProblemByStudent(
             @RequestHeader(name = "Authorization") String accessTokenHeader,
             @PathVariable("contest_id") UUID contestId) {
-        StudentDto studentDto = super.validateAuthorization(accessTokenHeader);
+        StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         ContentDtoForController dto = problemService.getNotSolvedProblemByStudent(
                 new MinInfoAboutStudentAndContestDto(contestId, studentDto.id())
         );
@@ -70,7 +69,7 @@ public class ProblemController extends SecurityController {
     @GetMapping("/v1/contest/{contest_id}/total_status")
     public ResponseEntity<ResponseTotalStatusVO> getTotalStatus(@RequestHeader(name = "Authorization") String accessTokenHeader,
                                                                 @PathVariable("contest_id") UUID contestId) {
-        StudentDto studentDto = super.validateAuthorization(accessTokenHeader);
+        StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
         List<Long> statues = problemService.getTotalStatus();
 

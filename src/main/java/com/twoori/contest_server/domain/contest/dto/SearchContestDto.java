@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ContestDto(
+public record SearchContestDto(
         UUID id,
         String name,
         String hostName,

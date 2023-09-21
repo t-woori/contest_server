@@ -1,8 +1,11 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
+import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
+import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,6 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 
+
 @ExtendWith({MockitoExtension.class})
 class ContestControllerTest {
 
@@ -36,6 +40,9 @@ class ContestControllerTest {
 
     @Mock
     private ContestService contestService;
+
+    @Mock
+    private SecurityUtil securityUtil;
 
     private static Stream<Arguments> argumentsForSearchContest() {
         return Stream.of(
@@ -46,7 +53,7 @@ class ContestControllerTest {
         );
     }
 
-    @DisplayName("대회 검색|Success|검색 결과 100건중 20건이 신청한 대회")
+    @DisplayName("대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
     @MethodSource("argumentsForSearchContest")
     @ParameterizedTest
     void givenSearchParameterWhenSearchContestsThenTotalContestCountOfContestInRegisteredContestCountOfContest(
@@ -58,8 +65,15 @@ class ContestControllerTest {
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now().plusMonths(3);
         UUID studentId = UUID.randomUUID();
+        String mockHeader = "";
+        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
+                "name",
+                "email",
+                "phoneNumber",
+                "accessToken",
+                "refreshToken"));
         given(contestService.searchContests(parameter, from, to)).willReturn(
-                IntStream.range(0, totalContestCount).mapToObj(i -> new ContestDto(contestIds.get(i),
+                IntStream.range(0, totalContestCount).mapToObj(i -> new SearchContestDtoForController(contestIds.get(i),
                         "contest name" + i,
                         "host" + i,
                         LocalDateTime.now(),
@@ -69,10 +83,10 @@ class ContestControllerTest {
         );
 
         // when
-        ResponseEntity<List<SearchContestVO>> actual = contestController.searchContests(studentId, parameter, from, to);
+        ResponseEntity<SearchContestsVO> actual = contestController.searchContests(mockHeader, parameter, from, to);
 
         // then
-        List<SearchContestVO> body = actual.getBody();
+        List<SearchContestVO> body = actual.getBody().getSearchContestVOList();
         assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(body)
                 .isNotNull()

@@ -1,8 +1,9 @@
 package com.twoori.contest_server.domain.contest.service;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
@@ -214,7 +215,7 @@ class ContestServiceTest {
         given(contestRepository.getContestsHasParameterInName(eq(parameter),
                 isA(LocalDateTime.class),
                 isA(LocalDateTime.class))).willReturn(
-                IntStream.range(0, 100).mapToObj(i -> new ContestDto(
+                IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
                                 contestIds.get(i),
                                 "test" + i,
                                 "hostName" + i,
@@ -225,13 +226,13 @@ class ContestServiceTest {
         );
 
         // when
-        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
         assertThat(contests)
                 .doesNotContainNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
-                        .thenComparing(ContestDto::runningEndDateTime))
+                .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
+                        .thenComparing(SearchContestDtoForController::endedAt))
                 .extracting("id").containsExactlyElementsOf(contestIds);
 
     }
@@ -248,7 +249,7 @@ class ContestServiceTest {
         given(contestRepository.getContestsHasParameterInName(eq(parameter),
                 isA(LocalDateTime.class),
                 isA(LocalDateTime.class))).willReturn(
-                IntStream.range(0, 100).mapToObj(i -> new ContestDto(
+                IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
                         contestIds.get(i),
                         "contest" + i,
                         "hostName" + i,
@@ -257,13 +258,13 @@ class ContestServiceTest {
                 )).toList()
         );
         // when
-        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
         assertThat(contests)
                 .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
-                        .thenComparing(ContestDto::runningEndDateTime))
+                .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
+                        .thenComparing(SearchContestDtoForController::endedAt))
                 .extracting("id").containsExactlyElementsOf(contestIds);
     }
 
@@ -280,7 +281,7 @@ class ContestServiceTest {
                 isA(LocalDateTime.class))).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> {
                             LocalDateTime startedAt = LocalDateTime.now().plusDays(1);
-                            return new ContestDto(
+                    return new SearchContestDto(
                                     contestIds.get(i),
                                     "contest" + i,
                                     "hostName" + i,
@@ -291,13 +292,13 @@ class ContestServiceTest {
                 ).toList()
         );
         //when
-        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         //then
         assertThat(contests)
                 .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(ContestDto::runningStartDateTime)
-                        .thenComparing(ContestDto::runningEndDateTime))
+                .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
+                        .thenComparing(SearchContestDtoForController::endedAt))
                 .extracting("id").containsExactlyElementsOf(contestIds);
 
     }
@@ -311,7 +312,7 @@ class ContestServiceTest {
         LocalDate to = from.minusMonths(1);
 
         // when
-        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
         verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
@@ -327,7 +328,7 @@ class ContestServiceTest {
         LocalDate to = from.plusMonths(1);
 
         // when
-        List<ContestDto> contests = contestService.searchContests(parameter, from, to);
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
         verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
