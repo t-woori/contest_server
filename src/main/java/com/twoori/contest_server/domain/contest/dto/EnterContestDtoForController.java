@@ -1,4 +1,4 @@
-package com.twoori.contest_server.domain.contest.service;
+package com.twoori.contest_server.domain.contest.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
