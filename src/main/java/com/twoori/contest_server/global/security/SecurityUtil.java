@@ -1,20 +1,22 @@
-package com.twoori.contest_server.global.controller;
+package com.twoori.contest_server.global.security;
 
 import com.twoori.contest_server.domain.student.dto.StudentDto;
-import com.twoori.contest_server.global.security.StudentJwtProvider;
 import com.twoori.contest_server.global.util.Utils;
+import org.springframework.stereotype.Component;
 
-public class SecurityController {
+@Component
+public class SecurityUtil {
     private final Utils utils;
     private final StudentJwtProvider studentJwtProvider;
 
-    public SecurityController(Utils utils, StudentJwtProvider studentJwtProvider) {
+    public SecurityUtil(Utils utils, StudentJwtProvider studentJwtProvider) {
         this.utils = utils;
         this.studentJwtProvider = studentJwtProvider;
     }
 
-    protected StudentDto validateAuthorization(String accessTokenHeader) {
+    public StudentDto validateAuthorization(String accessTokenHeader) {
         String accessToken = utils.parseAccessTokenAboutAuthorizationHeader(accessTokenHeader);
         return studentJwtProvider.validateAccessToken(accessToken);
     }
+
 }
