@@ -35,7 +35,8 @@ class ContestRepositoryTest {
                 .isNotNull()
                 .hasSize(2)
                 .extracting("id")
-                .isSameAs(List.of(
+                // contain all element
+                .containsExactlyInAnyOrderElementsOf(List.of(
                         UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118"),
                         UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f")));
 
