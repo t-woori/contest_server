@@ -6,10 +6,10 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ContestsVO extends APIOkMessageVO {
-    private final List<ContestVO> contests;
+public class RegisteredContestsVO extends APIOkMessageVO {
+    private final List<RegisteredContestVO> contests;
 
-    public ContestsVO(List<ContestVO> contests) {
+    public RegisteredContestsVO(List<RegisteredContestVO> contests) {
         this.contests = contests;
     }
 }

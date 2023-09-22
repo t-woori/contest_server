@@ -1,10 +1,12 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
+import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapperImpl;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.vo.ContestVO;
-import com.twoori.contest_server.domain.contest.vo.ContestsVO;
+import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
+import com.twoori.contest_server.domain.contest.vo.RegisteredContestsVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
@@ -17,6 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +50,9 @@ class ContestControllerTest {
 
     @Mock
     private SecurityUtil securityUtil;
+
+    @Spy
+    private ContestControllerVOMapper mapper = new ContestControllerVOMapperImpl();
 
     private static Stream<Arguments> argumentsForSearchContest() {
         return Stream.of(
@@ -96,8 +102,8 @@ class ContestControllerTest {
                 .isNotNull()
                 .hasSize(totalContestCount)
                 .isSortedAccordingTo(
-                        Comparator.comparing(SearchContestVO::startAt)
-                                .thenComparing(SearchContestVO::endAt));
+                        Comparator.comparing(SearchContestVO::startedAt)
+                                .thenComparing(SearchContestVO::endedAt));
         assertThat(body)
                 .filteredOn(SearchContestVO::isRegistered)
                 .hasSize(registeredContestCount);
@@ -117,22 +123,22 @@ class ContestControllerTest {
                 "accessToken",
                 "refreshToken"));
         given(contestService.getRegisteredContestsInFromTo(studentId)).willReturn(
-                IntStream.range(0, 20).mapToObj(i -> new ContestDto(contestIds.get(i),
+                IntStream.range(0, 20).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
                         "contest name" + i,
                         LocalDateTime.now(),
                         LocalDateTime.now().plusMinutes(10))).toList());
 
         // when
-        ResponseEntity<ContestsVO> actual = contestController.getRegisteredContestsAboutStudent(mockHeader);
+        ResponseEntity<RegisteredContestsVO> actual = contestController.getRegisteredContestsAboutStudent(mockHeader);
 
         // then
-        List<ContestVO> body = actual.getBody().getContests();
+        List<RegisteredContestVO> body = actual.getBody().getContests();
         assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(body)
                 .isNotNull()
                 .hasSize(20)
                 .isSortedAccordingTo(
-                        Comparator.comparing(ContestVO::startAt)
-                                .thenComparing(ContestVO::endAt));
+                        Comparator.comparing(RegisteredContestVO::startedAt)
+                                .thenComparing(RegisteredContestVO::endedAt));
     }
 }

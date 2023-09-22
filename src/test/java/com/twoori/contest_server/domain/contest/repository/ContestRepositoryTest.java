@@ -1,6 +1,6 @@
 package com.twoori.contest_server.domain.contest.repository;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class ContestRepositoryTest {
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
         LocalDateTime from = LocalDateTime.now().minusMinutes(1);
         LocalDateTime to = from.plusMonths(3);
-        List<ContestDto> actual = repository.getRegisteredContestsInFromTo(studentId, from, to);
+        List<RegisteredContestDto> actual = repository.getRegisteredContestsInFromTo(studentId, from, to);
         assertThat(actual)
                 .isNotNull()
                 .hasSize(2)

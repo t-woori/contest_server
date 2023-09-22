@@ -5,8 +5,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
@@ -80,9 +80,6 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     @Override
     public List<SearchContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to) {
         QContest contest = QContest.contest;
-        if (parameter == "") {
-
-        }
         JPAQuery<SearchContestDto> query = queryFactory
                 .select(
                         Projections.constructor(
@@ -117,16 +114,16 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public List<ContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to) {
+    public List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to) {
         QStudentInContest studentInContest = QStudentInContest.studentInContest;
         QContest contest = QContest.contest;
         return queryFactory.select(
                         Projections.constructor(
-                                ContestDto.class,
+                                RegisteredContestDto.class,
                                 contest.id.as("id"),
                                 contest.name.as("name"),
-                                contest.runningStartDateTime.as("startAt"),
-                                contest.runningEndDateTime.as("endAt")
+                                contest.runningStartDateTime.as("startedAt"),
+                                contest.runningEndDateTime.as("endedAt")
                         )
                 ).from(studentInContest)
                 .join(contest)
@@ -136,4 +133,5 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                         contest.runningEndDateTime.between(from, to))
                 .fetch();
     }
+
 }

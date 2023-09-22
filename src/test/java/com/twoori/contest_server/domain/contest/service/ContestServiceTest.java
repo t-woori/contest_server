@@ -338,19 +338,19 @@ class ContestServiceTest {
         UUID studentId = UUID.randomUUID();
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
         given(contestRepository.getRegisteredContestsInFromTo(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
-                .willReturn(IntStream.range(0, 100).mapToObj(i -> new ContestDto(contestIds.get(i),
+                .willReturn(IntStream.range(0, 100).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
                         "contest" + i,
                         LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(2))).toList());
 
         // when
-        List<ContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+        List<RegisteredContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
 
         // then
         assertThat(actual)
                 .isNotNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(ContestDto::startAt)
-                        .thenComparing(ContestDto::endAt))
+                .isSortedAccordingTo(Comparator.comparing(RegisteredContestDto::startedAt)
+                        .thenComparing(RegisteredContestDto::endedAt))
                 .extracting("id").containsExactlyElementsOf(contestIds);
     }
 
@@ -363,7 +363,7 @@ class ContestServiceTest {
                 .willReturn(List.of());
 
         // when
-        List<ContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+        List<RegisteredContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
 
         // then
         assertThat(actual)

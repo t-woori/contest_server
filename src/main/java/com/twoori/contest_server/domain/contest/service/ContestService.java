@@ -87,7 +87,7 @@ public class ContestService {
         );
     }
 
-    public List<ContestDto> getRegisteredContestsInFromTo(UUID studentId) {
+    public List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId) {
         LocalDateTime start = LocalDateTime.now().minusMinutes(1);
         LocalDateTime end = start.plusMonths(3);
         return contestRepository.getRegisteredContestsInFromTo(studentId, start, end);

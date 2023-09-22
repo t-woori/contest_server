@@ -1,7 +1,7 @@
 package com.twoori.contest_server.domain.contest.repository;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 
 import java.time.LocalDate;
@@ -25,5 +25,5 @@ public interface ContestRepositoryCustom {
 
     Set<UUID> getContestIdSetAboutRegisteredStudent(UUID id, LocalDate from, LocalDate to);
 
-    List<ContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to);
+    List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to);
 }
