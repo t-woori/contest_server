@@ -1,11 +1,12 @@
-package com.twoori.contest_server.domain.contest.vo;
+package com.twoori.contest_server.domain.contest.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ContestVO(
+public record ContestDto(
         UUID id,
         String name,
         LocalDateTime startAt,
-        LocalDateTime endAt) {
+        LocalDateTime endAt
+) {
 }

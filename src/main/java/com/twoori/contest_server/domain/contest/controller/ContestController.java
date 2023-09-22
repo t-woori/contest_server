@@ -3,10 +3,7 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
-import com.twoori.contest_server.domain.contest.vo.RegisterContestVO;
-import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
-import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
+import com.twoori.contest_server.domain.contest.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
@@ -88,4 +85,10 @@ public class ContestController {
                 "ok"
         ));
     }
+
+    @GetMapping("/v1/contest/registered")
+    public ResponseEntity<ContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
+        return null;
+    }
 }
+

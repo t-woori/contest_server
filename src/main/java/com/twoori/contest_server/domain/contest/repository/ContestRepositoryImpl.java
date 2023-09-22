@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
@@ -113,5 +114,10 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                         contest.runningEndDateTime.between(from.atStartOfDay(), to.atStartOfDay())
                 ).fetch();
         return Set.copyOf(sets);
+    }
+
+    @Override
+    public List<ContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to) {
+        return null;
     }
 }
