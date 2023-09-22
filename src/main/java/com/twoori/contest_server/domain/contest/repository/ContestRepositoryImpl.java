@@ -118,6 +118,22 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
 
     @Override
     public List<ContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to) {
-        return null;
+        QStudentInContest studentInContest = QStudentInContest.studentInContest;
+        QContest contest = QContest.contest;
+        return queryFactory.select(
+                        Projections.constructor(
+                                ContestDto.class,
+                                contest.id.as("id"),
+                                contest.name.as("name"),
+                                contest.runningStartDateTime.as("startAt"),
+                                contest.runningEndDateTime.as("endAt")
+                        )
+                ).from(studentInContest)
+                .join(contest)
+                .on(studentInContest.id.contestID.eq(contest.id))
+                .where(studentInContest.id.studentID.eq(studentId),
+                        contest.runningStartDateTime.between(from, to),
+                        contest.runningEndDateTime.between(from, to))
+                .fetch();
     }
 }

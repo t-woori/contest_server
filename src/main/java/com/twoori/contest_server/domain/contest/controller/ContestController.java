@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.contest.controller;
 
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.service.ContestService;
@@ -88,7 +89,20 @@ public class ContestController {
 
     @GetMapping("/v1/contest/registered")
     public ResponseEntity<ContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
-        return null;
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        List<ContestDto> contests = contestService.getRegisteredContestsInFromTo(studentDto.id());
+        return ResponseEntity.ok(
+                new ContestsVO(
+                        contests.stream().map(
+                                contest -> new ContestVO(
+                                        contest.id(),
+                                        contest.name(),
+                                        contest.startAt(),
+                                        contest.endAt()
+                                )
+                        ).toList()
+                )
+        );
     }
 }
 
