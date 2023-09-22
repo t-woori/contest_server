@@ -1,9 +1,6 @@
 package com.twoori.contest_server.domain.contest.service;
 
-import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
@@ -165,7 +162,6 @@ class ContestServiceTest {
                 new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         given(contestRepository.isResigned(contestId, student.getId())).willReturn(true);
-//        given(contestRepository.isEnteredStudentInContest(student.getId(), contestId)).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
@@ -335,4 +331,42 @@ class ContestServiceTest {
         assertThat(contests).isNotNull().isEmpty();
     }
 
+    @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과가 존재")
+    @Test
+    void givenStudentIdWhenGetRegisteredContestsThenSuccess() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
+        given(contestRepository.getRegisteredContestsInFromTo(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
+                .willReturn(IntStream.range(0, 100).mapToObj(i -> new ContestDto(contestIds.get(i),
+                        "contest" + i,
+                        LocalDateTime.now().plusDays(1),
+                        LocalDateTime.now().plusDays(2))).toList());
+
+        // when
+        List<ContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+
+        // then
+        assertThat(actual)
+                .isNotNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(ContestDto::startAt)
+                        .thenComparing(ContestDto::endAt))
+                .extracting("id").containsExactlyElementsOf(contestIds);
+    }
+
+    @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과 미존재")
+    @Test
+    void givenStudentIdWhenGetRegisteredContestsThenEmptyList() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.getRegisteredContestsInFromTo(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
+                .willReturn(List.of());
+
+        // when
+        List<ContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+
+        // then
+        assertThat(actual)
+                .isNotNull().isEmpty();
+    }
 }

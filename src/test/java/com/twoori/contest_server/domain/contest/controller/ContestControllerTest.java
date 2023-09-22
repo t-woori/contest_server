@@ -1,12 +1,16 @@
 package com.twoori.contest_server.domain.contest.controller;
 
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.contest.vo.ContestVO;
+import com.twoori.contest_server.domain.contest.vo.ContestsVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -99,4 +103,36 @@ class ContestControllerTest {
                 .hasSize(registeredContestCount);
     }
 
+    @DisplayName("신청한 대회중 시작하지 않은 대회 조회|Success|검색 결과 20건이 반환")
+    @Test
+    void givenNonParameterWhenGetRegisteredContestThenList20() {
+        // given
+        List<UUID> contestIds = IntStream.range(0, 20).mapToObj(i -> UUID.randomUUID()).toList();
+        UUID studentId = UUID.randomUUID();
+        String mockHeader = "";
+        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
+                "name",
+                "email",
+                "phoneNumber",
+                "accessToken",
+                "refreshToken"));
+        given(contestService.getRegisteredContestsInFromTo(studentId)).willReturn(
+                IntStream.range(0, 20).mapToObj(i -> new ContestDto(contestIds.get(i),
+                        "contest name" + i,
+                        LocalDateTime.now(),
+                        LocalDateTime.now().plusMinutes(10))).toList());
+
+        // when
+        ResponseEntity<ContestsVO> actual = contestController.getRegisteredContestsAboutStudent(mockHeader);
+
+        // then
+        List<ContestVO> body = actual.getBody().getContests();
+        assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(body)
+                .isNotNull()
+                .hasSize(20)
+                .isSortedAccordingTo(
+                        Comparator.comparing(ContestVO::startAt)
+                                .thenComparing(ContestVO::endAt));
+    }
 }
