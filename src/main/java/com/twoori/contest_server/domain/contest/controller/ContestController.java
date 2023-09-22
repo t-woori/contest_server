@@ -1,12 +1,11 @@
 package com.twoori.contest_server.domain.contest.controller;
 
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.vo.EnterContestVOAPI;
-import com.twoori.contest_server.domain.contest.vo.RegisterContestVO;
-import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
-import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
+import com.twoori.contest_server.domain.contest.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
@@ -27,10 +26,12 @@ public class ContestController {
 
     private final ContestService contestService;
     private final SecurityUtil securityUtil;
+    private final ContestControllerVOMapper mapper;
 
-    public ContestController(ContestService contestService, SecurityUtil securityUtil) {
+    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper) {
         this.contestService = contestService;
         this.securityUtil = securityUtil;
+        this.mapper = mapper;
     }
 
     @GetMapping("/v1/contest/{contest_id}/enter")
@@ -88,4 +89,12 @@ public class ContestController {
                 "ok"
         ));
     }
+
+    @GetMapping("/v1/contest/registered")
+    public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        List<RegisteredContestDto> contests = contestService.getRegisteredContestsInFromTo(studentDto.id());
+        return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
+    }
 }
+

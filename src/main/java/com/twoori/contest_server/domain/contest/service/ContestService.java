@@ -1,10 +1,7 @@
 package com.twoori.contest_server.domain.contest.service;
 
 import com.twoori.contest_server.domain.contest.dao.Contest;
-import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
@@ -88,5 +85,11 @@ public class ContestService {
                         .id(new StudentInContestID(studentDto.id(), contestId))
                         .build()
         );
+    }
+
+    public List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId) {
+        LocalDateTime start = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime end = start.plusMonths(3);
+        return contestRepository.getRegisteredContestsInFromTo(studentId, start, end);
     }
 }
