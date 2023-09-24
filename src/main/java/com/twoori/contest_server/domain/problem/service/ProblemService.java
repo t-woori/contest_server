@@ -10,6 +10,7 @@ import com.twoori.contest_server.domain.problem.exceptions.FirstSolveException;
 import com.twoori.contest_server.domain.problem.exceptions.NotSolvedProblemException;
 import com.twoori.contest_server.domain.problem.repository.ContentRepository;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
+import com.twoori.contest_server.domain.problem.repository.ProblemDto;
 import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import com.twoori.contest_server.global.exception.OKException;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -195,5 +197,9 @@ public class ProblemService {
 
     public List<Long> getTotalStatus() {
         return List.copyOf(totalStatus.values());
+    }
+
+    public ProblemDto getProblem(UUID contestId, Long problemId) {
+        return null;
     }
 }
