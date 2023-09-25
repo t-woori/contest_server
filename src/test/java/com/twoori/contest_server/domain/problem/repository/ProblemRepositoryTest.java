@@ -27,14 +27,9 @@ class ProblemRepositoryTest {
     @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
     void givenExistProblemIdWhenGetProblemThenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
-        // given problem and contestId When search Problem Then return one problem
-        // given
-        ProblemCondition condition = new ProblemCondition();
-        condition.setNoOfProblemInContest(noOfProblemIdInContest);
-        condition.setContestId(contestId);
 
         // when
-        ProblemDto actual = problemRepository.getProblem(condition);
+        ProblemDto actual = problemRepository.getProblem(contestId, noOfProblemIdInContest);
 
         // then
         assertThat(actual)
@@ -58,8 +53,16 @@ class ProblemRepositoryTest {
         condition.setContestId(contestId);
 
         // when & then
-        String message = assertThrows(NotFoundProblemException.class, () -> problemRepository.getProblem(condition)).getMessage();
-        assertThat(message).isEqualTo("not found contestId: " + contestId + " noOfProblemIdInContest: " + noOfProblemIdInContest);
+        NotFoundProblemException exception = assertThrows(NotFoundProblemException.class, () -> problemRepository.getProblem(
+                contestId, noOfProblemIdInContest
+        ));
+        assertThat(exception)
+                .isNotNull()
+                .extracting(NotFoundProblemException::getMessage)
+                .isNotNull().isEqualTo("not found problem");
+        assertThat(exception.getParamsInfo())
+                .isNotNull()
+                .isEqualTo("contestId: " + contestId + " noOfProblemInContest: " + noOfProblemIdInContest);
     }
 
 }

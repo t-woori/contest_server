@@ -11,16 +11,17 @@ import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,22 +30,22 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
 class ProblemControllerTest {
 
-
     private final String mockToken = "Bearer MockToken";
-    @InjectMocks
-    private ProblemController problemController;
-    @Mock
+
+    @MockBean
     private ProblemService problemService;
-    @Mock
+    @MockBean
     private SecurityUtil securityUtil;
+    @Autowired
     private MockMvc mvc;
 
     @BeforeEach
     void beforeAll() {
-        this.mvc = MockMvcBuilders.standaloneSetup(problemController).build();
         given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(UUID.randomUUID(), "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 
@@ -71,22 +72,22 @@ class ProblemControllerTest {
         // when & then
 
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
-                        "/v1/problem"
-                ).param("problem_id", noOfProblemInContest.toString()).
-                param("contest_id", contestId.toString()).
-                header("Authorization", mockToken));
+                "/v1/contest/{contest_id}/problem/{problem_id}"
+                , contestId.toString(), noOfProblemInContest.toString()
+        ).header("Authorization", mockToken));
         actual.andExpect(status().isOk())
                 .andExpect(jsonPath("$.problem_id").value(noOfProblemInContest))
-                .andExpect(jsonPath("$.problem_type").value(PROBLEM_TYPE.BLANK.name()))
-                .andExpect(jsonPath("$.chapter_type").value(CHAPTER_TYPE.CAFFEE.name()))
-                .andExpect(jsonPath("$.problem_grade").value(GRADE.ELEMENTARY.name()))
+                .andExpect(jsonPath("$.problem_type").value(PROBLEM_TYPE.BLANK.getValue()))
+                .andExpect(jsonPath("$.chapter_type").value(CHAPTER_TYPE.CAFFEE.getValue()))
+                .andExpect(jsonPath("$.problem_grade").value(GRADE.ELEMENTARY.getValue()))
                 .andExpect(jsonPath("$.image_url").value("mockImageURL"))
                 .andExpect(jsonPath("$.contents[0].content_id").value(0L))
                 .andExpect(jsonPath("$.contents[0].answer").value("mockAnswer"))
                 .andExpect(jsonPath("$.contents[0].pre_script").value("mockPreScript"))
                 .andExpect(jsonPath("$.contents[0].question").value("mockQuestion"))
                 .andExpect(jsonPath("$.contents[0].post_script").value("mockPostScript"))
-                .andExpect(jsonPath("$.contents[0].hint").value("mockHint"));
+                .andExpect(jsonPath("$.contents[0].hint").value("mockHint"))
+                .andDo(MockMvcResultHandlers.print());
 
     }
 
@@ -100,11 +101,26 @@ class ProblemControllerTest {
 
         // when & then
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
-                        "/v1/problem"
-                ).param("problem_id", "0").
+                        "/v1/contest/{contest_id}/problem/{problem_id}"
+                        , contestId.toString(), noOfProblemInContest.toString()
+                ).
                 header("Authorization", mockToken));
         actual.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("not found problem"));
     }
 
+    @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|null 혹은 유효하지 않는 값 존제")
+    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfInvalidProblemId")
+    @ParameterizedTest
+    void givenInvalidateParamWhenThrowInvalidateExceptionOnValidatorThenStatus400(Object contestId, Object noOfProblemInContest) throws Exception {
+
+        // when & then
+        ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
+                        "/v1/contest/{contest_id}/problem/{problem_id}"
+                        , contestId, noOfProblemInContest
+                ).
+                header("Authorization", mockToken));
+        actual.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("invalid parameter"));
+    }
 }

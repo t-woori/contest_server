@@ -13,6 +13,7 @@ spring:
         format_sql: true
     generate-ddl: true
     defer-datasource-initialization: true
+  jackson.property-naming-strategy: SNAKE_CASE
 jwt.secret: test
 logging.level:
   org.hibernate.SQL: debug
