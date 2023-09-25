@@ -16,6 +16,6 @@ public class NotFoundProblemException extends NotFoundException {
 
     @Override
     public String getParamsInfo() {
-        return "contestId: " + contestId + " problemId: " + problemId;
+        return "contestId: " + contestId + " noOfProblemInContest: " + problemId;
     }
 }

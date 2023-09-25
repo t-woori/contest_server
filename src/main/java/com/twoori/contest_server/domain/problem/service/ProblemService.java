@@ -8,10 +8,7 @@ import com.twoori.contest_server.domain.problem.dto.*;
 import com.twoori.contest_server.domain.problem.exceptions.AllSolvedException;
 import com.twoori.contest_server.domain.problem.exceptions.FirstSolveException;
 import com.twoori.contest_server.domain.problem.exceptions.NotSolvedProblemException;
-import com.twoori.contest_server.domain.problem.repository.ContentRepository;
-import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
-import com.twoori.contest_server.domain.problem.repository.ProblemDto;
-import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
+import com.twoori.contest_server.domain.problem.repository.*;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import com.twoori.contest_server.global.exception.OKException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +23,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class ProblemService {
+    private final ProblemRepository problemRepository;
     private final ContentRepository contentRepository;
 
     private final LogStudentInProblemRepository logStudentInProblemRepository;
@@ -39,11 +37,13 @@ public class ProblemService {
 
     public ProblemService(LogStudentInProblemRepository logStudentInProblemRepository,
                           ProblemInContestRepository problemInContestRepository,
-                          ContentRepository contentRepository) {
+                          ContentRepository contentRepository,
+                          ProblemRepository problemRepository) {
         this.logStudentInProblemRepository = logStudentInProblemRepository;
         this.problemInContestRepository = problemInContestRepository;
         this.contentRepository = contentRepository;
         initTotalStatus();
+        this.problemRepository = problemRepository;
     }
 
     private void initTotalStatus() {
@@ -199,7 +199,7 @@ public class ProblemService {
         return List.copyOf(totalStatus.values());
     }
 
-    public ProblemDto getProblem(UUID contestId, Long problemId) {
-        return null;
+    public ProblemDto getProblem(UUID contestId, Long noOfProblemInContest) {
+        return problemRepository.getProblem(contestId, noOfProblemInContest);
     }
 }

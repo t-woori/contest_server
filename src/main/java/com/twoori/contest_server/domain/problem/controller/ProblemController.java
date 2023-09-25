@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.problem.controller;
 import com.twoori.contest_server.domain.problem.dto.ContentDtoForController;
 import com.twoori.contest_server.domain.problem.dto.MinInfoAboutStudentAndContestDto;
 import com.twoori.contest_server.domain.problem.dto.QuizScoreDto;
+import com.twoori.contest_server.domain.problem.repository.ProblemDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.problem.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
@@ -75,5 +76,15 @@ public class ProblemController {
 
         log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
         return ResponseEntity.ok(new ResponseTotalStatusVO(statues, 200, "ok"));
+    }
+
+    @GetMapping("/v1/contest/{contest_id}/problem/{problem_id}")
+    public ResponseEntity<ProblemDto> getStudentStatus(@PathVariable("contest_id") UUID contestId, @PathVariable("problem_id") Long problemId,
+                                                       @RequestHeader(name = "Authorization") String accessTokenHeader) {
+        StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
+        log.info("[Controller] request student status. contest : {}, student: {}", contestId, studentDto.id());
+        ProblemDto problem = problemService.getProblem(contestId, problemId);
+        log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.id());
+        return ResponseEntity.ok(problem);
     }
 }
