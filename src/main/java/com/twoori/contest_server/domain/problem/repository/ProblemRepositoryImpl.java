@@ -5,6 +5,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.problem.dao.QContent;
 import com.twoori.contest_server.domain.problem.dao.QProblem;
 import com.twoori.contest_server.domain.problem.dao.QProblemInContest;
+import com.twoori.contest_server.domain.problem.dto.ContentDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import jakarta.persistence.EntityManager;
 import org.springframework.validation.annotation.Validated;
@@ -54,7 +56,7 @@ public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
                         qProblemInContest.id.contestId.eq(contestId),
                         qProblemInContest.noOfProblemInContest.eq(noOfProblemInContest)
                 ).fetch();
-        if (dto == null || dto.size() == 0) {
+        if (dto == null || dto.isEmpty()) {
             throw new NotFoundProblemException(contestId, noOfProblemInContest);
         }
         return dto.get(0);

@@ -1,5 +1,7 @@
 package com.twoori.contest_server.domain.problem.repository;
 
+import com.twoori.contest_server.domain.problem.dto.ContentDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import jakarta.transaction.Transactional;

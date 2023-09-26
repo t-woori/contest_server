@@ -1,4 +1,4 @@
-package com.twoori.contest_server.domain.problem.repository;
+package com.twoori.contest_server.domain.problem.dto;
 
 public record ContentDto(
         Long contentId,

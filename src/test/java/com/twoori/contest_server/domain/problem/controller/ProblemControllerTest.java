@@ -1,11 +1,11 @@
 package com.twoori.contest_server.domain.problem.controller;
 
+import com.twoori.contest_server.domain.problem.dto.ContentDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.enums.CHAPTER_TYPE;
 import com.twoori.contest_server.domain.problem.enums.GRADE;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
-import com.twoori.contest_server.domain.problem.repository.ContentDto;
-import com.twoori.contest_server.domain.problem.repository.ProblemDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
@@ -41,6 +41,7 @@ class ProblemControllerTest {
     private ProblemService problemService;
     @MockBean
     private SecurityUtil securityUtil;
+
     @Autowired
     private MockMvc mvc;
 
