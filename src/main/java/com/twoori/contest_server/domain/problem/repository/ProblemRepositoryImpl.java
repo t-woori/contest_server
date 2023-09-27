@@ -9,12 +9,10 @@ import com.twoori.contest_server.domain.problem.dto.ContentDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import jakarta.persistence.EntityManager;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.UUID;
 
-@Validated
 public class ProblemRepositoryImpl implements ProblemRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;

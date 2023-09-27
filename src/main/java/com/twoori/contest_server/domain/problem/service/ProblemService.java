@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.problem.service;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -15,25 +16,20 @@ import java.util.UUID;
 public class ProblemService {
     private final ProblemRepository problemRepository;
 
-
     private final Map<Long, Long> totalStatus = new HashMap<>();
+
 
     public ProblemService(ProblemRepository problemRepository) {
         this.problemRepository = problemRepository;
-        initTotalStatus();
-    }
-
-    private void initTotalStatus() {
-        for (long i = 0; i <= 9L; i++) {
-            totalStatus.put(i, 0L);
-        }
     }
 
     public List<Long> getTotalStatus() {
         return List.copyOf(totalStatus.values());
     }
 
+    @Cacheable(value = "problem", key = "#contestId.toString() +'_' +#noOfProblemInContest.toString()")
     public ProblemDto getProblem(UUID contestId, Long noOfProblemInContest) {
         return problemRepository.getProblem(contestId, noOfProblemInContest);
     }
+
 }
