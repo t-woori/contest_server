@@ -14,3 +14,10 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
+  redis:
+    image: redis:6.2.4
+    restart: on-failure
+    volumes:
+      - ./tmp/redis:/data
+    ports:
+      - "6379:6379"

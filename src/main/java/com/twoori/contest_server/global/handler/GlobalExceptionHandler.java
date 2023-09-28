@@ -5,9 +5,11 @@ import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -32,5 +34,12 @@ public class GlobalExceptionHandler {
         log.error("Missing Request Header Exception", e);
         return ResponseEntity.badRequest()
                 .body(new CommonAPIResponseVO(HttpStatus.BAD_REQUEST.value(), "empty " + e.getHeaderName() + " header"));
+    }
+
+    @ExceptionHandler({MethodArgumentNotValidException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<CommonAPIResponseVO> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("Illegal Argument Exception", e);
+        return ResponseEntity.badRequest()
+                .body(new CommonAPIResponseVO(HttpStatus.BAD_REQUEST.value(), "invalid parameter"));
     }
 }
