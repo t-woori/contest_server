@@ -92,4 +92,8 @@ public class ContestService {
         LocalDateTime end = start.plusMonths(3);
         return contestRepository.getRegisteredContestsInFromTo(studentId, start, end);
     }
+
+    public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
+
+    }
 }

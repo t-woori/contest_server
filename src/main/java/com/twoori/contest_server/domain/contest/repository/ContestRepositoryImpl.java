@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
@@ -134,4 +135,14 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 .fetch();
     }
 
+    @Transactional
+    @Override
+    public void cancelContest(UUID contestId, UUID studentId) {
+
+    }
+
+    @Override
+    public ContestDto getTimesAboutContest(UUID contestId) {
+        return null;
+    }
 }
