@@ -9,6 +9,8 @@ import com.twoori.contest_server.domain.student.dao.Student;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -26,8 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class ContestServiceTest {
@@ -369,4 +370,42 @@ class ContestServiceTest {
         assertThat(actual)
                 .isNotNull().isEmpty();
     }
+
+    @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForCancelTimeAndStartTime")
+    @ParameterizedTest
+    void givenContestWhenCancelContestThenSuccess(LocalDateTime cancelTime, LocalDateTime startTime) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.getTimesAboutContest(contestId)).willReturn(new ContestDto(
+                contestId, startTime, startTime.plusMinutes(CONTEST_TIME)
+        ));
+        doNothing().when(contestRepository).cancelContest(contestId, studentId);
+
+        // when
+        contestService.cancelContest(contestId, studentId, cancelTime);
+
+        // then
+        verify(contestRepository).cancelContest(contestId, studentId);
+    }
+
+    @DisplayName("취소 불가능한 시간대에 신청 취소|Fail| 대회 시작 하루 전까지만 취소 가능")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForNotCancelTimeAndStartTime")
+    @ParameterizedTest
+    void givenContestWhenCancelContestThenFail(LocalDateTime cancelTime, LocalDateTime startTime) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.getTimesAboutContest(contestId)).willReturn(new ContestDto(
+                contestId, startTime, startTime.plusMinutes(CONTEST_TIME)
+        ));
+
+        // when
+        contestService.cancelContest(contestId, studentId, cancelTime);
+
+        // then
+        verify(contestRepository, never()).cancelContest(contestId, studentId);
+    }
+
 }

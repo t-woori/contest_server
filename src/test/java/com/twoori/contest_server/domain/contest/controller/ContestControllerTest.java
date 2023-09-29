@@ -1,33 +1,35 @@
 package com.twoori.contest_server.domain.contest.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
-import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
-import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapperImpl;
 import com.twoori.contest_server.domain.contest.service.ContestService;
-import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
-import com.twoori.contest_server.domain.contest.vo.RegisteredContestsVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
-import com.twoori.contest_server.domain.contest.vo.SearchContestsVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.global.exception.PermissionDenialException;
 import com.twoori.contest_server.global.security.SecurityUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -37,22 +39,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@ExtendWith({MockitoExtension.class})
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
 class ContestControllerTest {
-
-    @InjectMocks
-    private ContestController contestController;
-
-    @Mock
+    private final String mockToken = "Bearer MockToken";
+    private final UUID studentId = UUID.randomUUID();
+    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    @MockBean
     private ContestService contestService;
-
-    @Mock
+    @MockBean
     private SecurityUtil securityUtil;
+    @Autowired
+    private MockMvc mvc;
 
-    @Spy
-    private ContestControllerVOMapper mapper = new ContestControllerVOMapperImpl();
 
     private static Stream<Arguments> argumentsForSearchContest() {
         return Stream.of(
@@ -63,25 +71,22 @@ class ContestControllerTest {
         );
     }
 
+    @BeforeEach
+    void beforeAll() {
+        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId, "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
+    }
+
     @DisplayName("대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
     @MethodSource("argumentsForSearchContest")
     @ParameterizedTest
     void givenSearchParameterWhenSearchContestsThenTotalContestCountOfContestInRegisteredContestCountOfContest(
             int registeredContestCount, int totalContestCount
-    ) {
+    ) throws Exception {
         // given
         String parameter = "";
         List<UUID> contestIds = IntStream.range(0, totalContestCount).mapToObj(i -> UUID.randomUUID()).toList();
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now().plusMonths(3);
-        UUID studentId = UUID.randomUUID();
-        String mockHeader = "";
-        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
-                "name",
-                "email",
-                "phoneNumber",
-                "accessToken",
-                "refreshToken"));
         given(contestService.searchContests(parameter, from, to)).willReturn(
                 IntStream.range(0, totalContestCount).mapToObj(i -> new SearchContestDtoForController(contestIds.get(i),
                         "contest name" + i,
@@ -93,25 +98,28 @@ class ContestControllerTest {
         );
 
         // when
-        ResponseEntity<SearchContestsVO> actual = contestController.searchContests(mockHeader, parameter, from, to);
+        ResultActions actual = mvc.perform(get("/v1/contest")
+                .param("from", from.toString())
+                .param("to", to.toString())
+                .param("search", parameter)
+                .header("Authorization", mockToken));
 
         // then
-        List<SearchContestVO> body = actual.getBody().getSearchContestVOList();
-        assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(body)
-                .isNotNull()
-                .hasSize(totalContestCount)
-                .isSortedAccordingTo(
-                        Comparator.comparing(SearchContestVO::startedAt)
-                                .thenComparing(SearchContestVO::endedAt));
-        assertThat(body)
-                .filteredOn(SearchContestVO::isRegistered)
-                .hasSize(registeredContestCount);
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        byte[] rawJson = actual.andReturn().getResponse().getContentAsByteArray();
+        Map<String, Object> body = objectMapper.readValue(rawJson, new TypeReference<>() {
+        });
+        List<SearchContestVO> contests = objectMapper.convertValue(body.get("contests"), new TypeReference<>() {
+        });
+        assertThat(contests)
+                .isNotNull().hasSize(totalContestCount)
+                .filteredOn(SearchContestVO::isRegistered).hasSize(registeredContestCount);
     }
 
     @DisplayName("신청한 대회중 시작하지 않은 대회 조회|Success|검색 결과 20건이 반환")
     @Test
-    void givenNonParameterWhenGetRegisteredContestThenList20() {
+    void givenNonParameterWhenGetRegisteredContestThenList20() throws Exception {
         // given
         List<UUID> contestIds = IntStream.range(0, 20).mapToObj(i -> UUID.randomUUID()).toList();
         UUID studentId = UUID.randomUUID();
@@ -129,16 +137,50 @@ class ContestControllerTest {
                         LocalDateTime.now().plusMinutes(10))).toList());
 
         // when
-        ResponseEntity<RegisteredContestsVO> actual = contestController.getRegisteredContestsAboutStudent(mockHeader);
+        ResultActions actual = mvc.perform(get("/v1/contest/registered")
+                .header("Authorization", mockHeader));
 
         // then
-        List<RegisteredContestVO> body = actual.getBody().getContests();
-        assertThat(actual.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(body)
-                .isNotNull()
-                .hasSize(20)
-                .isSortedAccordingTo(
-                        Comparator.comparing(RegisteredContestVO::startedAt)
-                                .thenComparing(RegisteredContestVO::endedAt));
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        byte[] rawJson = actual.andReturn().getResponse().getContentAsByteArray();
+        Map<String, Object> body = objectMapper.readValue(rawJson, new TypeReference<>() {
+        });
+        List<SearchContestVO> contests = objectMapper.convertValue(body.get("contests"), new TypeReference<>() {
+        });
+        assertThat(contests).isNotNull().hasSize(20);
+    }
+
+    @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
+    @Test
+    void givenRegisteredContestWhenCancelContestThenSuccess() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        doNothing().when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+                .header("Authorization", mockToken));
+
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":200,\"message\":\"ok\"}"));
+    }
+
+    @DisplayName("취소 불가능한 시간대에 신청 취소|Fail| 대회 시작 하루 전까지만 취소 가능")
+    @Test
+    void givenRegisteredContestWhenCancelContestThenFail() throws Exception {
+        UUID contestId = UUID.randomUUID();
+        doThrow(new PermissionDenialException("not cancel time")).when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+                .header("Authorization", mockToken));
+
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":403,\"message\":\"\"}"));
     }
 }
