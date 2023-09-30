@@ -6,6 +6,8 @@ import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMa
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
+import com.twoori.contest_server.global.exception.PermissionDenialException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -401,10 +403,8 @@ class ContestServiceTest {
                 contestId, startTime, startTime.plusMinutes(CONTEST_TIME)
         ));
 
-        // when
-        contestService.cancelContest(contestId, studentId, cancelTime);
-
-        // then
+        // when & then
+        Assertions.assertThrows(PermissionDenialException.class, () -> contestService.cancelContest(contestId, studentId, cancelTime));
         verify(contestRepository, never()).cancelContest(contestId, studentId);
     }
 

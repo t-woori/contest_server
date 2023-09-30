@@ -2,7 +2,6 @@ package com.twoori.contest_server.domain.contest.repository;
 
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
-import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,9 +58,12 @@ class ContestRepositoryTest {
         repository.cancelContest(contestId, studentId);
 
         // then
-        System.out.println("before");
-        StudentInContest actual = testEntityManager.find(StudentInContest.class, new StudentInContestID(studentId, contestId));
-        assertThat(actual).isNotNull().extracting("deletedAt").isNotNull();
+        StudentInContest dao = (StudentInContest) testEntityManager.getEntityManager()
+                .createNativeQuery("select * from student_in_contest " +
+                        "where student_id = :studentId and  contest_id = :contestId", StudentInContest.class)
+                .setParameter("studentId", studentId).setParameter("contestId", contestId)
+                .getSingleResult();
+        assertThat(dao).isNotNull().extracting("deletedAt").isNotNull();
     }
 
 }

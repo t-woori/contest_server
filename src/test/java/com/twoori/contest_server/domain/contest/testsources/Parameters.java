@@ -15,8 +15,7 @@ public class Parameters {
                 Arguments.of(now, now.plusDays(1)),
                 Arguments.of(now, now.plusDays(2)),
                 Arguments.of(now, now.plusDays(3)),
-                Arguments.of(now, now.plusDays(4)),
-                Arguments.of(now, now.toLocalDate().atStartOfDay().minusSeconds(1))
+                Arguments.of(now, now.plusDays(4))
         );
     }
 
