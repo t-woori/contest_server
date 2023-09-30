@@ -92,4 +92,15 @@ public class ContestService {
         LocalDateTime end = start.plusMonths(3);
         return contestRepository.getRegisteredContestsInFromTo(studentId, start, end);
     }
+
+    public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
+        CancelContestDto contestDto = contestRepository.getTimesAboutContest(contestId)
+                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+        LocalDateTime expiredTime = contestDto.startDateTime().toLocalDate().atStartOfDay();
+        if (cancelTime.isBefore(expiredTime) || cancelTime.isEqual(expiredTime)) {
+            contestRepository.cancelContest(contestId, studentId);
+            return;
+        }
+        throw new NotCancelRegisterContest(studentId, contestId);
+    }
 }

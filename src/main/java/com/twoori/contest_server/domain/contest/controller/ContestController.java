@@ -8,6 +8,7 @@ import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
+import com.twoori.contest_server.global.vo.APIOkMessageVO;
 import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -95,6 +96,16 @@ public class ContestController {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
         List<RegisteredContestDto> contests = contestService.getRegisteredContestsInFromTo(studentDto.id());
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
+    }
+
+    @PostMapping("/v1/contest/{contest_id}/cancel")
+    public ResponseEntity<APIOkMessageVO> cancelContest(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @PathVariable("contest_id") UUID contestId
+    ) {
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        contestService.cancelContest(contestId, studentDto.id(), LocalDateTime.now());
+        return ResponseEntity.ok(new APIOkMessageVO());
     }
 }
 

@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
+import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
@@ -132,6 +133,34 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                         contest.runningStartDateTime.between(from, to),
                         contest.runningEndDateTime.between(from, to))
                 .fetch();
+    }
+
+    @Transactional
+    @Override
+    public void cancelContest(UUID contestId, UUID studentId) {
+        QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
+        queryFactory.update(qStudentInContest)
+                .set(qStudentInContest.updatedAt, LocalDateTime.now())
+                .set(qStudentInContest.deletedAt, LocalDateTime.now())
+                .where(qStudentInContest.id.contestID.eq(contestId),
+                        qStudentInContest.id.studentID.eq(studentId))
+                .execute();
+    }
+
+    @Override
+    public Optional<CancelContestDto> getTimesAboutContest(UUID contestId) {
+        QContest qContest = QContest.contest;
+        CancelContestDto result = queryFactory
+                .select(
+                        Projections.constructor(
+                                CancelContestDto.class,
+                                qContest.id.as("contestId"),
+                                qContest.runningStartDateTime.as("startDateTime"),
+                                qContest.runningEndDateTime.as("endDateTime")
+                        )
+                ).from(qContest)
+                .where(qContest.id.eq(contestId)).fetchOne();
+        return Optional.ofNullable(result);
     }
 
 }

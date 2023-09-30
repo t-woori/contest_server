@@ -1,12 +1,14 @@
 package com.twoori.contest_server.domain.contest.repository;
 
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
+import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,9 @@ class ContestRepositoryTest {
 
     @Autowired
     private ContestRepository repository;
+
+    @Autowired
+    private TestEntityManager testEntityManager;
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|2건의 대회가 존재")
     @Test
@@ -41,4 +46,24 @@ class ContestRepositoryTest {
                         UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f")));
 
     }
+
+    @DisplayName("신청 취소 요청|Success| SoftDelete 성공")
+    @Test
+    void givenRegisteredContestWhenCancelContestThenSuccess() {
+        // given
+        UUID studentId = UUID.fromString("dba77299-9009-422c-91ab-7a976525c80a");
+        UUID contestId = UUID.fromString("a3030109-b69e-417a-8b18-e2d12a3c33de");
+
+        // when
+        repository.cancelContest(contestId, studentId);
+
+        // then
+        StudentInContest dao = (StudentInContest) testEntityManager.getEntityManager()
+                .createNativeQuery("select * from student_in_contest " +
+                        "where student_id = :studentId and  contest_id = :contestId", StudentInContest.class)
+                .setParameter("studentId", studentId).setParameter("contestId", contestId)
+                .getSingleResult();
+        assertThat(dao).isNotNull().extracting("deletedAt").isNotNull();
+    }
+
 }

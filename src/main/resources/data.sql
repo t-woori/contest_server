@@ -55,7 +55,10 @@ VALUES (0xd45fa47fb1de42b29b5982b6cacb1614,
         '00 다문화 센터',
         '00 다문화 센터 6차 대회/하루 뒤에 시작');
 INSERT INTO student(id, created_at, updated_at, deleted_at, name, email, phone_number, access_token, refresh_token)
-VALUES (0xd7762394592c4e338d7106fc5a94abfb, now(), now(), null, 'mockuser', 'mock@mock.com',
+VALUES (0xd7762394592c4e338d7106fc5a94abfb, now(), now(), null, 'mockuser1', 'mock@mock.com',
+        '010-1234-5678', 'mockAccessToken', 'mockRefreshToken');
+INSERT INTO student(id, created_at, updated_at, deleted_at, name, email, phone_number, access_token, refresh_token)
+VALUES (0xDBA772999009422C91AB7A976525C80A, now(), now(), null, 'mockuser2', 'mock@mock.com',
         '010-1234-5678', 'mockAccessToken', 'mockRefreshToken');
 INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, deleted_at)
 VALUES (0xd7762394592c4e338d7106fc5a94abfb, 0x53A703531F964B3984F922704218627F, now(), now(), null);
@@ -63,6 +66,8 @@ INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, d
 VALUES (0xd7762394592c4e338d7106fc5a94abfb, 0xd45fa47fb1de42b29b5982b6cacb1614, now(), now(), null);
 INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, deleted_at)
 VALUES (0xd7762394592c4e338d7106fc5a94abfb, 0x992033a011c945b0a64301a2c706f118, now(), now(), null);
+INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, deleted_at)
+VALUES (0xDBA772999009422C91AB7A976525C80A, 0xA3030109B69E417A8B18E2D12A3C33DE, now(), now(), null);
 
 INSERT INTO problem(id, created_at, updated_at, deleted_at, image_url, grade, problem_type, chapter_type)
 VALUES (0, now(), now(), null,

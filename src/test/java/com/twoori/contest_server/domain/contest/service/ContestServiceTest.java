@@ -6,9 +6,12 @@ import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMa
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
+import com.twoori.contest_server.global.exception.PermissionDenialException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -26,8 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class})
 class ContestServiceTest {
@@ -44,7 +46,7 @@ class ContestServiceTest {
     @Spy
     private ContestDtoForControllerMapper mapper = new ContestDtoForControllerMapperImpl();
 
-    @DisplayName("Success case1: 대회 시작 10분전에 입장 시도")
+    @DisplayName("대회 시작 10분전에 입장|Success|대회 입장 가능 시간 내에 입장 시도")
     @Test
     void givenContestWhenEnterStudentInContestThenSuccess() {
         // given
@@ -68,7 +70,7 @@ class ContestServiceTest {
 
     }
 
-    @DisplayName("Success case2: 대회 기간 내에 재진입 허용")
+    @DisplayName("이미 진입한 상태에서 모종의 문재로 인해 다시 입장 시도|Success|이미 입장한 상태에서 다시 입장 시도")
     @Test
     void givenReEnterStatusWhenEnterStudentInContestThenSuccess() {
         // given
@@ -94,7 +96,7 @@ class ContestServiceTest {
 
     }
 
-    @DisplayName("Success case3: 대회 시작 1분후에 입장 시도")
+    @DisplayName("대회 시작 1분 후 입장|Success| 최대 1분간 대회 입장 유예 시간 제공")
     @Test
     void givenEnterContestWhenEnterStudentInContestThenSuccess() {
         // given
@@ -117,7 +119,7 @@ class ContestServiceTest {
                 .containsExactly(contestId, startDateTime, endDateTime);
     }
 
-    @DisplayName("Fail case1: 대회가 종료된 후 입장 시도")
+    @DisplayName("대회 종료 후 입장 시도|Fail|대회 종료 후 입장 불가")
     @Test
     void givenEndContestWhenEnterStudentInContestThenThrowExpiredContestException() {
         // given
@@ -129,11 +131,12 @@ class ContestServiceTest {
                 new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
         ));
         // when & then
-        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+        UUID studentId = student.getId();
+        assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
                 .isInstanceOf(EndContestException.class);
     }
 
-    @DisplayName("Fail case2: 대회 대기 시간 전에 입장 시도")
+    @DisplayName("대회 시작 11분전에 입장|Fail|대회 입장 시간 보다 먼저 입장")
     @Test
     void givenNotStartContestWhenEnterStudentInContestThenThrowEarlyContestException() {
         // given
@@ -146,11 +149,12 @@ class ContestServiceTest {
         ));
 
         // when & then
-        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+        UUID studentId = student.getId();
+        assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
                 .isInstanceOf(EarlyEnterTimeException.class);
     }
 
-    @DisplayName("Fail case3: 대회 자진 포기 후 재입장 시도")
+    @DisplayName("대회 자진 포기 후 재입장|Fail|자진 포기한 대회에 재입장 시도")
     @Test
     void givenResignedContestWhenEnterStudentInContestThenThrowResignedContestException() {
         // given
@@ -164,11 +168,12 @@ class ContestServiceTest {
         given(contestRepository.isResigned(contestId, student.getId())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+        UUID studentId = student.getId();
+        assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
                 .isInstanceOf(ResignedContestException.class);
     }
 
-    @DisplayName("Fail case4: 존재 하지 않는 대회 진 ")
+    @DisplayName("존재하지 않는 대회에 입장 시도|Fail|대회가 존재하지 않음")
     @Test
     void givenHasNotContestWhenEnterStudentInContestThenThrowResignedContestException() {
         // given
@@ -176,13 +181,14 @@ class ContestServiceTest {
         LocalDateTime enterDateTime = LocalDateTime.now();
         given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.empty());
         // when & then
-        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+        UUID studentId = student.getId();
+        assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
                 .isInstanceOf(NotFoundContestException.class);
     }
 
-    @DisplayName("Fail Case 5: 대회에 최초 진입을 2분뒤에 진행")
+    @DisplayName("대회 최초진입을 2분뒤에 실행|Fail|대회 입장 시간 초과 후 입장 시도")
     @Test
-    void givenReEnterContestWhenReEnterStudentInContestThenSuccess() {
+    void givenReEnterContestWhenReEnterStudentInContestThenThrowExpiredTimeException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -196,7 +202,8 @@ class ContestServiceTest {
         given(contestRepository.isEnteredStudentInContest(student.getId(), contestId)).willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> contestService.enterStudentInContest(student.getId(), contestId, enterDateTime))
+        UUID studentId = student.getId();
+        assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
                 .isInstanceOf(ExpiredTimeException.class);
     }
 
@@ -369,4 +376,41 @@ class ContestServiceTest {
         assertThat(actual)
                 .isNotNull().isEmpty();
     }
+
+    @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForCancelTimeAndStartTime")
+    @ParameterizedTest
+    void givenContestWhenCancelContestThenSuccess(LocalDateTime cancelTime, LocalDateTime startTime) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.getTimesAboutContest(contestId)).willReturn(Optional.of(
+                new CancelContestDto(contestId, startTime, startTime.plusMinutes(CONTEST_TIME))
+        ));
+        doNothing().when(contestRepository).cancelContest(contestId, studentId);
+
+        // when
+        contestService.cancelContest(contestId, studentId, cancelTime);
+
+        // then
+        verify(contestRepository).cancelContest(contestId, studentId);
+    }
+
+    @DisplayName("취소 불가능한 시간대에 신청 취소|Fail| 대회 시작 하루 전까지만 취소 가능")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForNotCancelTimeAndStartTime")
+    @ParameterizedTest
+    void givenContestWhenCancelContestThenFail(LocalDateTime cancelTime, LocalDateTime startTime) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.getTimesAboutContest(contestId)).willReturn(Optional.of(
+                new CancelContestDto(contestId, startTime, startTime.plusMinutes(CONTEST_TIME))
+        ));
+
+        // when & then
+        assertThatThrownBy(() -> contestService.cancelContest(contestId, studentId, cancelTime))
+                .isInstanceOf(PermissionDenialException.class);
+        verify(contestRepository, never()).cancelContest(contestId, studentId);
+    }
+
 }
