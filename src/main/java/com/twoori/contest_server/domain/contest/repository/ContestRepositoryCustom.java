@@ -1,6 +1,6 @@
 package com.twoori.contest_server.domain.contest.repository;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
@@ -30,5 +30,5 @@ public interface ContestRepositoryCustom {
 
     void cancelContest(UUID contestId, UUID studentId);
 
-    ContestDto getTimesAboutContest(UUID contestId);
+    Optional<CancelContestDto> getTimesAboutContest(UUID contestId);
 }

@@ -5,7 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
+import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
@@ -148,15 +148,19 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public ContestDto getTimesAboutContest(UUID contestId) {
-        return queryFactory
+    public Optional<CancelContestDto> getTimesAboutContest(UUID contestId) {
+        QContest qContest = QContest.contest;
+        CancelContestDto result = queryFactory
                 .select(
                         Projections.constructor(
-                                ContestDto.class,
-                                QContest.contest.runningStartDateTime.as("startDateTime"),
-                                QContest.contest.runningEndDateTime.as("endDateTime")
+                                CancelContestDto.class,
+                                qContest.id.as("contestId"),
+                                qContest.runningStartDateTime.as("startDateTime"),
+                                qContest.runningEndDateTime.as("endDateTime")
                         )
-                ).from(QContest.contest)
-                .where(QContest.contest.id.eq(contestId)).fetchOne();
+                ).from(qContest)
+                .where(qContest.id.eq(contestId)).fetchOne();
+        return Optional.ofNullable(result);
     }
+
 }
