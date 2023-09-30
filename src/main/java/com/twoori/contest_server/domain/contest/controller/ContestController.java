@@ -98,7 +98,7 @@ public class ContestController {
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
     }
 
-    @PostMapping("/v1/contest/{contest_id}/cancel")
+    @PutMapping("/v1/contest/{contest_id}/cancel")
     public ResponseEntity<APIOkMessageVO> cancelContest(
             @RequestHeader(name = "Authorization") String accessToken,
             @PathVariable("contest_id") UUID contestId

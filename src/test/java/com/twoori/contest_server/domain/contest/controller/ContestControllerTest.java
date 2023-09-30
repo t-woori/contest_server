@@ -43,7 +43,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -160,7 +160,7 @@ class ContestControllerTest {
         doNothing().when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
                 .header("Authorization", mockToken));
 
         // then
@@ -177,7 +177,7 @@ class ContestControllerTest {
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
                 .header("Authorization", mockToken));
 
         // then
@@ -196,7 +196,7 @@ class ContestControllerTest {
                 "name", "email", "phoneNumber", "accessToken", "refreshToken"));
 
         // when
-        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
                 .header("Authorization", mockHeader));
 
         // then
@@ -218,7 +218,7 @@ class ContestControllerTest {
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
                 .header("Authorization", mockHeader));
 
         // then
