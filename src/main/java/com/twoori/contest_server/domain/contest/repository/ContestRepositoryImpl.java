@@ -138,11 +138,25 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     @Transactional
     @Override
     public void cancelContest(UUID contestId, UUID studentId) {
-
+        QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
+        queryFactory.update(qStudentInContest)
+                .set(qStudentInContest.updatedAt, LocalDateTime.now())
+                .set(qStudentInContest.deletedAt, LocalDateTime.now())
+                .where(qStudentInContest.id.contestID.eq(contestId),
+                        qStudentInContest.id.studentID.eq(studentId))
+                .execute();
     }
 
     @Override
     public ContestDto getTimesAboutContest(UUID contestId) {
-        return null;
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                ContestDto.class,
+                                QContest.contest.runningStartDateTime.as("startDateTime"),
+                                QContest.contest.runningEndDateTime.as("endDateTime")
+                        )
+                ).from(QContest.contest)
+                .where(QContest.contest.id.eq(contestId)).fetchOne();
     }
 }

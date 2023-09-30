@@ -11,6 +11,7 @@ import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.BadRequestException;
 import com.twoori.contest_server.global.exception.NotFoundException;
+import com.twoori.contest_server.global.exception.PermissionDenialException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -94,6 +95,12 @@ public class ContestService {
     }
 
     public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
-
+        ContestDto contestDto = contestRepository.getTimesAboutContest(contestId);
+        LocalDateTime expiredTime = contestDto.startTime().toLocalDate().atStartOfDay();
+        if (cancelTime.isBefore(expiredTime) || cancelTime.isEqual(expiredTime)) {
+            contestRepository.cancelContest(contestId, studentId);
+            return;
+        }
+        throw new PermissionDenialException("not cancel time");
     }
 }
