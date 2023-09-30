@@ -2,6 +2,7 @@ package com.twoori.contest_server.domain.contest.repository;
 
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
+import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,20 @@ class ContestRepositoryTest {
                 .setParameter("studentId", studentId).setParameter("contestId", contestId)
                 .getSingleResult();
         assertThat(dao).isNotNull().extracting("deletedAt").isNotNull();
+    }
+
+    @DisplayName("대회 포기 요청|Success| isResigned 플래그가 true로 변경")
+    void givenStudentIdAndContestIdWhenResigneContestThenIsResignedIsTrue() {
+        // given
+        UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
+        UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
+
+        // when
+        repository.resignContest(studentId, contestId);
+
+        // then
+        StudentInContest entity = testEntityManager.find(StudentInContest.class, new StudentInContestID(studentId, contestId));
+        assertThat(entity).isNotNull().extracting("isResigned").isEqualTo(true);
     }
 
 }
