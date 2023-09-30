@@ -5,10 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
+import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
-import com.twoori.contest_server.global.exception.PermissionDenialException;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -172,7 +173,8 @@ class ContestControllerTest {
     @Test
     void givenRegisteredContestWhenCancelContestThenFail() throws Exception {
         UUID contestId = UUID.randomUUID();
-        doThrow(new PermissionDenialException("not cancel time")).when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
+        doThrow(new NotCancelRegisterContest(studentId, contestId))
+                .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
         ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
@@ -182,5 +184,46 @@ class ContestControllerTest {
         actual.andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":403,\"message\":\"not cancel time\"}"));
+    }
+
+    @DisplayName("잘못된 파라미터값으로 대회 신청 취소 요청|Fail| 파라미터 변환 실패")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForWrongContestIds")
+    @ParameterizedTest
+    void givenWrongParameterWhenCancelContestThenFail(Object contestId) throws Exception {
+        // given
+        String mockHeader = "";
+        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
+                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+
+        // when
+        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+                .header("Authorization", mockHeader));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":400,\"message\":\"invalid parameter\"}"));
+    }
+
+    @DisplayName("존재하지 않는 contestId 혹은 studentId로 요청| Fail| 존재하지 않는 파라미터")
+    @Test
+    void givenNotFoundIdsWhenCancelContestThenFail() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        String mockHeader = "";
+        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
+                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+        doThrow(new NotFoundContestException(studentId, contestId))
+                .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/v1/contest/{contest_id}/cancel", contestId)
+                .header("Authorization", mockHeader));
+
+        // then
+        actual.andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":404,\"message\":\"not found contest\"}"));
     }
 }

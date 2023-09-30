@@ -30,4 +30,12 @@ public class Parameters {
                 Arguments.of(now, now.toLocalDate().atStartOfDay())
         );
     }
+
+    public static Stream<Arguments> argumentsForWrongContestIds() {
+        return Stream.of(
+                Arguments.of("asdfasdf"),
+                Arguments.of("12L"),
+                Arguments.of(1234)
+        );
+    }
 }
