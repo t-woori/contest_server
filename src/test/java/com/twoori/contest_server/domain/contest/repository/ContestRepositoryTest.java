@@ -68,6 +68,7 @@ class ContestRepositoryTest {
     }
 
     @DisplayName("대회 포기 요청|Success| isResigned 플래그가 true로 변경")
+    @Test
     void givenStudentIdAndContestIdWhenResigneContestThenIsResignedIsTrue() {
         // given
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
