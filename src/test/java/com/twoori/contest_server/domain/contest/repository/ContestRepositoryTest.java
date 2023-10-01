@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.contest.repository;
 
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -69,7 +70,7 @@ class ContestRepositoryTest {
 
     @DisplayName("대회 포기 요청|Success| isResigned 플래그가 true로 변경")
     @Test
-    void givenStudentIdAndContestIdWhenResigneContestThenIsResignedIsTrue() {
+    void givenStudentIdAndContestIdWhenResignedContestThenIsResignedIsTrue() {
         // given
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
@@ -82,4 +83,19 @@ class ContestRepositoryTest {
         assertThat(entity).isNotNull().extracting("isResigned").isEqualTo(true);
     }
 
+    @DisplayName("종료된 대회 요청|Success|종료된 대회들만 조회")
+    @Test
+    void givenStudentIdWhenSearchEndOfContestsThen() {
+        // given
+        UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
+        LocalDateTime from = LocalDateTime.now().minusMonths(3);
+        LocalDateTime to = LocalDateTime.now().minusMinutes(1);
+        // when
+        List<ContestDto> endOfContests = repository.searchEndOfContests(studentId, from, to);
+
+        // then
+        UUID endContestId = UUID.fromString("d45fa47f-b1de-42b2-9b59-82b6cacb1614");
+        assertThat(endOfContests).isNotNull().hasSize(1)
+                .extracting("contestId").containsExactly(endContestId);
+    }
 }

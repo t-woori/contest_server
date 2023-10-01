@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
@@ -282,4 +283,27 @@ class ContestControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":400,\"message\":\"not registered contest\"}"));
     }
+
+    @DisplayName("종료된 대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
+    @Test
+    void givenValidateTokenWhenSearchEndContestsThen100OfContests() throws Exception {
+        // given
+        given(contestService.searchEndOfContests(studentId)).willReturn(IntStream.range(0, 10)
+                .mapToObj(i -> new ContestDto(UUID.randomUUID(),
+                        "contest name" + i, "host" + i,
+                        LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2).plusMinutes(15))).toList());
+        // when
+        ResultActions actual = mvc.perform(get("/v1/contests/end")
+                .header("Authorization", mockToken));
+
+        // then
+        byte[] rawJson = actual.andReturn().getResponse().getContentAsByteArray();
+        Map<String, Object> body = objectMapper.readValue(rawJson, new TypeReference<>() {
+        });
+        List<SearchContestVO> contests = objectMapper.convertValue(body.get("contests"), new TypeReference<>() {
+        });
+        actual.andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        assertThat(contests).isNotNull().hasSize(10);
+    }
+
 }

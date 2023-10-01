@@ -442,4 +442,24 @@ class ContestServiceTest {
                 .isInstanceOf(NotRegisteredContestException.class);
         verify(contestRepository, never()).resignContest(contestId, studentId);
     }
+
+    @DisplayName("종료된 대회 검색|Success|종료된 대회들만 검색")
+    @Test
+    void givenCurrentTimeAndStudentIdWhenSearchExpiredContestThenReturnExpiredContests() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
+        given(contestRepository.searchEndOfContests(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
+                .willReturn(IntStream.range(0, 100).mapToObj(i -> new ContestDto(contestIds.get(i),
+                        "contest" + i, "host" + i,
+                        LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(2))).toList());
+
+        // when
+        List<ContestDto> actual = contestService.searchEndOfContests(studentId);
+
+        // then
+        assertThat(actual)
+                .isNotNull().isNotEmpty().hasSize(100)
+                .extracting("contestId").containsExactlyElementsOf(contestIds);
+    }
 }
