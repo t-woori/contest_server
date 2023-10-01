@@ -103,4 +103,11 @@ public class ContestService {
         }
         throw new NotCancelRegisterContest(studentId, contestId);
     }
+
+    public void resignContest(UUID contestId, UUID studentId) {
+        if (!contestRepository.isEnteredStudentInContest(studentId, contestId)) {
+            throw new NotRegisteredContestException(studentId, contestId);
+        }
+        contestRepository.resignContest(contestId, studentId);
+    }
 }

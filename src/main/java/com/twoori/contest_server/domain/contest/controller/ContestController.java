@@ -107,5 +107,15 @@ public class ContestController {
         contestService.cancelContest(contestId, studentDto.id(), LocalDateTime.now());
         return ResponseEntity.ok(new APIOkMessageVO());
     }
+
+    @PutMapping("/v1/contest/{contest_id}/resign")
+    public ResponseEntity<APIOkMessageVO> resignContest(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @PathVariable("contest_id") UUID contestId
+    ) {
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        contestService.resignContest(contestId, studentDto.id());
+        return ResponseEntity.ok(new APIOkMessageVO());
+    }
 }
 

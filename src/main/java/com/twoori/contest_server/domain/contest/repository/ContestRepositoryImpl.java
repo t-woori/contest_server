@@ -163,4 +163,15 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
+    @Override
+    public void resignContest(UUID studentId, UUID contestId) {
+        QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
+        queryFactory.update(qStudentInContest)
+                .set(qStudentInContest.isResigned, Expressions.asBoolean(true).isTrue())
+                .set(qStudentInContest.updatedAt, LocalDateTime.now())
+                .where(qStudentInContest.id.contestID.eq(contestId),
+                        qStudentInContest.id.studentID.eq(studentId))
+                .execute();
+    }
+
 }
