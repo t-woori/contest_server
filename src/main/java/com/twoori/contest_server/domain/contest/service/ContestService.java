@@ -11,12 +11,14 @@ import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.BadRequestException;
 import com.twoori.contest_server.global.exception.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 public class ContestService {
     private static final int ENTER_TIME = 10;
@@ -102,5 +104,13 @@ public class ContestService {
             return;
         }
         throw new NotCancelRegisterContest(studentId, contestId);
+    }
+
+    public void resignContest(UUID contestId, UUID studentId) {
+        if (!contestRepository.isEnteredStudentInContest(studentId, contestId)) {
+            log.error("not registered contest, contestId: {}, studentId: {}", contestId, studentId);
+            throw new NotRegisteredContestException(studentId, contestId);
+        }
+        contestRepository.resignContest(contestId, studentId);
     }
 }

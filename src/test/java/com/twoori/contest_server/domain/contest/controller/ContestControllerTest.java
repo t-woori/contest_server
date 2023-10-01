@@ -7,6 +7,7 @@ import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
+import com.twoori.contest_server.domain.contest.excpetion.NotRegisteredContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
@@ -225,5 +226,60 @@ class ContestControllerTest {
         actual.andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":404,\"message\":\"not found contest\"}"));
+    }
+
+    @DisplayName("대회 자진 포기 요청|Success|포기 완료")
+    @Test
+    void givenRequestResignWhenResignContestThenSuccess() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        doNothing().when(contestService).resignContest(contestId, studentId);
+
+        // when
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+                .header("Authorization", mockToken)
+                .param("contest_id", contestId.toString()));
+
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":200,\"message\":\"ok\"}"));
+    }
+
+    @DisplayName("잘못된 파라미터로 대회 자진 포기 요청|Fail|잘못된 파라미터")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForWrongContestIds")
+    @ParameterizedTest
+    void givenWrongParameterWhenResignContestThenFail(Object contestId) throws Exception {
+        // given
+        String mockHeader = "";
+        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
+                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+
+        // when
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+                .header("Authorization", mockHeader));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":400,\"message\":\"invalid parameter\"}"));
+    }
+
+    @DisplayName("신청하지도 않는 대회에 자진 포기|Fail|불가능한 상황에서 대회 신청 취소 요청")
+    @Test
+    void givenNotRegisteredContestWhenResignContestThenFail() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        doThrow(new NotRegisteredContestException(studentId, contestId))
+                .when(contestService).resignContest(contestId, studentId);
+
+        // when
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+                .header("Authorization", mockToken));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":400,\"message\":\"not registered contest\"}"));
     }
 }

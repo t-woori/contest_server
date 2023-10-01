@@ -413,4 +413,33 @@ class ContestServiceTest {
         verify(contestRepository, never()).cancelContest(contestId, studentId);
     }
 
+    @DisplayName("대회 중 자진 포기 요청|Success|대회 자진 포기 기록")
+    @Test
+    void givenContestWhenResignContestThenSuccess() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.isEnteredStudentInContest(studentId, contestId)).willReturn(true);
+        doNothing().when(contestRepository).resignContest(contestId, studentId);
+
+        // when
+        contestService.resignContest(contestId, studentId);
+
+        // then
+        verify(contestRepository).resignContest(contestId, studentId);
+    }
+
+    @DisplayName("대회 중 자진 포기 요청|Fail|대회에 신청하지 않은 상태에서 자진 포기 요청")
+    @Test
+    void givenContestWhenResignContestThenFail() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(contestRepository.isEnteredStudentInContest(studentId, contestId)).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> contestService.resignContest(contestId, studentId))
+                .isInstanceOf(NotRegisteredContestException.class);
+        verify(contestRepository, never()).resignContest(contestId, studentId);
+    }
 }

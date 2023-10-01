@@ -31,4 +31,6 @@ public interface ContestRepositoryCustom {
     void cancelContest(UUID contestId, UUID studentId);
 
     Optional<CancelContestDto> getTimesAboutContest(UUID contestId);
+
+    void resignContest(UUID studentId, UUID contestId);
 }
