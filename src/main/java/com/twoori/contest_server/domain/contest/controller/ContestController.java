@@ -114,7 +114,9 @@ public class ContestController {
             @PathVariable("contest_id") UUID contestId
     ) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
         contestService.resignContest(contestId, studentDto.id());
+        log.info("resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 }
