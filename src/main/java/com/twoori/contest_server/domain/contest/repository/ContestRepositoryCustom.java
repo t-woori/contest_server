@@ -1,9 +1,6 @@
 package com.twoori.contest_server.domain.contest.repository;
 
-import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
-import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,4 +30,6 @@ public interface ContestRepositoryCustom {
     Optional<CancelContestDto> getTimesAboutContest(UUID contestId);
 
     void resignContest(UUID studentId, UUID contestId);
+
+    List<ContestDto> searchEndOfContests(UUID studentId, LocalDateTime from, LocalDateTime to);
 }

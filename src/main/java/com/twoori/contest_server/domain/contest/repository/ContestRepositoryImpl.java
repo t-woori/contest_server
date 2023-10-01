@@ -5,10 +5,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
-import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
-import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
-import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -172,6 +169,26 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 .where(qStudentInContest.id.contestID.eq(contestId),
                         qStudentInContest.id.studentID.eq(studentId))
                 .execute();
+    }
+
+    @Override
+    public List<ContestDto> searchEndOfContests(UUID studentId, LocalDateTime from, LocalDateTime to) {
+        return queryFactory.select(
+                        Projections.constructor(
+                                ContestDto.class,
+                                QContest.contest.id.as("contestId"),
+                                QContest.contest.name.as("name"),
+                                QContest.contest.hostName.as("hostName"),
+                                QContest.contest.runningStartDateTime.as("startedAt"),
+                                QContest.contest.runningEndDateTime.as("endedAt")
+                        )
+                ).from(QStudentInContest.studentInContest)
+                .join(QContest.contest)
+                .on(QStudentInContest.studentInContest.id.contestID.eq(QContest.contest.id),
+                        QStudentInContest.studentInContest.id.studentID.eq(studentId))
+                .where(QContest.contest.runningStartDateTime.between(from, to),
+                        QContest.contest.runningEndDateTime.between(from, to))
+                .fetch();
     }
 
 }

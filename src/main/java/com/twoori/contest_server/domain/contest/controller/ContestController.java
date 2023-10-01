@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.contest.controller;
 
+import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
@@ -118,6 +119,15 @@ public class ContestController {
         contestService.resignContest(contestId, studentDto.id());
         log.info("resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
         return ResponseEntity.ok(new APIOkMessageVO());
+    }
+
+    @GetMapping("/v1/contests/end")
+    public ResponseEntity<ContestsVO> getEndOfContests(
+            @RequestHeader(name = "Authorization") String accessToken
+    ) {
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        List<ContestDto> contests = contestService.searchEndOfContests(studentDto.id());
+        return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 }
 

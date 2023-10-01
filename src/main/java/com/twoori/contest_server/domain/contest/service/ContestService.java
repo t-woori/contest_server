@@ -113,4 +113,8 @@ public class ContestService {
         }
         contestRepository.resignContest(contestId, studentId);
     }
+
+    public List<ContestDto> searchEndOfContests(UUID studentId) {
+        return contestRepository.searchEndOfContests(studentId, LocalDateTime.now().minusMonths(3), LocalDateTime.now());
+    }
 }
