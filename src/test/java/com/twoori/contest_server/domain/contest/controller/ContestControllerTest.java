@@ -3,8 +3,8 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
@@ -133,7 +133,7 @@ class ContestControllerTest {
                 "phoneNumber",
                 "accessToken",
                 "refreshToken"));
-        given(contestService.getRegisteredContestsInFromTo(studentId)).willReturn(
+        given(contestService.searchContestForEnterContest(studentId)).willReturn(
                 IntStream.range(0, 20).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
                         "contest name" + i,
                         LocalDateTime.now(),
@@ -289,7 +289,7 @@ class ContestControllerTest {
     void givenValidateTokenWhenSearchEndContestsThen100OfContests() throws Exception {
         // given
         given(contestService.searchEndOfContests(studentId)).willReturn(IntStream.range(0, 10)
-                .mapToObj(i -> new ContestDto(UUID.randomUUID(),
+                .mapToObj(i -> new SearchContestDto(UUID.randomUUID(),
                         "contest name" + i, "host" + i,
                         LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2).plusMinutes(15))).toList());
         // when

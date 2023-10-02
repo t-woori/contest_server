@@ -1,8 +1,8 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.ContestDto;
 import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
 import com.twoori.contest_server.domain.contest.service.ContestService;
@@ -67,11 +67,11 @@ public class ContestController {
                 new SearchContestsVO(
                         contests.stream().map(
                                 contest -> new SearchContestVO(
-                                        contest.id(),
+                                        contest.contestId(),
                                         contest.name(),
                                         contest.startedAt(),
                                         contest.endedAt(),
-                                        registeredIdSets.contains(contest.id())
+                                        registeredIdSets.contains(contest.contestId())
                                 )
                         ).toList()
                 )
@@ -95,7 +95,7 @@ public class ContestController {
     @GetMapping("/v1/contest/registered")
     public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<RegisteredContestDto> contests = contestService.getRegisteredContestsInFromTo(studentDto.id());
+        List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentDto.id());
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
     }
 
@@ -126,7 +126,7 @@ public class ContestController {
             @RequestHeader(name = "Authorization") String accessToken
     ) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<ContestDto> contests = contestService.searchEndOfContests(studentDto.id());
+        List<SearchContestDto> contests = contestService.searchEndOfContests(studentDto.id());
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 }

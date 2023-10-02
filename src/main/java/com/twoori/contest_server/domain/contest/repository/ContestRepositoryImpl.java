@@ -1,21 +1,25 @@
 package com.twoori.contest_server.domain.contest.repository;
 
+import com.querydsl.core.types.ConstructorExpression;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.contest.dao.QContest;
-import com.twoori.contest_server.domain.contest.dto.*;
+import com.twoori.contest_server.domain.contest.dto.CancelContestDto;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.student.dao.QStudentInContest;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ContestRepositoryImpl implements ContestRepositoryCustom {
 
@@ -35,11 +39,12 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                                 QContest.contest.hostName.as("hostName"),
                                 QContest.contest.runningStartDateTime.as("startDateTime"),
                                 QContest.contest.runningEndDateTime.as("endDateTime")
-                        )).from(QStudentInContest.studentInContest)
+                        )
+                ).from(QStudentInContest.studentInContest)
                 .join(QContest.contest)
                 .on(QStudentInContest.studentInContest.id.contestID.eq(QContest.contest.id))
                 .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
-                        QStudentInContest.studentInContest.id.studentID.eq(studentId))
+                        studentIdEq(studentId))
                 .fetchOne();
         if (contestDto == null) {
             return Optional.empty();
@@ -51,7 +56,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     public boolean isResigned(UUID contestId, UUID studentId) {
         return queryFactory.selectFrom(QStudentInContest.studentInContest)
                 .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
-                        QStudentInContest.studentInContest.id.studentID.eq(studentId),
+                        studentIdEq(studentId),
                         QStudentInContest.studentInContest.isResigned.eq(true))
                 .fetchFirst() != null;
     }
@@ -71,64 +76,56 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
         queryFactory.update(QStudentInContest.studentInContest)
                 .set(QStudentInContest.studentInContest.isEntered, Expressions.asBoolean(true).isTrue())
                 .where(QStudentInContest.studentInContest.id.contestID.eq(contestId),
-                        QStudentInContest.studentInContest.id.studentID.eq(studentId))
+                        studentIdEq(studentId))
                 .execute();
     }
 
-    @Override
-    public List<SearchContestDto> getContestsHasParameterInName(String parameter, LocalDateTime from, LocalDateTime to) {
-        QContest contest = QContest.contest;
-        JPAQuery<SearchContestDto> query = queryFactory
-                .select(
-                        Projections.constructor(
-                                SearchContestDto.class,
-                                contest.id.as("contestId"),
-                                contest.name.as("name"),
-                                contest.hostName.as("hostName"),
-                                contest.runningStartDateTime.as("startDateTime"),
-                                contest.runningEndDateTime.as("endDateTime")
-                        )
-                ).from(contest)
-                .where(contest.name.contains(parameter),
-                        contest.runningStartDateTime.between(from, to));
-        return query.fetch();
-    }
 
     @Override
-    public Set<UUID> getContestIdSetAboutRegisteredStudent(UUID id, LocalDate from, LocalDate to) {
+    public Set<UUID> getContestIdSetAboutRegisteredStudent(ContestCondition condition) {
         QStudentInContest studentInContest = QStudentInContest.studentInContest;
         QContest contest = QContest.contest;
-        List<UUID> sets = queryFactory
+        return queryFactory
                 .select(studentInContest.id.contestID)
                 .from(studentInContest)
                 .join(contest)
                 .on(studentInContest.id.contestID.eq(contest.id))
                 .where(
-                        studentInContest.id.studentID.eq(id),
-                        contest.runningStartDateTime.between(from.atStartOfDay(), to.atStartOfDay()),
-                        contest.runningEndDateTime.between(from.atStartOfDay(), to.atStartOfDay())
+                        studentIdEq(condition.getRegisteredStudentId()),
+                        startedAtBetweenFromTo(condition.getFrom(), condition.getTo())
+                ).fetchAll().stream().collect(Collectors.toSet());
+    }
+
+    public List<SearchContestDto> searchNotStartedContests(ContestCondition condition) {
+        return queryFactory.select(projectionAboutContestDto()).from(QContest.contest)
+                .where(
+                        startedAtBetweenFromTo(condition.getFrom(), condition.getTo()),
+                        parameterEq(condition.getParameter())
                 ).fetch();
-        return Set.copyOf(sets);
+    }
+
+    private ConstructorExpression<SearchContestDto> projectionAboutContestDto() {
+        return Projections.constructor(
+                SearchContestDto.class,
+                QContest.contest.id.as("contestId"),
+                QContest.contest.name.as("name"),
+                QContest.contest.hostName.as("hostName"),
+                QContest.contest.runningStartDateTime.as("startedAt"),
+                QContest.contest.runningEndDateTime.as("endedAt")
+        );
     }
 
     @Override
-    public List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId, LocalDateTime from, LocalDateTime to) {
+    public List<SearchContestDto> searchRegisteredContest(ContestCondition condition) {
         QStudentInContest studentInContest = QStudentInContest.studentInContest;
         QContest contest = QContest.contest;
         return queryFactory.select(
-                        Projections.constructor(
-                                RegisteredContestDto.class,
-                                contest.id.as("id"),
-                                contest.name.as("name"),
-                                contest.runningStartDateTime.as("startedAt"),
-                                contest.runningEndDateTime.as("endedAt")
-                        )
+                        projectionAboutContestDto()
                 ).from(studentInContest)
                 .join(contest)
                 .on(studentInContest.id.contestID.eq(contest.id))
-                .where(studentInContest.id.studentID.eq(studentId),
-                        contest.runningStartDateTime.between(from, to),
-                        contest.runningEndDateTime.between(from, to))
+                .where(studentIdEq(condition.getRegisteredStudentId()),
+                        startedAtBetweenFromTo(condition.getFrom(), condition.getTo()))
                 .fetch();
     }
 
@@ -172,23 +169,45 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public List<ContestDto> searchEndOfContests(UUID studentId, LocalDateTime from, LocalDateTime to) {
+    public List<SearchContestDto> searchEndOfContests(ContestCondition condition) {
         return queryFactory.select(
-                        Projections.constructor(
-                                ContestDto.class,
-                                QContest.contest.id.as("contestId"),
-                                QContest.contest.name.as("name"),
-                                QContest.contest.hostName.as("hostName"),
-                                QContest.contest.runningStartDateTime.as("startedAt"),
-                                QContest.contest.runningEndDateTime.as("endedAt")
-                        )
+                        projectionAboutContestDto()
                 ).from(QStudentInContest.studentInContest)
                 .join(QContest.contest)
-                .on(QStudentInContest.studentInContest.id.contestID.eq(QContest.contest.id),
-                        QStudentInContest.studentInContest.id.studentID.eq(studentId))
-                .where(QContest.contest.runningStartDateTime.between(from, to),
-                        QContest.contest.runningEndDateTime.between(from, to))
+                .on(QStudentInContest.studentInContest.id.contestID.eq(QContest.contest.id))
+                .where(
+                        studentIdEq(condition.getRegisteredStudentId()),
+                        endedAtBetweenFromTo(condition.getFrom(), condition.getTo()),
+                        parameterEq(condition.getParameter()))
                 .fetch();
     }
 
+    private Predicate parameterEq(String parameter) {
+        if (parameter == null) {
+            return null;
+        }
+        return QContest.contest.name.contains(parameter);
+    }
+
+
+    private BooleanExpression studentIdEq(UUID studentId) {
+        if (studentId == null) {
+            return null;
+        }
+        return QStudentInContest.studentInContest.id.studentID.eq(studentId);
+    }
+
+    private BooleanExpression endedAtBetweenFromTo(LocalDateTime from, LocalDateTime to) {
+        if (from == null || to == null) {
+            return null;
+        }
+        return QContest.contest.runningEndDateTime.between(from, to);
+    }
+
+    private Predicate startedAtBetweenFromTo(LocalDateTime from, LocalDateTime to) {
+        if (from == null || to == null) {
+            return null;
+        }
+        return QContest.contest.runningStartDateTime.between(from, to);
+    }
 }

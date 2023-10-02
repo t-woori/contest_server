@@ -4,6 +4,7 @@ import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
+import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
 import com.twoori.contest_server.global.exception.PermissionDenialException;
@@ -27,7 +28,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -215,15 +216,14 @@ class ContestServiceTest {
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
         LocalDate from = LocalDate.now();
         LocalDate to = from.plusMonths(3);
-        given(contestRepository.getContestsHasParameterInName(eq(parameter),
-                isA(LocalDateTime.class),
-                isA(LocalDateTime.class))).willReturn(
+        ContestCondition condition = new ContestCondition();
+        condition.setFrom(from.atStartOfDay());
+        condition.setTo(to.atStartOfDay());
+        condition.setParameter(parameter);
+        given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
-                                contestIds.get(i),
-                                "test" + i,
-                                "hostName" + i,
-                                from.atStartOfDay().plusDays(1),
-                                from.atStartOfDay().plusDays(2)
+                        contestIds.get(i), "test" + i, "hostName" + i,
+                        from.atStartOfDay().plusDays(1), from.atStartOfDay().plusDays(2)
                         )
                 ).toList()
         );
@@ -236,7 +236,7 @@ class ContestServiceTest {
                 .doesNotContainNull().isNotEmpty().hasSize(100)
                 .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
                         .thenComparing(SearchContestDtoForController::endedAt))
-                .extracting("id").containsExactlyElementsOf(contestIds);
+                .extracting("contestId").containsExactlyElementsOf(contestIds);
 
     }
 
@@ -249,16 +249,14 @@ class ContestServiceTest {
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
         LocalDate from = LocalDate.now();
         LocalDate to = from.plusMonths(1);
-        given(contestRepository.getContestsHasParameterInName(eq(parameter),
-                isA(LocalDateTime.class),
-                isA(LocalDateTime.class))).willReturn(
+        ContestCondition condition = new ContestCondition();
+        condition.setFrom(from.atStartOfDay());
+        condition.setTo(to.atStartOfDay());
+        condition.setParameter(parameter);
+        given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
-                        contestIds.get(i),
-                        "contest" + i,
-                        "hostName" + i,
-                        from.atStartOfDay().plusDays(1),
-                        from.atStartOfDay().plusDays(2)
-                )).toList()
+                        contestIds.get(i), "contest" + i, "hostName" + i,
+                        from.atStartOfDay().plusDays(1), from.atStartOfDay().plusDays(2))).toList()
         );
         // when
         List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
@@ -266,9 +264,7 @@ class ContestServiceTest {
         // then
         assertThat(contests)
                 .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
-                        .thenComparing(SearchContestDtoForController::endedAt))
-                .extracting("id").containsExactlyElementsOf(contestIds);
+                .extracting("contestId").containsExactlyElementsOf(contestIds);
     }
 
     @DisplayName("대회 검색|Success|현시점부터 1개월 이상, 2개월 미만인 모든 대회 검색")
@@ -279,30 +275,24 @@ class ContestServiceTest {
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
         LocalDate from = LocalDate.now().plusMonths(1);
         LocalDate to = from.plusMonths(2);
-        given(contestRepository.getContestsHasParameterInName(eq(parameter),
-                isA(LocalDateTime.class),
-                isA(LocalDateTime.class))).willReturn(
+        ContestCondition condition = new ContestCondition();
+        condition.setFrom(from.atStartOfDay());
+        condition.setTo(to.atStartOfDay());
+        condition.setParameter(parameter);
+        given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> {
-                            LocalDateTime startedAt = LocalDateTime.now().plusDays(1);
-                    return new SearchContestDto(
-                                    contestIds.get(i),
-                                    "contest" + i,
-                                    "hostName" + i,
-                                    startedAt,
-                                    startedAt.plusMinutes(CONTEST_TIME)
-                            );
-                        }
-                ).toList()
-        );
+                    LocalDateTime startedAt = LocalDateTime.now().plusDays(1);
+                    return new SearchContestDto(contestIds.get(i), "contest" + i, "hostName" + i,
+                            startedAt, startedAt.plusMinutes(CONTEST_TIME));
+                }).toList());
+
         //when
         List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         //then
         assertThat(contests)
                 .isNotNull().doesNotContainNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(SearchContestDtoForController::startedAt)
-                        .thenComparing(SearchContestDtoForController::endedAt))
-                .extracting("id").containsExactlyElementsOf(contestIds);
+                .extracting("contestId").containsExactlyElementsOf(contestIds);
 
     }
 
@@ -318,7 +308,7 @@ class ContestServiceTest {
         List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
-        verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
+        verify(contestRepository, never()).searchEndOfContests(isA(ContestCondition.class));
         assertThat(contests).isNotNull().isEmpty();
     }
 
@@ -334,7 +324,7 @@ class ContestServiceTest {
         List<SearchContestDtoForController> contests = contestService.searchContests(parameter, from, to);
 
         // then
-        verify(contestRepository, never()).getContestsHasParameterInName(anyString(), any(), any());
+        verify(contestRepository, never()).searchEndOfContests(isA(ContestCondition.class));
         assertThat(contests).isNotNull().isEmpty();
     }
 
@@ -344,21 +334,18 @@ class ContestServiceTest {
         // given
         UUID studentId = UUID.randomUUID();
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
-        given(contestRepository.getRegisteredContestsInFromTo(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
-                .willReturn(IntStream.range(0, 100).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
-                        "contest" + i,
-                        LocalDateTime.now().plusDays(1),
+        given(contestRepository.searchRegisteredContest(isA(ContestCondition.class)))
+                .willReturn(IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(contestIds.get(i),
+                        "contest" + i, "hostName" + i, LocalDateTime.now().plusDays(1),
                         LocalDateTime.now().plusDays(2))).toList());
 
         // when
-        List<RegisteredContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+        List<RegisteredContestDto> actual = contestService.searchContestForEnterContest(studentId);
 
         // then
         assertThat(actual)
                 .isNotNull().isNotEmpty().hasSize(100)
-                .isSortedAccordingTo(Comparator.comparing(RegisteredContestDto::startedAt)
-                        .thenComparing(RegisteredContestDto::endedAt))
-                .extracting("id").containsExactlyElementsOf(contestIds);
+                .extracting("contestId").containsExactlyElementsOf(contestIds);
     }
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과 미존재")
@@ -366,15 +353,13 @@ class ContestServiceTest {
     void givenStudentIdWhenGetRegisteredContestsThenEmptyList() {
         // given
         UUID studentId = UUID.randomUUID();
-        given(contestRepository.getRegisteredContestsInFromTo(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
-                .willReturn(List.of());
+        given(contestRepository.searchRegisteredContest(isA(ContestCondition.class))).willReturn(List.of());
 
         // when
-        List<RegisteredContestDto> actual = contestService.getRegisteredContestsInFromTo(studentId);
+        List<RegisteredContestDto> actual = contestService.searchContestForEnterContest(studentId);
 
         // then
-        assertThat(actual)
-                .isNotNull().isEmpty();
+        assertThat(actual).isNotNull().isEmpty();
     }
 
     @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
@@ -385,8 +370,7 @@ class ContestServiceTest {
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
         given(contestRepository.getTimesAboutContest(contestId)).willReturn(Optional.of(
-                new CancelContestDto(contestId, startTime, startTime.plusMinutes(CONTEST_TIME))
-        ));
+                new CancelContestDto(contestId, startTime, startTime.plusMinutes(CONTEST_TIME))));
         doNothing().when(contestRepository).cancelContest(contestId, studentId);
 
         // when
@@ -449,13 +433,13 @@ class ContestServiceTest {
         // given
         UUID studentId = UUID.randomUUID();
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
-        given(contestRepository.searchEndOfContests(eq(studentId), isA(LocalDateTime.class), isA(LocalDateTime.class)))
-                .willReturn(IntStream.range(0, 100).mapToObj(i -> new ContestDto(contestIds.get(i),
+        given(contestRepository.searchEndOfContests(isA(ContestCondition.class)))
+                .willReturn(IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(contestIds.get(i),
                         "contest" + i, "host" + i,
                         LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(2))).toList());
 
         // when
-        List<ContestDto> actual = contestService.searchEndOfContests(studentId);
+        List<SearchContestDto> actual = contestService.searchEndOfContests(studentId);
 
         // then
         assertThat(actual)

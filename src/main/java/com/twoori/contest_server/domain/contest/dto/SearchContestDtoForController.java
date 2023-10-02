@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record SearchContestDtoForController(
-        UUID id,
+        UUID contestId,
         String name,
         String hostName,
         LocalDateTime startedAt,
