@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record RegisteredContestDto(
-        UUID id,
+        UUID contestId,
         String name,
         LocalDateTime startedAt,
         LocalDateTime endedAt

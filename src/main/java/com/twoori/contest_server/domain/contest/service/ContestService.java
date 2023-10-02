@@ -4,6 +4,7 @@ import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
+import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -63,17 +67,21 @@ public class ContestService {
         if (from.isAfter(to) || from.isBefore(now.toLocalDate())) {
             return new ArrayList<>();
         }
-        return contestRepository.getContestsHasParameterInName(parameter,
-                        from.atTime(now.toLocalTime()),
-                        to.atTime(now.toLocalTime()))
-                .stream().sorted(
-                        Comparator.comparing(SearchContestDto::runningStartDateTime)
-                                .thenComparing(SearchContestDto::runningEndDateTime)
-                ).map(mapper::toSearchDtoForController).toList();
+        ContestCondition condition = new ContestCondition();
+        condition.setParameter(parameter);
+        condition.setFrom(from.atStartOfDay());
+        condition.setTo(to.atStartOfDay());
+        List<SearchContestDto> result = contestRepository.searchNotStartedContests(condition);
+        return mapper.toSearchDtoForControllerList(result);
+
     }
 
     public Set<UUID> getRegisteredContestIdsInFromTo(UUID studentId, LocalDate from, LocalDate to) {
-        return contestRepository.getContestIdSetAboutRegisteredStudent(studentId, from, to);
+        ContestCondition condition = new ContestCondition();
+        condition.setRegisteredStudentId(studentId);
+        condition.setFrom(from.atStartOfDay());
+        condition.setTo(to.atStartOfDay());
+        return contestRepository.getContestIdSetAboutRegisteredStudent(condition);
     }
 
     public void registerContestByUser(UUID contestId, StudentDto studentDto, String authCode) {
@@ -89,10 +97,14 @@ public class ContestService {
         );
     }
 
-    public List<RegisteredContestDto> getRegisteredContestsInFromTo(UUID studentId) {
+    public List<RegisteredContestDto> searchContestForEnterContest(UUID studentId) {
         LocalDateTime start = LocalDateTime.now().minusMinutes(1);
         LocalDateTime end = start.plusMonths(3);
-        return contestRepository.getRegisteredContestsInFromTo(studentId, start, end);
+        ContestCondition condition = new ContestCondition();
+        condition.setRegisteredStudentId(studentId);
+        condition.setFrom(start);
+        condition.setTo(end);
+        return mapper.toRegisteredContestDto(contestRepository.searchRegisteredContest(condition));
     }
 
     public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
@@ -112,5 +124,13 @@ public class ContestService {
             throw new NotRegisteredContestException(studentId, contestId);
         }
         contestRepository.resignContest(contestId, studentId);
+    }
+
+    public List<SearchContestDto> searchEndOfContests(UUID studentIdAboutRegisteredContest) {
+        ContestCondition condition = new ContestCondition();
+        condition.setRegisteredStudentId(studentIdAboutRegisteredContest);
+        condition.setFrom(LocalDateTime.now().minusMonths(3));
+        condition.setTo(LocalDateTime.now());
+        return contestRepository.searchEndOfContests(condition);
     }
 }
