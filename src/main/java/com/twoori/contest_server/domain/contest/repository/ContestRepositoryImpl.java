@@ -15,11 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class ContestRepositoryImpl implements ContestRepositoryCustom {
 
@@ -85,7 +81,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     public Set<UUID> getContestIdSetAboutRegisteredStudent(ContestCondition condition) {
         QStudentInContest studentInContest = QStudentInContest.studentInContest;
         QContest contest = QContest.contest;
-        return queryFactory
+        return new HashSet<>(queryFactory
                 .select(studentInContest.id.contestID)
                 .from(studentInContest)
                 .join(contest)
@@ -93,7 +89,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 .where(
                         studentIdEq(condition.getRegisteredStudentId()),
                         startedAtBetweenFromTo(condition.getFrom(), condition.getTo())
-                ).fetchAll().stream().collect(Collectors.toSet());
+                ).fetch());
     }
 
     public List<SearchContestDto> searchNotStartedContests(ContestCondition condition) {
