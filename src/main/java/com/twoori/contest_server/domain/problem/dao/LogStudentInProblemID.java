@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 @Embeddable
 public class LogStudentInProblemID implements Serializable {
     @Column(name = "contest_id")
@@ -26,11 +27,23 @@ public class LogStudentInProblemID implements Serializable {
     @Column(name = "content_id")
     private Long contentId;
 
-    public LogStudentInProblemID(UUID contestId, UUID studentId, Long problemId, Long contentId) {
+    @Column(name = "count_of_try")
+    private Integer countOfTry;
+
+    private LogStudentInProblemID(UUID contestId, UUID studentId, Long problemId, Long contentId, Integer countOfTry) {
         this.contestId = contestId;
         this.studentId = studentId;
         this.problemId = problemId;
         this.contentId = contentId;
+        this.countOfTry = countOfTry;
+    }
+
+    public static LogStudentInProblemID ofIncludeCountOfTry(UUID contestId, UUID studentId, Long problemId, Long contentId, Integer countOfTry) {
+        return new LogStudentInProblemID(contestId, studentId, problemId, contentId, countOfTry);
+    }
+
+    public static LogStudentInProblemID ofExcludeCountOfTry(UUID contestId, UUID studentId, Long problemId, Long contentId) {
+        return new LogStudentInProblemID(contestId, studentId, problemId, contentId, 0);
     }
 
     @Override

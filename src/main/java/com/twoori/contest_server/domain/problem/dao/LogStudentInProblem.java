@@ -3,12 +3,9 @@ package com.twoori.contest_server.domain.problem.dao;
 import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.student.dao.Student;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,25 +15,25 @@ import java.util.Objects;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(name = "log_student_in_problem")
 public class LogStudentInProblem {
+
     @EmbeddedId
     private LogStudentInProblemID logStudentInProblemId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contest_id")
     @MapsId("contest_id")
     private Contest contest;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     @MapsId("student_id")
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
     @JoinColumn(name = "problem_id")
     @MapsId("content_id")
@@ -53,20 +50,12 @@ public class LogStudentInProblem {
     private LocalDateTime deletedAt;
 
     @Column(nullable = false)
-    private LocalDateTime startSolveProblemDateTime;
+    private Double score;
 
-    @Setter
-    private LocalDateTime endSolveProblemDateTime;
 
-    @Setter
-    @PositiveOrZero
-    @ColumnDefault("0")
-    @Column(nullable = false)
-    private Double score = 0.0;
-
-    public LogStudentInProblem(LogStudentInProblemID logStudentInProblemId, LocalDateTime startSolveProblemDateTime) {
+    public LogStudentInProblem(LogStudentInProblemID logStudentInProblemId, Double score) {
         this.logStudentInProblemId = logStudentInProblemId;
-        this.startSolveProblemDateTime = startSolveProblemDateTime;
+        this.score = score;
     }
 
     @Override
