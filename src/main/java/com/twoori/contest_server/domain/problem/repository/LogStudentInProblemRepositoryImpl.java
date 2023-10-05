@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dao.QLogStudentInProblem;
 import jakarta.persistence.EntityManager;
+import org.springframework.cache.annotation.Cacheable;
 
 public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRepositoryCustom {
 
@@ -38,6 +39,8 @@ public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRep
         );
     }
 
+    @Cacheable(value = "max_score", key = "#logStudentInProblemID.getNoOfProblemInContest().toString()+'_'+" +
+            "#logStudentInProblemID.getContentId()+'_'+" + "#logStudentInProblemID.getContestId()+'_' +#logStudentInProblemID.getStudentId()")
     @Override
     public Double getMaxScoreProblemOne(LogStudentInProblemID logStudentInProblemID) {
         return queryFactory.select(qLogStudentInProblem.score.max())

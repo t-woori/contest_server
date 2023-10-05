@@ -7,6 +7,7 @@ import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRe
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
 import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,8 @@ public class ProblemService {
         return problemRepository.getProblem(contestId, noOfProblemInContest);
     }
 
+    @CachePut(value = "max_score", key = "#solvedProblemVO.noOfProblemInContest.toString()+'_'+" +
+            "#solvedProblemVO.contentId()+'_'+" + "#solvedProblemVO.contestId()+'_' +#solvedProblemVO.studentId")
     public Double updateMaxScoreAboutProblem(SolvedProblemVO solvedProblemVO) {
         LogStudentInProblemID logStudentInProblemID = LogStudentInProblemID.ofExcludeCountOfTry(
                 solvedProblemVO.contestId(),
