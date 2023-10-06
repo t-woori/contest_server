@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 @Embeddable
 public class LogStudentInProblemID implements Serializable {
     @Column(name = "contest_id")

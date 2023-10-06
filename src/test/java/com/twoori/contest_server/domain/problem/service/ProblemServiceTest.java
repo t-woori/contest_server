@@ -4,13 +4,13 @@ import com.twoori.contest_server.domain.problem.dao.LogStudentInProblem;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dto.ContentDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
+import com.twoori.contest_server.domain.problem.dto.SolvedProblemDto;
 import com.twoori.contest_server.domain.problem.enums.CHAPTER_TYPE;
 import com.twoori.contest_server.domain.problem.enums.GRADE;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
-import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,19 +78,19 @@ class ProblemServiceTest {
         Long noOfProblemInContest = 0L;
         Long contentId = 0L;
         Double newScore = 0.70;
-        SolvedProblemVO solvedProblemVO = new SolvedProblemVO(studentId, contestId, noOfProblemInContest, contentId, newScore);
-        given(logStudentInProblemRepository.countLatestSolvedProblem(
-                LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, solvedProblemVO.contentId())
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        given(logStudentInProblemRepository.getMaxCountOfTryAboutId(
+                LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, solvedProblemDto.contentId())
         )).willReturn(0);
 
         // when
-        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemVO);
+        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemDto);
 
         // then
         verify(logStudentInProblemRepository).save(
                 new LogStudentInProblem(
-                        LogStudentInProblemID.ofIncludeCountOfTry(contestId, studentId, noOfProblemInContest, solvedProblemVO.contentId(), 1)
-                        , solvedProblemVO.newScore()));
+                        LogStudentInProblemID.ofIncludeCountOfTry(contestId, studentId, noOfProblemInContest, solvedProblemDto.contentId(), 1)
+                        , solvedProblemDto.newScore()));
         assertThat(actual).isEqualTo(newScore);
     }
 
@@ -104,12 +104,12 @@ class ProblemServiceTest {
         Long contentId = 0L;
         Double newScore = 0.70;
         LogStudentInProblemID id = LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, contentId);
-        SolvedProblemVO solvedProblemVO = new SolvedProblemVO(studentId, contestId, noOfProblemInContest, contentId, newScore);
-        given(logStudentInProblemRepository.countLatestSolvedProblem(id)).willReturn(1);
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        given(logStudentInProblemRepository.getMaxCountOfTryAboutId(id)).willReturn(1);
         given(logStudentInProblemRepository.getMaxScoreProblemOne(id)).willReturn(0.60);
 
         // when
-        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemVO);
+        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemDto);
 
         // then
         Integer nextCountOfTry = 0;
@@ -120,7 +120,7 @@ class ProblemServiceTest {
                 nextCountOfTry);
         assertThat(actual).isEqualTo(newScore);
         verify(logStudentInProblemRepository, times(1)).save(
-                new LogStudentInProblem(insertedEntityId, solvedProblemVO.newScore()));
+                new LogStudentInProblem(insertedEntityId, solvedProblemDto.newScore()));
     }
 
     @DisplayName("기존 점수보다 새로운 점수가 더 낮다|Not Cache Put|RDB에 로그만 기록하고 rediss에 캐싱하지 않는다.")
@@ -134,12 +134,12 @@ class ProblemServiceTest {
         Double beforeMaxScore = 0.70;
         Double newScore = 0.60;
         LogStudentInProblemID id = LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, contentId);
-        SolvedProblemVO solvedProblemVO = new SolvedProblemVO(studentId, contestId, noOfProblemInContest, contentId, newScore);
-        given(logStudentInProblemRepository.countLatestSolvedProblem(id)).willReturn(1);
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        given(logStudentInProblemRepository.getMaxCountOfTryAboutId(id)).willReturn(1);
         given(logStudentInProblemRepository.getMaxScoreProblemOne(id)).willReturn(beforeMaxScore);
 
         // when
-        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemVO);
+        Double actual = problemService.updateMaxScoreAboutProblem(solvedProblemDto);
 
         // then
         Integer nextCountOfTry = 1;
@@ -150,6 +150,6 @@ class ProblemServiceTest {
                 nextCountOfTry);
         assertThat(actual).isEqualTo(beforeMaxScore);
         verify(logStudentInProblemRepository, times(1)).save(
-                new LogStudentInProblem(insertedEntityId, solvedProblemVO.newScore()));
+                new LogStudentInProblem(insertedEntityId, solvedProblemDto.newScore()));
     }
 }

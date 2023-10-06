@@ -5,7 +5,7 @@ import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
-import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
+import com.twoori.contest_server.domain.problem.vo.SolvedProblemDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,27 +40,27 @@ public class ProblemService {
         return problemRepository.getProblem(contestId, noOfProblemInContest);
     }
 
-    @CachePut(value = "max_score", key = "#solvedProblemVO.noOfProblemInContest.toString()+'_'+" +
-            "#solvedProblemVO.contentId()+'_'+" + "#solvedProblemVO.contestId()+'_' +#solvedProblemVO.studentId")
-    public Double updateMaxScoreAboutProblem(SolvedProblemVO solvedProblemVO) {
+    @CachePut(value = "max_score", key = "#solvedProblemDto.noOfProblemInContest.toString()+'_'+" +
+            "#solvedProblemDto.contentId()+'_'+" + "#solvedProblemDto.contestId()+'_' +#solvedProblemDto.studentId")
+    public Double updateMaxScoreAboutProblem(SolvedProblemDto solvedProblemDto) {
         LogStudentInProblemID logStudentInProblemID = LogStudentInProblemID.ofExcludeCountOfTry(
-                solvedProblemVO.contestId(),
-                solvedProblemVO.studentId(),
-                solvedProblemVO.noOfProblemInContest(),
-                solvedProblemVO.contentId());
-        Integer maxCount = logStudentInProblemRepository.countLatestSolvedProblem(logStudentInProblemID);
+                solvedProblemDto.contestId(),
+                solvedProblemDto.studentId(),
+                solvedProblemDto.noOfProblemInContest(),
+                solvedProblemDto.contentId());
+        Integer maxCount = logStudentInProblemRepository.getMaxCountOfTryAboutId(logStudentInProblemID);
         logStudentInProblemRepository.save(
                 new LogStudentInProblem(
                         LogStudentInProblemID.ofIncludeCountOfTry(
-                                solvedProblemVO.contestId(),
-                                solvedProblemVO.studentId(),
-                                solvedProblemVO.noOfProblemInContest(),
-                                solvedProblemVO.contentId(),
+                                solvedProblemDto.contestId(),
+                                solvedProblemDto.studentId(),
+                                solvedProblemDto.noOfProblemInContest(),
+                                solvedProblemDto.contentId(),
                                 maxCount + 1)
-                        , solvedProblemVO.newScore()));
+                        , solvedProblemDto.newScore()));
         Double maxScore = getMaxScore(logStudentInProblemID);
-        if (maxScore < solvedProblemVO.newScore()) {
-            return solvedProblemVO.newScore();
+        if (maxScore < solvedProblemDto.newScore()) {
+            return solvedProblemDto.newScore();
         }
         return maxScore;
     }

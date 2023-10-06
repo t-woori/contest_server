@@ -50,7 +50,7 @@ class LogStudentInProblemRepositoryTest {
         }
 
         // when
-        Integer maxCount = logStudentInProblemRepository.countLatestSolvedProblem(
+        Integer maxCount = logStudentInProblemRepository.getMaxCountOfTryAboutId(
                 LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, problemId, contentId));
 
         // then

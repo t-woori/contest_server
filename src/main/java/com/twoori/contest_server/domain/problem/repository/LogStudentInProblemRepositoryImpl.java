@@ -18,7 +18,7 @@ public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRep
     }
 
     @Override
-    public Integer countLatestSolvedProblem(LogStudentInProblemID logStudentInProblemID) {
+    public Integer getMaxCountOfTryAboutId(LogStudentInProblemID logStudentInProblemID) {
         Integer result = queryFactory.select(qLogStudentInProblem.logStudentInProblemId.countOfTry.max())
                 .from(qLogStudentInProblem)
                 .where(logStudentInProblemIdExcludeCountOfTryEq(logStudentInProblemID))
@@ -29,15 +29,6 @@ public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRep
         return result;
     }
 
-
-    private Predicate logStudentInProblemIdExcludeCountOfTryEq(LogStudentInProblemID logStudentInProblemID) {
-        return Expressions.allOf(
-                qLogStudentInProblem.logStudentInProblemId.contestId.eq(logStudentInProblemID.getContestId()),
-                qLogStudentInProblem.logStudentInProblemId.studentId.eq(logStudentInProblemID.getStudentId()),
-                qLogStudentInProblem.logStudentInProblemId.problemId.eq(logStudentInProblemID.getProblemId()),
-                qLogStudentInProblem.logStudentInProblemId.contentId.eq(logStudentInProblemID.getContentId())
-        );
-    }
 
     @Cacheable(value = "max_score", key = "#logStudentInProblemID.getProblemId().toString()+'_'+" +
             "#logStudentInProblemID.getContentId()+'_'+" + "#logStudentInProblemID.getContestId()+'_' +#logStudentInProblemID.getStudentId()")
@@ -51,5 +42,14 @@ public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRep
             return 0.0;
         }
         return result;
+    }
+
+    private Predicate logStudentInProblemIdExcludeCountOfTryEq(LogStudentInProblemID logStudentInProblemID) {
+        return Expressions.allOf(
+                qLogStudentInProblem.logStudentInProblemId.contestId.eq(logStudentInProblemID.getContestId()),
+                qLogStudentInProblem.logStudentInProblemId.studentId.eq(logStudentInProblemID.getStudentId()),
+                qLogStudentInProblem.logStudentInProblemId.problemId.eq(logStudentInProblemID.getProblemId()),
+                qLogStudentInProblem.logStudentInProblemId.contentId.eq(logStudentInProblemID.getContentId())
+        );
     }
 }
