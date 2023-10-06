@@ -4,6 +4,7 @@ import com.twoori.contest_server.domain.problem.dao.LogStudentInProblem;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -78,6 +79,23 @@ class LogStudentInProblemRepositoryTest {
 
         // then
         assertThat(actual).isEqualTo(maxScore);
+    }
+
+    @DisplayName("기록이 없는 상태에서 max값 조회|Success|0을 반환")
+    @Test
+    void givenHasNotLogWhenGetMaxScoreProblemOneThenReturnZero() {
+        // given
+        UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
+        UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
+        Long problemId = 1L;
+        Long contentId = 0L;
+        // when
+        Double actual = logStudentInProblemRepository.getMaxScoreProblemOne(
+                LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, problemId, contentId));
+
+        // then
+        Double expect = 0.0;
+        assertThat(actual).isEqualTo(expect);
     }
 
 }
