@@ -93,6 +93,8 @@ public class ContestService {
         studentInContestRepository.save(
                 StudentInContest.builder()
                         .id(new StudentInContestID(studentDto.id(), contestId))
+                        .isResigned(false)
+                        .isEntered(false)
                         .build()
         );
     }
