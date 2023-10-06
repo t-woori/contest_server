@@ -39,13 +39,17 @@ public class LogStudentInProblemRepositoryImpl implements LogStudentInProblemRep
         );
     }
 
-    @Cacheable(value = "max_score", key = "#logStudentInProblemID.getNoOfProblemInContest().toString()+'_'+" +
+    @Cacheable(value = "max_score", key = "#logStudentInProblemID.getProblemId().toString()+'_'+" +
             "#logStudentInProblemID.getContentId()+'_'+" + "#logStudentInProblemID.getContestId()+'_' +#logStudentInProblemID.getStudentId()")
     @Override
     public Double getMaxScoreProblemOne(LogStudentInProblemID logStudentInProblemID) {
-        return queryFactory.select(qLogStudentInProblem.score.max())
+        Double result = queryFactory.select(qLogStudentInProblem.score.max())
                 .from(qLogStudentInProblem)
                 .where(logStudentInProblemIdExcludeCountOfTryEq(logStudentInProblemID))
                 .fetchOne();
+        if (result == null) {
+            return 0.0;
+        }
+        return result;
     }
 }

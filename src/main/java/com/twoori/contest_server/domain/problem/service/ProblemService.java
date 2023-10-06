@@ -49,9 +49,6 @@ public class ProblemService {
                 solvedProblemVO.noOfProblemInContest(),
                 solvedProblemVO.contentId());
         Integer maxCount = logStudentInProblemRepository.countLatestSolvedProblem(logStudentInProblemID);
-        if (maxCount == null) {
-            maxCount = 0;
-        }
         logStudentInProblemRepository.save(
                 new LogStudentInProblem(
                         LogStudentInProblemID.ofIncludeCountOfTry(
@@ -61,10 +58,14 @@ public class ProblemService {
                                 solvedProblemVO.contentId(),
                                 maxCount + 1)
                         , solvedProblemVO.newScore()));
-        Double maxScore = logStudentInProblemRepository.getMaxScoreProblemOne(logStudentInProblemID);
+        Double maxScore = getMaxScore(logStudentInProblemID);
         if (maxScore < solvedProblemVO.newScore()) {
             return solvedProblemVO.newScore();
         }
         return maxScore;
+    }
+
+    public Double getMaxScore(LogStudentInProblemID logStudentInProblemID) {
+        return logStudentInProblemRepository.getMaxScoreProblemOne(logStudentInProblemID);
     }
 }

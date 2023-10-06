@@ -37,7 +37,8 @@ public class CacheConfig {
         configurations.put("problem", defaultConfig.entryTtl(Duration.ofHours(1))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(ProblemDto.class))));
         configurations.put("max_score", defaultConfig.entryTtl(Duration.ofMinutes(30))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(Double.class))));
+
         return RedisCacheManager.RedisCacheManagerBuilder
                 .fromConnectionFactory(redisConnectionFactory).cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(configurations)
