@@ -10,6 +10,7 @@ import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterConte
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
 import com.twoori.contest_server.domain.contest.excpetion.NotRegisteredContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -149,9 +151,10 @@ class ContestControllerTest {
         byte[] rawJson = actual.andReturn().getResponse().getContentAsByteArray();
         Map<String, Object> body = objectMapper.readValue(rawJson, new TypeReference<>() {
         });
-        List<SearchContestVO> contests = objectMapper.convertValue(body.get("contests"), new TypeReference<>() {
+        List<RegisteredContestVO> contests = objectMapper.convertValue(body.get("contests"), new TypeReference<>() {
         });
-        assertThat(contests).isNotNull().hasSize(20);
+        assertThat(contests).isNotNull().hasSize(20)
+                .allMatch(Objects::nonNull);
     }
 
     @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
