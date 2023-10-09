@@ -5,12 +5,14 @@ import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 @Transactional
+@ExtendWith(SpringExtension.class)
 @DataJpaTest
 class ProblemRepositoryTest {
 
@@ -29,7 +32,6 @@ class ProblemRepositoryTest {
     @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
     void givenExistProblemIdWhenGetProblemThenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
-
         // when
         ProblemDto actual = problemRepository.getProblem(contestId, noOfProblemIdInContest);
 

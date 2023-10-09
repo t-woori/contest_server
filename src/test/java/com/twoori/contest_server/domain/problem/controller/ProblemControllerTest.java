@@ -1,22 +1,28 @@
 package com.twoori.contest_server.domain.problem.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twoori.contest_server.domain.problem.dto.ContentDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
+import com.twoori.contest_server.domain.problem.dto.SolvedProblemDto;
 import com.twoori.contest_server.domain.problem.enums.CHAPTER_TYPE;
 import com.twoori.contest_server.domain.problem.enums.GRADE;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
+import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -27,6 +33,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,6 +53,9 @@ class ProblemControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
     @BeforeEach
     void beforeAll() {
@@ -123,5 +135,27 @@ class ProblemControllerTest {
                 header("Authorization", mockToken));
         actual.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("invalid parameter"));
+    }
+
+    @DisplayName("PUT /v1/contest/{contest_id}/student/{student_id}/problem/score|Success|문제 제출 성공")
+    @Test
+    void givenSolvedProblemWhenUpdateSolvedProblemThenSuccess() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        SolvedProblemVO solvedProblemVO = new SolvedProblemVO(0L, 0L, 0.70);
+        // when & then
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/student/{student_id}/problem/score",
+                contestId,
+                studentId).
+                header("Authorization", mockToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(solvedProblemVO))
+        );
+        actual.andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("ok"));
+        verify(problemService, times(1)).updateMaxScoreAboutProblem(
+                new SolvedProblemDto(contestId, studentId, solvedProblemVO.problemId(), solvedProblemVO.contentId(), solvedProblemVO.score())
+        );
     }
 }
