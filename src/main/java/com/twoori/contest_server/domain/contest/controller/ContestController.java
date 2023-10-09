@@ -129,5 +129,7 @@ public class ContestController {
         List<SearchContestDto> contests = contestService.searchEndOfContests(studentDto.id());
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
+
+
 }
 
