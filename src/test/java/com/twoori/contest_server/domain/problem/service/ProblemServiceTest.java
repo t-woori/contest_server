@@ -78,7 +78,7 @@ class ProblemServiceTest {
         Long noOfProblemInContest = 0L;
         Long contentId = 0L;
         Double newScore = 0.70;
-        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(contestId, studentId, noOfProblemInContest, contentId, newScore);
         given(logStudentInProblemRepository.getMaxCountOfTryAboutId(
                 LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, solvedProblemDto.contentId())
         )).willReturn(0);
@@ -104,7 +104,7 @@ class ProblemServiceTest {
         Long contentId = 0L;
         Double newScore = 0.70;
         LogStudentInProblemID id = LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, contentId);
-        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(contestId, studentId, noOfProblemInContest, contentId, newScore);
         given(logStudentInProblemRepository.getMaxCountOfTryAboutId(id)).willReturn(1);
         given(logStudentInProblemRepository.getMaxScoreProblemOne(id)).willReturn(0.60);
 
@@ -134,7 +134,7 @@ class ProblemServiceTest {
         Double beforeMaxScore = 0.70;
         Double newScore = 0.60;
         LogStudentInProblemID id = LogStudentInProblemID.ofExcludeCountOfTry(contestId, studentId, noOfProblemInContest, contentId);
-        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(studentId, contestId, noOfProblemInContest, contentId, newScore);
+        SolvedProblemDto solvedProblemDto = new SolvedProblemDto(contestId, studentId, noOfProblemInContest, contentId, newScore);
         given(logStudentInProblemRepository.getMaxCountOfTryAboutId(id)).willReturn(1);
         given(logStudentInProblemRepository.getMaxScoreProblemOne(id)).willReturn(beforeMaxScore);
 
