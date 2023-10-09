@@ -155,7 +155,7 @@ class ProblemControllerTest {
         actual.andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("ok"));
         verify(problemService, times(1)).updateMaxScoreAboutProblem(
-                new SolvedProblemDto(contestId, studentId, solvedProblemVO.noOfProblemInContest(), solvedProblemVO.contentId(), solvedProblemVO.newScore())
+                new SolvedProblemDto(contestId, studentId, solvedProblemVO.problemId(), solvedProblemVO.contentId(), solvedProblemVO.score())
         );
     }
 }
