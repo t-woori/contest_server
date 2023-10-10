@@ -1,12 +1,18 @@
 package com.twoori.contest_server.domain.contest.service;
 
+import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
+import com.twoori.contest_server.domain.contest.mapper.RepositoryMapper;
+import com.twoori.contest_server.domain.contest.mapper.RepositoryMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
+import com.twoori.contest_server.domain.student.dao.StudentInContest;
+import com.twoori.contest_server.domain.student.dao.StudentInContestID;
+import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.PermissionDenialException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -46,6 +53,10 @@ class ContestServiceTest {
     private ContestRepository contestRepository;
     @Spy
     private ContestDtoForControllerMapper mapper = new ContestDtoForControllerMapperImpl();
+    @Mock
+    private StudentInContestRepository studentInContestRepository;
+    @Spy
+    private RepositoryMapper repositoryMapper = new RepositoryMapperImpl();
 
     @DisplayName("대회 시작 10분전에 입장|Success|대회 입장 가능 시간 내에 입장 시도")
     @Test
@@ -446,4 +457,61 @@ class ContestServiceTest {
                 .isNotNull().isNotEmpty().hasSize(100)
                 .extracting("contestId").containsExactlyElementsOf(contestIds);
     }
+
+    @DisplayName("대회 종료 이전에 명시적으로 종료|Success|입력한 대회 시간으로 종료 기록 후 계산")
+    @Test
+    void givenEndDateTimeBeforeEndContestWhenEndingContestThenScoringEndContestTime() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        LocalDateTime endContestAboutStudentDateTime = LocalDateTime.now();
+        LocalDateTime startContestDateTime = endContestAboutStudentDateTime.minusMinutes(15);
+        LocalDateTime endContestDateTime = endContestAboutStudentDateTime.plusMinutes(1);
+        long expectDiffTime = Duration.between(startContestDateTime, endContestAboutStudentDateTime).toSeconds();
+        StudentInContest studentInContest = StudentInContest.builder()
+                .isEntered(true).isResigned(true)
+                .id(new StudentInContestID(studentId, contestId))
+                .contest(new Contest(contestId, "code", "name", "hostName",
+                        startContestDateTime, endContestDateTime)).build();
+        given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
+                .willReturn(Optional.of(studentInContest));
+        // when
+        EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+
+        // then
+        assertThat(studentInContest).extracting("endContestAt")
+                .isEqualTo(endContestAboutStudentDateTime);
+        verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
+        assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
+                .extracting("diffTime").isEqualTo(expectDiffTime);
+    }
+
+    @DisplayName("대회 시간이 초과되어 클라이언트에서 강제로 대회 종료를 요청|Success|대회 종료 시간으로 기록 후 계산")
+    @Test
+    void givenEndDateTimeAfterEndContestWhenEndContestThenScoringEndContestTime() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        LocalDateTime endContestAboutStudentDateTime = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        LocalDateTime startContestDateTime = endContestAboutStudentDateTime.minusMinutes(15);
+        LocalDateTime endContestDateTime = endContestAboutStudentDateTime.minusSeconds(1);
+        long expectDiffTime = Duration.between(startContestDateTime, endContestDateTime).toSeconds();
+        StudentInContest studentInContest = StudentInContest.builder()
+                .isEntered(true).isResigned(true)
+                .id(new StudentInContestID(studentId, contestId))
+                .contest(new Contest(contestId, "code", "name", "hostName",
+                        startContestDateTime, endContestDateTime)).build();
+        given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
+                .willReturn(Optional.of(studentInContest));
+        // when
+        EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+
+        // then
+        assertThat(studentInContest).extracting("endContestAt")
+                .isEqualTo(endContestDateTime);
+        verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
+        assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
+                .extracting("diffTime").isEqualTo(expectDiffTime);
+    }
+    
 }

@@ -3,6 +3,7 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.twoori.contest_server.domain.contest.dto.EndContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
@@ -30,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,7 +67,6 @@ class ContestControllerTest {
     private SecurityUtil securityUtil;
     @Autowired
     private MockMvc mvc;
-
 
     private static Stream<Arguments> argumentsForSearchContest() {
         return Stream.of(
@@ -309,4 +310,29 @@ class ContestControllerTest {
         assertThat(contests).isNotNull().hasSize(10);
     }
 
+
+    @DisplayName("PUT /v1/contest/{contest_id}/end|명시적 대회 종료 요청| 걸린 시간 제공")
+    @Test
+    void givenRequestEndContestWhenEndContestThenReturnScoreAndTime() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime startDateTime = LocalDateTime.now();
+        LocalDateTime endDateTime = startDateTime.plusMinutes(10);
+        long diffTime = Duration.between(startDateTime, endDateTime).getSeconds();
+        given(contestService.endingContest(eq(contestId), eq(studentId), isA(
+                LocalDateTime.class
+        ))).willReturn(
+                new EndContestDto(diffTime)
+        );
+
+        // when
+        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
+                .header("Authorization", mockToken));
+
+
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":200,\"message\":\"ok\",\"diff_time\": " + diffTime + "}"));
+    }
 }

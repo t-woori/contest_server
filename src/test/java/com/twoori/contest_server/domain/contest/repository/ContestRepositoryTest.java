@@ -174,4 +174,5 @@ class ContestRepositoryTest {
                         UUID.fromString("a3030109-b69e-417a-8b18-e2d12a3c33de")
                 ));
     }
+
 }
