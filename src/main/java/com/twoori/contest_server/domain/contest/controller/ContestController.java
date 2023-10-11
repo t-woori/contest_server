@@ -1,9 +1,6 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
-import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
-import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
@@ -130,6 +127,15 @@ public class ContestController {
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 
-
+    @PutMapping("/v1/contest/{contest_id}/end")
+    public ResponseEntity<EndContestVO> endContest(
+            @RequestHeader(name = "Authorization") String accessToken,
+            @PathVariable("contest_id") UUID contestId
+    ) {
+        LocalDateTime endDateTime = LocalDateTime.now();
+        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
+        EndContestDto dto = contestService.endingContest(contestId, studentDto.id(), endDateTime);
+        return ResponseEntity.ok(mapper.toEndContestDto(dto));
+    }
 }
 

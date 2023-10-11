@@ -4,17 +4,20 @@ import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
+import com.twoori.contest_server.domain.contest.mapper.RepositoryMapper;
 import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.domain.student.dto.StudentInContestDto;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.BadRequestException;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,13 +32,14 @@ public class ContestService {
     private final StudentInContestRepository studentInContestRepository;
     private final ContestRepository contestRepository;
     private final ContestDtoForControllerMapper mapper;
-
+    private final RepositoryMapper repositoryMapper;
     public ContestService(StudentInContestRepository studentInContestRepository,
                           ContestRepository contestRepository,
-                          ContestDtoForControllerMapper mapper) {
+                          ContestDtoForControllerMapper mapper, RepositoryMapper repositoryMapper) {
         this.studentInContestRepository = studentInContestRepository;
         this.contestRepository = contestRepository;
         this.mapper = mapper;
+        this.repositoryMapper = repositoryMapper;
     }
 
     public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
@@ -135,4 +139,18 @@ public class ContestService {
         condition.setTo(LocalDateTime.now());
         return contestRepository.searchEndOfContests(condition);
     }
+
+    public EndContestDto endingContest(UUID contestId, UUID studentId, LocalDateTime endDateTime) {
+        StudentInContest studentInContest = studentInContestRepository.findById(new StudentInContestID(studentId, contestId))
+                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+        StudentInContestDto studentInContestDto = repositoryMapper.toStudentInContestDto(studentInContest);
+        LocalDateTime loggedEndDateTime = endDateTime;
+        if (endDateTime.isAfter(studentInContestDto.getEndedAt())) {
+            loggedEndDateTime = studentInContestDto.getEndedAt();
+        }
+        studentInContest.setEndContestAt(loggedEndDateTime);
+        studentInContestRepository.save(studentInContest);
+        return new EndContestDto(Duration.between(studentInContestDto.getStartedAt(), loggedEndDateTime).toSeconds());
+    }
+
 }
