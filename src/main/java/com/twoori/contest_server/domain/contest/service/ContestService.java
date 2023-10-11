@@ -145,12 +145,12 @@ public class ContestService {
                 .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
         StudentInContestDto studentInContestDto = repositoryMapper.toStudentInContestDto(studentInContest);
         LocalDateTime loggedEndDateTime = endDateTime;
-        if (endDateTime.isAfter(studentInContestDto.getEndedAt())) {
-            loggedEndDateTime = studentInContestDto.getEndedAt();
+        if (endDateTime.isAfter(studentInContestDto.endedAt())) {
+            loggedEndDateTime = studentInContestDto.endedAt();
         }
         studentInContest.setEndContestAt(loggedEndDateTime);
         studentInContestRepository.save(studentInContest);
-        return new EndContestDto(Duration.between(studentInContestDto.getStartedAt(), loggedEndDateTime).toSeconds());
+        return new EndContestDto(Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds());
     }
 
 }

@@ -319,11 +319,8 @@ class ContestControllerTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(10);
         long diffTime = Duration.between(startDateTime, endDateTime).getSeconds();
-        given(contestService.endingContest(eq(contestId), eq(studentId), isA(
-                LocalDateTime.class
-        ))).willReturn(
-                new EndContestDto(diffTime)
-        );
+        given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class)))
+                .willReturn(new EndContestDto(diffTime));
 
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
