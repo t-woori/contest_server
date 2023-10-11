@@ -107,7 +107,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
                 QContest.contest.name.as("name"),
                 QContest.contest.hostName.as("hostName"),
                 QContest.contest.runningStartDateTime.as("startedAt"),
-                QContest.contest.runningEndDateTime.as("endedAt")
+                QContest.contest.runningEndDateTime.as("endContestDateTime")
         );
     }
 

@@ -10,7 +10,6 @@ public interface RepositoryMapper {
     default StudentInContestDto toStudentInContestDto(StudentInContest studentInContest) {
         Contest contest = studentInContest.getContest();
         return new StudentInContestDto(
-                contest.getRunningStartDateTime(), contest.getRunningEndDateTime()
-                , studentInContest.getIsEntered(), studentInContest.getIsResigned());
+                contest.getRunningStartDateTime(), contest.getRunningEndDateTime(), studentInContest.getEndContestAt());
     }
 }
