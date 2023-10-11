@@ -1,8 +1,10 @@
 package com.twoori.contest_server.domain.contest.mapper;
 
+import com.twoori.contest_server.domain.contest.dto.EndContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.vo.ContestVO;
+import com.twoori.contest_server.domain.contest.vo.EndContestVO;
 import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
@@ -22,4 +24,6 @@ public interface ContestControllerVOMapper {
     List<RegisteredContestVO> mapToVOList(List<RegisteredContestDto> dtoList);
 
     List<ContestVO> mapToListContestVO(List<SearchContestDto> dtoList);
+
+    EndContestVO toEndContestDto(EndContestDto dto);
 }

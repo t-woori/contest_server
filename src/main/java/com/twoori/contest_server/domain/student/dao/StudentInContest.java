@@ -28,11 +28,11 @@ public class StudentInContest {
     private StudentInContestID id;
 
     @MapsId("contest_id")
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Contest contest;
 
     @MapsId("student_id")
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Student student;
 
     @CreatedDate
@@ -51,6 +51,10 @@ public class StudentInContest {
     @ColumnDefault("false")
     @Column(nullable = false)
     private Boolean isEntered;
+
+    @Setter
+    private LocalDateTime endContestAt;
+
 
     @Override
     public boolean equals(Object o) {
