@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -513,5 +514,32 @@ class ContestServiceTest {
         assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
                 .extracting("diffTime").isEqualTo(expectDiffTime);
     }
-    
+
+    @DisplayName("대회 종료 요청을 n번 보냄|Fail|대회 종료 시간은 첫번째 보낸 것만 기록하고 이외의 요청은 기록하지 않음")
+    @ValueSource(ints = {2, 3, 4, 5, 6, 7, 8, 9, 10})
+    @ParameterizedTest(name = "{0} 번 대회 종료 요청을 수행")
+    void givenEndContestTimeWhenEndContestMoreThenTwiceThenOneIsRecorded(int loopCount) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        LocalDateTime endContestAboutStudentDateTime = LocalDateTime.now();
+        LocalDateTime startContestDateTime = endContestAboutStudentDateTime.minusMinutes(15);
+        LocalDateTime endContestDateTime = endContestAboutStudentDateTime.plusMinutes(1);
+        long expectDiffTime = Duration.between(startContestDateTime, endContestAboutStudentDateTime).toSeconds();
+        StudentInContest studentInContest = StudentInContest.builder()
+                .isEntered(true).isResigned(true)
+                .id(new StudentInContestID(studentId, contestId))
+                .contest(new Contest(contestId, "code", "name", "hostName",
+                        startContestDateTime, endContestDateTime)).build();
+        given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
+                .willReturn(Optional.of(studentInContest));
+        // when & then
+        for (int i = 0; i < loopCount; i++) {
+            EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+            assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
+                    .extracting("diffTime").isEqualTo(expectDiffTime);
+        }
+        verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
+    }
+
 }
