@@ -80,7 +80,7 @@ class ContestRepositoryTest {
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
 
         // when
-        repository.resignContest(studentId, contestId);
+        repository.resignContest(contestId, studentId);
 
         // then
         StudentInContest entity = testEntityManager.find(StudentInContest.class, new StudentInContestID(studentId, contestId));

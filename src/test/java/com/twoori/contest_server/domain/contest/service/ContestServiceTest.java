@@ -206,7 +206,7 @@ class ContestServiceTest {
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(CONTEST_TIME);
-        LocalDateTime enterDateTime = startDateTime.plusMinutes(3);
+        LocalDateTime enterDateTime = startDateTime.plusMinutes(2);
 
         given(contestRepository.getRegisteredStudentAboutStudent(contestId, student.getId())).willReturn(Optional.of(
                 new EnterContestDto(contestId, "name", "hostName", startDateTime, endDateTime)
