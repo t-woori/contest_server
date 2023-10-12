@@ -58,9 +58,9 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public boolean isEnteredStudentInContest(UUID id, UUID contestId) {
+    public boolean isEnteredStudentInContest(UUID studentId, UUID contestId) {
         return queryFactory.selectOne().from(QStudentInContest.studentInContest)
-                .where(QStudentInContest.studentInContest.id.contestID.eq(id),
+                .where(QStudentInContest.studentInContest.id.studentID.eq(studentId),
                         QStudentInContest.studentInContest.id.contestID.eq(contestId))
                 .limit(1)
                 .fetchFirst() != null;
@@ -153,8 +153,9 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
+    @Transactional
     @Override
-    public void resignContest(UUID studentId, UUID contestId) {
+    public void resignContest(UUID contestId, UUID studentId) {
         QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
         queryFactory.update(qStudentInContest)
                 .set(qStudentInContest.isResigned, Expressions.asBoolean(true).isTrue())

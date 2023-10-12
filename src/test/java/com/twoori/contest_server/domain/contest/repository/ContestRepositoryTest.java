@@ -80,7 +80,7 @@ class ContestRepositoryTest {
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
 
         // when
-        repository.resignContest(studentId, contestId);
+        repository.resignContest(contestId, studentId);
 
         // then
         StudentInContest entity = testEntityManager.find(StudentInContest.class, new StudentInContestID(studentId, contestId));
@@ -138,7 +138,7 @@ class ContestRepositoryTest {
         assertThat(actual).isFalse();
     }
 
-    @DisplayName("대회 진입 여부 확인|Success| 대회 진입 하지 않은 상태")
+    @DisplayName("대회 진입 여부 확인|Success| 대회 진입한 않은 상태")
     @Test
     void givenContestAndStudentIdWhenIsEnteredStudentInContestThenReturnFalse() {
         // given
@@ -149,7 +149,7 @@ class ContestRepositoryTest {
         boolean actual = repository.isEnteredStudentInContest(studentId, contestId);
 
         // then
-        assertThat(actual).isFalse();
+        assertThat(actual).isTrue();
     }
 
     @DisplayName("시작하지 않은 대회 조회|Success| 4건의 대회가 제공")

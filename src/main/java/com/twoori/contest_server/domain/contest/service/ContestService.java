@@ -126,7 +126,7 @@ public class ContestService {
 
     public void resignContest(UUID contestId, UUID studentId) {
         if (!contestRepository.isEnteredStudentInContest(studentId, contestId)) {
-            log.error("not registered contest, contestId: {}, studentId: {}", contestId, studentId);
+            log.error("not entered contest, contestId: {}, studentId: {}", contestId, studentId);
             throw new NotRegisteredContestException(studentId, contestId);
         }
         contestRepository.resignContest(contestId, studentId);
