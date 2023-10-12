@@ -155,7 +155,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
 
     @Transactional
     @Override
-    public void resignContest(UUID studentId, UUID contestId) {
+    public void resignContest(UUID contestId, UUID studentId) {
         QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
         queryFactory.update(qStudentInContest)
                 .set(qStudentInContest.isResigned, Expressions.asBoolean(true).isTrue())

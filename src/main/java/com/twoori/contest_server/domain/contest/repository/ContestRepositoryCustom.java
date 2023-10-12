@@ -26,7 +26,7 @@ public interface ContestRepositoryCustom {
 
     Optional<CancelContestDto> getTimesAboutContest(UUID contestId);
 
-    void resignContest(UUID studentId, UUID contestId);
+    void resignContest(UUID contestId, UUID studentId);
 
     List<SearchContestDto> searchRegisteredContest(ContestCondition condition);
 
