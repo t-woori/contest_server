@@ -1,12 +1,16 @@
 package com.twoori.contest_server.domain.problem.controller;
 
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
+import com.twoori.contest_server.domain.problem.dto.UpdateProblemCountDto;
 import com.twoori.contest_server.domain.problem.mapper.ProblemMapper;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.problem.vo.ProblemVO;
 import com.twoori.contest_server.domain.problem.vo.ResponseTotalStatusVO;
 import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.APIOkMessageVO;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +27,13 @@ public class ProblemController {
     private final ProblemService problemService;
     private final ProblemMapper mapper;
     private final SecurityUtil securityUtil;
+    private final TrackingStudentService trackingService;
 
-    public ProblemController(ProblemService problemService, ProblemMapper mapper, SecurityUtil securityUtil) {
+    public ProblemController(ProblemService problemService, ProblemMapper mapper, SecurityUtil securityUtil, TrackingStudentService trackingService) {
         this.problemService = problemService;
         this.mapper = mapper;
         this.securityUtil = securityUtil;
+        this.trackingService = trackingService;
     }
 
     @GetMapping("/v1/contest/{contest_id}/total_status")
@@ -49,6 +55,10 @@ public class ProblemController {
         log.info("[Controller] request student status. contest : {}, student: {}", contestId, studentDto.id());
         ProblemDto problem = problemService.getProblem(contestId, problemId);
         log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.id());
+        trackingService.updateProblemCountAboutStudent(new UpdateProblemCountDto(
+                new StudentInContestIdDto(contestId, studentDto.id()),
+                new ProblemIdDto(problemId, 0L)
+        ));
         return ResponseEntity.ok(mapper.dtoToVo(problem));
     }
 
