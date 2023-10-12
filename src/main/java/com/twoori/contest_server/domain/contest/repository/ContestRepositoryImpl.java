@@ -58,9 +58,9 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
     }
 
     @Override
-    public boolean isEnteredStudentInContest(UUID id, UUID contestId) {
+    public boolean isEnteredStudentInContest(UUID studentId, UUID contestId) {
         return queryFactory.selectOne().from(QStudentInContest.studentInContest)
-                .where(QStudentInContest.studentInContest.id.contestID.eq(id),
+                .where(QStudentInContest.studentInContest.id.studentID.eq(studentId),
                         QStudentInContest.studentInContest.id.contestID.eq(contestId))
                 .limit(1)
                 .fetchFirst() != null;
