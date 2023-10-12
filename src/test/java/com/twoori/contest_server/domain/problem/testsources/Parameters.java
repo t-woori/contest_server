@@ -50,8 +50,9 @@ public class Parameters {
             for (int j = 0; j <= i; j++) {
                 subScores.add(scores.get(j));
             }
-            arguments.add(Arguments.of(subScores, subScores.stream()
-                    .mapToDouble(Double::doubleValue).average().orElseThrow()));
+            double average = Math.floor(subScores.stream()
+                    .mapToDouble(Double::doubleValue).average().orElseThrow() * 10000) / 10000;
+            arguments.add(Arguments.of(subScores, average));
         }
         return arguments.stream();
     }
