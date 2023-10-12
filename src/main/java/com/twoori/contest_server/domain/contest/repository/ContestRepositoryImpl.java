@@ -153,6 +153,7 @@ public class ContestRepositoryImpl implements ContestRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
+    @Transactional
     @Override
     public void resignContest(UUID studentId, UUID contestId) {
         QStudentInContest qStudentInContest = QStudentInContest.studentInContest;
