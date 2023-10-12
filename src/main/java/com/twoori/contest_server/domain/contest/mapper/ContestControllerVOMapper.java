@@ -25,5 +25,6 @@ public interface ContestControllerVOMapper {
 
     List<ContestVO> mapToListContestVO(List<SearchContestDto> dtoList);
 
-    EndContestVO toEndContestDto(EndContestDto dto);
+    //    @Mapping(target = "average", source = "average")
+    EndContestVO toEndContestDto(EndContestDto dto, double average);
 }
