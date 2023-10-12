@@ -3,7 +3,6 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.twoori.contest_server.domain.contest.dto.EndContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
@@ -323,8 +322,7 @@ class ContestControllerTest {
         LocalDateTime endDateTime = startDateTime.plusMinutes(10);
         long diffTime = Duration.between(startDateTime, endDateTime).getSeconds();
         double average = 0.7;
-        given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class)))
-                .willReturn(new EndContestDto(diffTime));
+        given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class))).willReturn(diffTime);
         given(problemService.createAverageScore(contestId, studentId)).willReturn(average);
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)

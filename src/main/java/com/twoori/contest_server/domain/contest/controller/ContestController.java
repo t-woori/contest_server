@@ -1,6 +1,9 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.*;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
@@ -137,9 +140,9 @@ public class ContestController {
     ) {
         LocalDateTime endDateTime = LocalDateTime.now();
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        EndContestDto dto = contestService.endingContest(contestId, studentDto.id(), endDateTime);
+        long diffTime = contestService.endingContest(contestId, studentDto.id(), endDateTime);
         double average = problemService.createAverageScore(contestId, studentDto.id());
-        return ResponseEntity.ok(mapper.toEndContestDto(dto, average));
+        return ResponseEntity.ok(new EndContestVO(average, diffTime));
     }
 }
 
