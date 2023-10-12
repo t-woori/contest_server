@@ -29,7 +29,7 @@ class ProblemRepositoryTest {
     @Autowired
     private ProblemRepository problemRepository;
 
-    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
     void givenExistProblemIdWhenGetProblemThenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
         // when
@@ -48,7 +48,7 @@ class ProblemRepositoryTest {
         }
     }
 
-    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfNotExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
     @ParameterizedTest
     void givenNotExistProblemIdIdWhenGetProblemThenThrowNotFoundProblemException(UUID contestId, Long noOfProblemIdInContest) {
         // given
