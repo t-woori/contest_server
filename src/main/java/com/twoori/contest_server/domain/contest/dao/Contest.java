@@ -50,13 +50,22 @@ public class Contest {
     @Column(nullable = false)
     private LocalDateTime runningEndDateTime;
 
-    public Contest(UUID id, String authCode, String name, String hostName, LocalDateTime runningStartDateTime, LocalDateTime runningEndDateTime) {
+    @Column(nullable = false)
+    private Double rateAccuracyByScoring;
+
+    @Column(nullable = false)
+    private Double rateTimeByScoring;
+
+    public Contest(UUID id, String authCode, String name, String hostName, LocalDateTime runningStartDateTime,
+                   LocalDateTime runningEndDateTime, Double rateAccuracyByScoring, Double rateTimeByScoring) {
         this.id = id;
         this.authCode = authCode;
         this.name = name;
         this.hostName = hostName;
         this.runningStartDateTime = runningStartDateTime;
         this.runningEndDateTime = runningEndDateTime;
+        this.rateAccuracyByScoring = rateAccuracyByScoring;
+        this.rateTimeByScoring = rateTimeByScoring;
     }
 
     @Override

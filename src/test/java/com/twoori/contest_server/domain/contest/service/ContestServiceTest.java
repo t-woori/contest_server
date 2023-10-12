@@ -473,7 +473,7 @@ class ContestServiceTest {
                 .isEntered(true).isResigned(true)
                 .id(new StudentInContestID(studentId, contestId))
                 .contest(new Contest(contestId, "code", "name", "hostName",
-                        startContestDateTime, endContestDateTime)).build();
+                        startContestDateTime, endContestDateTime, 0.5, 0.5)).build();
         given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
                 .willReturn(Optional.of(studentInContest));
         // when
@@ -500,7 +500,7 @@ class ContestServiceTest {
                 .isEntered(true).isResigned(true)
                 .id(new StudentInContestID(studentId, contestId))
                 .contest(new Contest(contestId, "code", "name", "hostName",
-                        startContestDateTime, endContestDateTime)).build();
+                        startContestDateTime, endContestDateTime, 0.5, 0.5)).build();
         given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
                 .willReturn(Optional.of(studentInContest));
         // when
@@ -528,7 +528,7 @@ class ContestServiceTest {
                 .isEntered(true).isResigned(true)
                 .id(new StudentInContestID(studentId, contestId))
                 .contest(new Contest(contestId, "code", "name", "hostName",
-                        startContestDateTime, endContestDateTime)).build();
+                        startContestDateTime, endContestDateTime, 0.5, 0.5)).build();
         given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
                 .willReturn(Optional.of(studentInContest));
         // when & then
