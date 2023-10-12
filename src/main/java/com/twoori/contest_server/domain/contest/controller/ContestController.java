@@ -1,9 +1,13 @@
 package com.twoori.contest_server.domain.contest.controller;
 
-import com.twoori.contest_server.domain.contest.dto.*;
+import com.twoori.contest_server.domain.contest.dto.EnterContestDtoForController;
+import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
+import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
+import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.APIOkMessageVO;
@@ -26,11 +30,13 @@ public class ContestController {
     private final ContestService contestService;
     private final SecurityUtil securityUtil;
     private final ContestControllerVOMapper mapper;
+    private final ProblemService problemService;
 
-    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper) {
+    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper, ProblemService problemService) {
         this.contestService = contestService;
         this.securityUtil = securityUtil;
         this.mapper = mapper;
+        this.problemService = problemService;
     }
 
     @GetMapping("/v1/contest/{contest_id}/enter")
@@ -134,8 +140,9 @@ public class ContestController {
     ) {
         LocalDateTime endDateTime = LocalDateTime.now();
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        EndContestDto dto = contestService.endingContest(contestId, studentDto.id(), endDateTime);
-        return ResponseEntity.ok(mapper.toEndContestDto(dto));
+        long diffTime = contestService.endingContest(contestId, studentDto.id(), endDateTime);
+        double average = problemService.createAverageScore(contestId, studentDto.id());
+        return ResponseEntity.ok(new EndContestVO(average, diffTime));
     }
 }
 

@@ -140,13 +140,13 @@ public class ContestService {
         return contestRepository.searchEndOfContests(condition);
     }
 
-    public EndContestDto endingContest(UUID contestId, UUID studentId, LocalDateTime endDateTime) {
+    public long endingContest(UUID contestId, UUID studentId, LocalDateTime endDateTime) {
         StudentInContest studentInContest = studentInContestRepository.findById(new StudentInContestID(studentId, contestId))
                 .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
         StudentInContestDto studentInContestDto = repositoryMapper.toStudentInContestDto(studentInContest);
         if (studentInContestDto.endContestAt() != null) {
-            return new EndContestDto(Duration.between(studentInContestDto.startedAt(),
-                    studentInContestDto.endContestAt()).toSeconds());
+            return Duration.between(studentInContestDto.startedAt(),
+                    studentInContestDto.endContestAt()).toSeconds();
         }
         LocalDateTime loggedEndDateTime = endDateTime;
         if (endDateTime.isAfter(studentInContestDto.endContestDateTime())) {
@@ -154,7 +154,7 @@ public class ContestService {
         }
         studentInContest.setEndContestAt(loggedEndDateTime);
         studentInContestRepository.save(studentInContest);
-        return new EndContestDto(Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds());
+        return Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds();
     }
 
 }

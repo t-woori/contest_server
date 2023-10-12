@@ -5,10 +5,11 @@ import lombok.Getter;
 
 @Getter
 public class EndContestVO extends APIOkMessageVO {
+    private final Double average;
     private final Long diffTime;
 
-    public EndContestVO(Long diffTime) {
-        super();
+    public EndContestVO(Double average, Long diffTime) {
+        this.average = average;
         this.diffTime = diffTime;
     }
 }

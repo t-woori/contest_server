@@ -477,14 +477,13 @@ class ContestServiceTest {
         given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
                 .willReturn(Optional.of(studentInContest));
         // when
-        EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+        long actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
 
         // then
         assertThat(studentInContest).extracting("endContestAt")
                 .isEqualTo(endContestAboutStudentDateTime);
         verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
-        assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
-                .extracting("diffTime").isEqualTo(expectDiffTime);
+        assertThat(actual).isEqualTo(expectDiffTime);
     }
 
     @DisplayName("대회 시간이 초과되어 클라이언트에서 강제로 대회 종료를 요청|Success|대회 종료 시간으로 기록 후 계산")
@@ -505,14 +504,13 @@ class ContestServiceTest {
         given(studentInContestRepository.findById(new StudentInContestID(studentId, contestId)))
                 .willReturn(Optional.of(studentInContest));
         // when
-        EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+        long actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
 
         // then
         assertThat(studentInContest).extracting("endContestAt")
                 .isEqualTo(endContestDateTime);
         verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
-        assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
-                .extracting("diffTime").isEqualTo(expectDiffTime);
+        assertThat(actual).isEqualTo(expectDiffTime);
     }
 
     @DisplayName("대회 종료 요청을 n번 보냄|Fail|대회 종료 시간은 첫번째 보낸 것만 기록하고 이외의 요청은 기록하지 않음")
@@ -535,9 +533,8 @@ class ContestServiceTest {
                 .willReturn(Optional.of(studentInContest));
         // when & then
         for (int i = 0; i < loopCount; i++) {
-            EndContestDto actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
-            assertThat(actual).isNotNull().hasNoNullFieldsOrProperties()
-                    .extracting("diffTime").isEqualTo(expectDiffTime);
+            long actual = contestService.endingContest(contestId, studentId, endContestAboutStudentDateTime);
+            assertThat(actual).isEqualTo(expectDiffTime);
         }
         verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
     }

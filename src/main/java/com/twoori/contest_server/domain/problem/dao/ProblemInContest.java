@@ -21,12 +21,12 @@ public class ProblemInContest {
     @EmbeddedId
     private ProblemInContestId id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contest_id", nullable = false)
     @MapsId("contest_id")
     private Contest contest;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_id", nullable = false)
     @MapsId("problem_id")
     private Problem problem;

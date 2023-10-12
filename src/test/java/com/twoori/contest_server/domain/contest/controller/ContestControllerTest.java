@@ -3,7 +3,6 @@ package com.twoori.contest_server.domain.contest.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.twoori.contest_server.domain.contest.dto.EndContestDto;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
@@ -13,6 +12,7 @@ import com.twoori.contest_server.domain.contest.excpetion.NotRegisteredContestEx
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
+import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +63,8 @@ class ContestControllerTest {
     private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     @MockBean
     private ContestService contestService;
+    @MockBean
+    private ProblemService problemService;
     @MockBean
     private SecurityUtil securityUtil;
     @Autowired
@@ -319,9 +321,9 @@ class ContestControllerTest {
         LocalDateTime startDateTime = LocalDateTime.now();
         LocalDateTime endDateTime = startDateTime.plusMinutes(10);
         long diffTime = Duration.between(startDateTime, endDateTime).getSeconds();
-        given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class)))
-                .willReturn(new EndContestDto(diffTime));
-
+        double average = 0.7;
+        given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class))).willReturn(diffTime);
+        given(problemService.createAverageScore(contestId, studentId)).willReturn(average);
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
                 .header("Authorization", mockToken));
@@ -330,6 +332,7 @@ class ContestControllerTest {
         // then
         actual.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{\"status\":200,\"message\":\"ok\",\"diff_time\": " + diffTime + "}"));
+                .andExpect(content().json("{\"status\":200,\"message\":\"ok\"," +
+                        "\"average\":" + average + ",\"diff_time\": " + diffTime + "}"));
     }
 }

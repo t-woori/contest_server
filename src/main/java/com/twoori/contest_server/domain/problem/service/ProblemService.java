@@ -3,8 +3,11 @@ package com.twoori.contest_server.domain.problem.service;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblem;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemInContestDto;
 import com.twoori.contest_server.domain.problem.dto.SolvedProblemDto;
+import com.twoori.contest_server.domain.problem.mapper.ProblemInContestMapper;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
+import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
@@ -19,6 +22,8 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class ProblemService {
+    private final ProblemInContestMapper problemInContestMapper;
+    private final ProblemInContestRepository problemInContestRepository;
     private final LogStudentInProblemRepository logStudentInProblemRepository;
     private final ProblemRepository problemRepository;
 
@@ -26,9 +31,13 @@ public class ProblemService {
 
 
     public ProblemService(ProblemRepository problemRepository,
-                          LogStudentInProblemRepository logStudentInProblemRepository) {
+                          LogStudentInProblemRepository logStudentInProblemRepository,
+                          ProblemInContestRepository problemInContestRepository,
+                          ProblemInContestMapper problemInContestMapper) {
         this.problemRepository = problemRepository;
         this.logStudentInProblemRepository = logStudentInProblemRepository;
+        this.problemInContestRepository = problemInContestRepository;
+        this.problemInContestMapper = problemInContestMapper;
     }
 
     public List<Long> getTotalStatus() {
@@ -67,5 +76,18 @@ public class ProblemService {
 
     public Double getMaxScore(LogStudentInProblemID logStudentInProblemID) {
         return logStudentInProblemRepository.getMaxScoreProblemOne(logStudentInProblemID);
+    }
+
+    public double createAverageScore(UUID contestId, UUID studentId) {
+        return Math.floor(problemInContestRepository.findById_ContestId(contestId)
+                .stream()
+                .map(problemInContestMapper::toDto)
+                .map(ProblemInContestDto::contentContentCompositeIds)
+                .flatMap(List::stream)
+                .mapToDouble(v ->
+                        getMaxScore(LogStudentInProblemID.ofExcludeCountOfTry(
+                                contestId, studentId, v.getProblemId(), v.getContentId())))
+                .average().orElse(0) * 10000
+        ) / 10000;
     }
 }

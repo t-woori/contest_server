@@ -63,7 +63,7 @@ class ProblemControllerTest {
     }
 
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Success|문제 제공 성공")
-    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
     void givenProblemIdWhenGetProblemThenProblemInfo(UUID contestId, Long noOfProblemInContest) throws Exception {
         // given
@@ -105,7 +105,7 @@ class ProblemControllerTest {
     }
 
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|존재하지 문제 조회")
-    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfNotExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
     @ParameterizedTest
     void givenNotFoundExceptionWhenGetProblemThenStatus404(UUID contestId, Long noOfProblemInContest) throws Exception {
         // given
@@ -123,7 +123,7 @@ class ProblemControllerTest {
     }
 
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|null 혹은 유효하지 않는 값 존제")
-    @MethodSource("com.twoori.contest_server.domain.problem.repository.Parameters#parametersOfInvalidProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfInvalidProblemId")
     @ParameterizedTest
     void givenInvalidateParamWhenThrowInvalidateExceptionOnValidatorThenStatus400(Object contestId, Object noOfProblemInContest) throws Exception {
 
