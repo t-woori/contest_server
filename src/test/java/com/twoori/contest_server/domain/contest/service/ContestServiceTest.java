@@ -196,7 +196,7 @@ class ContestServiceTest {
         // when & then
         UUID studentId = student.getId();
         assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
-                .isInstanceOf(NotFoundContestException.class);
+                .isInstanceOf(NotFoundRegisteredContestException.class);
     }
 
     @DisplayName("대회 최초진입을 2분뒤에 실행|Fail|대회 입장 시간 초과 후 입장 시도")

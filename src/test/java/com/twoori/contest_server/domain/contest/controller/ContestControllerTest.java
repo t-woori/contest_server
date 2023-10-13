@@ -7,7 +7,7 @@ import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
 import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
-import com.twoori.contest_server.domain.contest.excpetion.NotFoundContestException;
+import com.twoori.contest_server.domain.contest.excpetion.NotFoundRegisteredContestException;
 import com.twoori.contest_server.domain.contest.excpetion.NotRegisteredContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
@@ -214,7 +214,7 @@ class ContestControllerTest {
         String mockHeader = "";
         given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
                 "name", "email", "phoneNumber", "accessToken", "refreshToken"));
-        doThrow(new NotFoundContestException(studentId, contestId))
+        doThrow(new NotFoundRegisteredContestException(studentId, contestId))
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
