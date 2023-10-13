@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  rdb:
+    image: mysql:8.0.33
+    restart: on-failure
+    volumes:
+      - ./tmp/rdb:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Seoul
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+  redis:
+    image: redis:6.2.4
+    restart: on-failure
+    volumes:
+      - ./tmp/redis:/data
