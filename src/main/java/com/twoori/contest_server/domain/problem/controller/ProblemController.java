@@ -27,13 +27,13 @@ public class ProblemController {
     private final ProblemService problemService;
     private final ProblemMapper mapper;
     private final SecurityUtil securityUtil;
-    private final TrackingStudentService trackingService;
+    private final TrackingStudentService trackingStudentService;
 
-    public ProblemController(ProblemService problemService, ProblemMapper mapper, SecurityUtil securityUtil, TrackingStudentService trackingService) {
+    public ProblemController(ProblemService problemService, ProblemMapper mapper, SecurityUtil securityUtil, TrackingStudentService trackingStudentService) {
         this.problemService = problemService;
         this.mapper = mapper;
         this.securityUtil = securityUtil;
-        this.trackingService = trackingService;
+        this.trackingStudentService = trackingStudentService;
     }
 
     @GetMapping("/v1/contest/{contest_id}/total_status")
@@ -54,11 +54,12 @@ public class ProblemController {
         StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         log.info("[Controller] request student status. contest : {}, student: {}", contestId, studentDto.id());
         ProblemDto problem = problemService.getProblem(contestId, problemId);
-        log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.id());
-        trackingService.updateProblemCountAboutStudent(new UpdateProblemCountDto(
+        log.info("[Controller] tracking student status. contest : {}, student: {}, problemDto: {}", contestId, studentDto.id(), problem);
+        trackingStudentService.updateProblemCountAboutStudent(new UpdateProblemCountDto(
                 new StudentInContestIdDto(contestId, studentDto.id()),
                 new ProblemIdDto(problemId, 0L)
         ));
+        log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.id());
         return ResponseEntity.ok(mapper.dtoToVo(problem));
     }
 
