@@ -26,9 +26,7 @@ public class TrackingStudentService {
     public void updateProblemCountAboutStudent(UpdateProblemCountDto newDto) {
         String nullableProblemIdRawValue = studentRedisTemplate.opsForValue().get(newDto.getStudentRedisTemplateKey());
         if (nullableProblemIdRawValue == null) {
-            increaseStudentCountOnce(newDto.getTotalStatusRedisTemplateKey());
-            studentRedisTemplate.expire(newDto.getTotalStatusRedisTemplateKey(), Duration.ofHours(1));
-            studentRedisTemplate.opsForValue().set(newDto.getStudentRedisTemplateKey(), newDto.getTotalStatusRedisTemplateKey());
+            initStudentStatus(newDto);
             return;
         }
         String[] splitValue = nullableProblemIdRawValue.split("_");
@@ -42,6 +40,12 @@ public class TrackingStudentService {
                 new ProblemIdDto(problemId, contentId));
         decreaseStudentCountOnce(currentDto.getTotalStatusRedisTemplateKey());
         increaseStudentCountOnce(newDto.getTotalStatusRedisTemplateKey());
+        studentRedisTemplate.opsForValue().set(newDto.getStudentRedisTemplateKey(), newDto.getTotalStatusRedisTemplateKey());
+    }
+
+    private void initStudentStatus(UpdateProblemCountDto newDto) {
+        increaseStudentCountOnce(newDto.getTotalStatusRedisTemplateKey());
+        studentRedisTemplate.expire(newDto.getTotalStatusRedisTemplateKey(), Duration.ofHours(1));
         studentRedisTemplate.opsForValue().set(newDto.getStudentRedisTemplateKey(), newDto.getTotalStatusRedisTemplateKey());
     }
 
