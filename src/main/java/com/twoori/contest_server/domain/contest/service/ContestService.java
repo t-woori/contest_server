@@ -160,4 +160,9 @@ public class ContestService {
         return Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds();
     }
 
+    public UUID findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
+        return studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTime(studentId, now)
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null))
+                .getId().getContestID();
+    }
 }
