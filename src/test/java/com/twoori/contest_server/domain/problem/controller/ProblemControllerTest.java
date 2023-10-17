@@ -11,6 +11,7 @@ import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemExcept
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.problem.vo.SolvedProblemVO;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +51,8 @@ class ProblemControllerTest {
     private ProblemService problemService;
     @MockBean
     private SecurityUtil securityUtil;
+    @MockBean
+    private TrackingStudentService trackingStudentService;
 
     @Autowired
     private MockMvc mvc;
