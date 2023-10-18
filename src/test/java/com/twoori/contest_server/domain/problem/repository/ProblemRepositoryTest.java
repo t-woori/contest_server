@@ -31,7 +31,7 @@ class ProblemRepositoryTest {
     private ProblemRepository problemRepository;
 
     @DisplayName("존재하는 문제 검색|Success|여러개의 contenet가 포함된 문제 단건 조회")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfExistsProblemId")
     @ParameterizedTest(name = "contestId: {0}, noOfProblemInContest: {1}")
     void givenExistProblemId_whenGetProblem_thenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
         // when
@@ -51,7 +51,7 @@ class ProblemRepositoryTest {
     }
 
     @DisplayName("존재하지 않는 문제 검색|Fail|NotFoundProblemException")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfNotExistsProblemId")
     @ParameterizedTest(name = "contestId: {0}, noOfProblemInContest: {1}")
     void givenNotExistProblemIdId_whenGetProblem_thenThrowNotFoundProblemException(UUID contestId, Long noOfProblemIdInContest) {
         // given

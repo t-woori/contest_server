@@ -54,7 +54,7 @@ class ProblemServiceTest {
 
 
     @DisplayName("대회 ID와 문제 ID를 받아서 문제를 제공|Success|문제 제공 성공")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfExistsProblemId")
     @ParameterizedTest
     void giveProblemIdWhenGetProblemThenReturnProblem(UUID contestId, Long noOfProblemInContest) {
         // given
@@ -70,7 +70,7 @@ class ProblemServiceTest {
     }
 
     @DisplayName("대회 ID와 문제 ID를 받아서 문제를 제공|Fail|문제 제공 실패")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfNotExistsProblemId")
     @ParameterizedTest
     void givenProblemId_whenThrowNotFoundProblemException_thenReturnNotFoundProblemException(UUID contestId, Long noOfProblemInContest) {
         // given

@@ -6,6 +6,15 @@ import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 public class Parameters {
+    public static Stream<Arguments> argumentsForSearchContest() {
+        return Stream.of(
+                Arguments.of(0, 100),
+                Arguments.of(1, 100),
+                Arguments.of(10, 100),
+                Arguments.of(100, 100)
+        );
+    }
+
     /**
      * @return contestTime, cancelTime
      */

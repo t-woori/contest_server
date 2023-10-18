@@ -19,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,7 +39,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -70,22 +68,13 @@ class ContestControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    private static Stream<Arguments> argumentsForSearchContest() {
-        return Stream.of(
-                Arguments.of(0, 100),
-                Arguments.of(1, 100),
-                Arguments.of(10, 100),
-                Arguments.of(100, 100)
-        );
-    }
-
     @BeforeEach
     void beforeAll() {
         given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId, "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 
     @DisplayName("대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
-    @MethodSource("argumentsForSearchContest")
+    @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForSearchContest")
     @ParameterizedTest
     void givenSearchParameter_whenSearchContests_thenTotalContestCountOfContestInRegisteredContestCountOfContest(
             int registeredContestCount, int totalContestCount

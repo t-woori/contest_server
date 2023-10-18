@@ -13,12 +13,12 @@ public class Parameters {
     private static final long START_PROBLEM_ID = 0;
     private static final long END_PROBLEM_ID = 9;
 
-    public static Stream<Arguments> parametersOfExistsProblemId() {
+    public static Stream<Arguments> argumentsOfExistsProblemId() {
         UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
         return LongStream.range(START_PROBLEM_ID, END_PROBLEM_ID).mapToObj(id -> Arguments.of(contestId, id));
     }
 
-    public static Stream<Arguments> parametersOfNotExistsProblemId() {
+    public static Stream<Arguments> argumentsOfNotExistsProblemId() {
         UUID contestIdAboutMappedProblem = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
         return Stream.of(
                 Arguments.of(contestIdAboutMappedProblem, END_PROBLEM_ID + 1),
@@ -31,7 +31,7 @@ public class Parameters {
         );
     }
 
-    public static Stream<Arguments> parametersOfInvalidProblemId() {
+    public static Stream<Arguments> argumentsOfInvalidProblemId() {
         return Stream.of(
                 Arguments.of("aaaa", "1L2B"),
                 Arguments.of("asdf", "!@#$"),
