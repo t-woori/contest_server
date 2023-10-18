@@ -9,6 +9,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class TrackingStudentService {
@@ -67,4 +70,18 @@ public class TrackingStudentService {
         hashOperations.increment(STUDENT_COUNT_KEY, problemIdDto, -1L);
     }
 
+    public List<Long> getTotalStatus() {
+        HashOperations<String, ProblemIdDto, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
+        List<ProblemIdDto> problemIdDtos = new LinkedList<>();
+        for (int i = 0; i < 10; i++) {
+            problemIdDtos.add(new ProblemIdDto(i, 0L));
+        }
+        List<Long> result = new ArrayList<>(hashOperations.multiGet(STUDENT_COUNT_KEY, problemIdDtos));
+        for (int i = 0; i < result.size(); i++) {
+            if (result.get(i) == null) {
+                result.set(i, 0L);
+            }
+        }
+        return result;
+    }
 }

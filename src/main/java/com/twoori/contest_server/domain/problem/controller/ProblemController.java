@@ -41,10 +41,9 @@ public class ProblemController {
                                                                 @PathVariable("contest_id") UUID contestId) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
-        List<Long> statues = problemService.getTotalStatus();
-
-        log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
-        return ResponseEntity.ok(new ResponseTotalStatusVO(statues, 200, "ok"));
+        List<Long> statues = trackingStudentService.getTotalStatus();
+        log.info("[Controller] response total status. contest : {}, student: {}", contestId, studentDto.id());
+        return ResponseEntity.ok(new ResponseTotalStatusVO(statues));
     }
 
     @GetMapping("/v1/contest/{contest_id}/problem/{problem_id}")
