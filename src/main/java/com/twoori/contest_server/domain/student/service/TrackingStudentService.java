@@ -2,6 +2,7 @@ package com.twoori.contest_server.domain.student.service;
 
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.dto.UpdateProblemCountDto;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -14,49 +15,56 @@ public class TrackingStudentService {
 
     private static final String STUDENT_COUNT_KEY = "student_count";
     private final RedisTemplate<String, Long> totalStatusRedisTemplate;
-    private final RedisTemplate<String, String> studentRedisTemplate;
+    private final RedisTemplate<StudentInContestIdDto, ProblemIdDto> studentRedisTemplate;
 
-    public TrackingStudentService(RedisTemplate<String, Long> totalStatusRedisTemplate, RedisTemplate<String, String> studentRedisTemplate) {
+    public TrackingStudentService(RedisTemplate<String, Long> totalStatusRedisTemplate, RedisTemplate<StudentInContestIdDto, ProblemIdDto> studentRedisTemplate) {
         this.totalStatusRedisTemplate = totalStatusRedisTemplate;
         this.studentRedisTemplate = studentRedisTemplate;
-        studentRedisTemplate.expire(STUDENT_COUNT_KEY, Duration.ofHours(1));
+        totalStatusRedisTemplate.expire(STUDENT_COUNT_KEY, Duration.ofHours(1));
     }
 
     @Async
-    public void updateProblemCountAboutStudent(UpdateProblemCountDto newDto) {
-        String nullableProblemIdRawValue = studentRedisTemplate.opsForValue().get(newDto.getStudentRedisTemplateKey());
-        if (nullableProblemIdRawValue == null) {
-            initStudentStatus(newDto);
-            return;
+    public void updateProblemCountAboutStudent(UpdateProblemCountDto afterDto) {
+        try {
+            ProblemIdDto problemIdDto = studentRedisTemplate.opsForValue().get(afterDto.studentInContestIdDto());
+            if (afterDto.problemIdDto().equals(problemIdDto)) {
+                return;
+            }
+            UpdateProblemCountDto beforeDto = new UpdateProblemCountDto(afterDto.studentInContestIdDto(), problemIdDto);
+            decreaseStudentCountOnce(beforeDto.problemIdDto());
+            increaseStudentCountOnce(afterDto.problemIdDto());
+            studentRedisTemplate.opsForValue().setIfPresent(afterDto.studentInContestIdDto(), afterDto.problemIdDto());
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("bytes is null")) {
+                initStudentStatus(new UpdateProblemCountDto(
+                        afterDto.studentInContestIdDto(),
+                        new ProblemIdDto(0L, 0L)));
+                return;
+            }
+            throw e;
         }
-        String[] splitValue = nullableProblemIdRawValue.split("_");
-        long problemId = Long.parseLong(splitValue[0]);
-        long contentId = Long.parseLong(splitValue[1]);
-        if (newDto.problemIdDto().problemId() == problemId && newDto.problemIdDto().contentId() == contentId) {
-            return;
-        }
-        UpdateProblemCountDto currentDto = new UpdateProblemCountDto(
-                newDto.studentInContestIdDto(),
-                new ProblemIdDto(problemId, contentId));
-        decreaseStudentCountOnce(currentDto.getTotalStatusRedisTemplateKey());
-        increaseStudentCountOnce(newDto.getTotalStatusRedisTemplateKey());
-        studentRedisTemplate.opsForValue().set(newDto.getStudentRedisTemplateKey(), newDto.getTotalStatusRedisTemplateKey());
     }
 
-    private void initStudentStatus(UpdateProblemCountDto newDto) {
-        increaseStudentCountOnce(newDto.getTotalStatusRedisTemplateKey());
-        studentRedisTemplate.expire(newDto.getTotalStatusRedisTemplateKey(), Duration.ofHours(1));
-        studentRedisTemplate.opsForValue().set(newDto.getStudentRedisTemplateKey(), newDto.getTotalStatusRedisTemplateKey());
+    private void initStudentStatus(UpdateProblemCountDto dto) {
+        increaseStudentCountOnce(dto.problemIdDto());
+        studentRedisTemplate.expire(dto.studentInContestIdDto(), Duration.ofHours(1));
+        studentRedisTemplate.opsForValue().setIfAbsent(dto.studentInContestIdDto(), dto.problemIdDto());
     }
 
-    private void increaseStudentCountOnce(String problemAndContentHashKey) {
-        HashOperations<String, String, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
-        hashOperations.increment(STUDENT_COUNT_KEY, problemAndContentHashKey, 1L);
+    private void increaseStudentCountOnce(ProblemIdDto problemIdDto) {
+        HashOperations<String, ProblemIdDto, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
+        hashOperations.increment(STUDENT_COUNT_KEY, problemIdDto, 1L);
     }
 
-    private void decreaseStudentCountOnce(String problemAndContentHashKey) {
-        HashOperations<String, String, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
-        hashOperations.increment(STUDENT_COUNT_KEY, problemAndContentHashKey, -1L);
+    public void quitContest(StudentInContestIdDto dto) {
+        ProblemIdDto problemIdDto = studentRedisTemplate.opsForValue().get(dto);
+        decreaseStudentCountOnce(problemIdDto);
+        studentRedisTemplate.delete(dto);
     }
-//
+
+    private void decreaseStudentCountOnce(ProblemIdDto problemIdDto) {
+        HashOperations<String, ProblemIdDto, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
+        hashOperations.increment(STUDENT_COUNT_KEY, problemIdDto, -1L);
+    }
+
 }
