@@ -14,6 +14,8 @@ import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,8 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -65,6 +66,8 @@ class ContestControllerTest {
     private ProblemService problemService;
     @MockBean
     private SecurityUtil securityUtil;
+    @MockBean
+    private TrackingStudentService trackingStudentService;
     @Autowired
     private MockMvc mvc;
 
@@ -230,6 +233,7 @@ class ContestControllerTest {
         // given
         UUID contestId = UUID.randomUUID();
         doNothing().when(contestService).resignContest(contestId, studentId);
+        doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
 
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
@@ -237,6 +241,8 @@ class ContestControllerTest {
                 .param("contest_id", contestId.toString()));
 
         // then
+        verify(trackingStudentService, times(1))
+                .quitContest(new StudentInContestIdDto(contestId, studentId));
         actual.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":200,\"message\":\"ok\"}"));
@@ -313,12 +319,16 @@ class ContestControllerTest {
         double average = 0.7;
         given(contestService.endingContest(eq(contestId), eq(studentId), isA(LocalDateTime.class))).willReturn(diffTime);
         given(problemService.createAverageScore(contestId, studentId)).willReturn(average);
+        doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
+
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
                 .header("Authorization", mockToken));
 
 
         // then
+        verify(trackingStudentService, times(1))
+                .quitContest(new StudentInContestIdDto(contestId, studentId));
         actual.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":200,\"message\":\"ok\"," +
