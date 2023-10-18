@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -110,7 +107,10 @@ public class ContestService {
         condition.setRegisteredStudentId(studentId);
         condition.setFrom(start);
         condition.setTo(end);
-        return mapper.toRegisteredContestDto(contestRepository.searchRegisteredContest(condition));
+        List<SearchContestDto> searchContestDtos = new ArrayList<>(contestRepository.searchRegisteredContest(condition));
+        searchContestDtos.sort(Comparator.comparing(SearchContestDto::startedAt)
+                .thenComparing(SearchContestDto::endedAt));
+        return mapper.toRegisteredContestDto(searchContestDtos);
     }
 
     public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
@@ -137,7 +137,10 @@ public class ContestService {
         condition.setRegisteredStudentId(studentIdAboutRegisteredContest);
         condition.setFrom(LocalDateTime.now().minusMonths(3));
         condition.setTo(LocalDateTime.now());
-        return contestRepository.searchEndOfContests(condition);
+        List<SearchContestDto> searchContestDtos = new ArrayList<>(contestRepository.searchEndOfContests(condition));
+        searchContestDtos.sort(Comparator.comparing(SearchContestDto::startedAt)
+                .thenComparing(SearchContestDto::endedAt));
+        return searchContestDtos;
     }
 
     public long endingContest(UUID contestId, UUID studentId, LocalDateTime endDateTime) {
