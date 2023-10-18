@@ -357,6 +357,8 @@ class ContestServiceTest {
         // then
         assertThat(actual)
                 .isNotNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(RegisteredContestDto::startedAt)
+                        .thenComparing(RegisteredContestDto::endedAt))
                 .extracting("contestId").containsExactlyElementsOf(contestIds);
     }
 
@@ -456,6 +458,8 @@ class ContestServiceTest {
         // then
         assertThat(actual)
                 .isNotNull().isNotEmpty().hasSize(100)
+                .isSortedAccordingTo(Comparator.comparing(SearchContestDto::startedAt)
+                        .thenComparing(SearchContestDto::endedAt))
                 .extracting("contestId").containsExactlyElementsOf(contestIds);
     }
 
