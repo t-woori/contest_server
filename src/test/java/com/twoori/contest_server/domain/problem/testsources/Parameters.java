@@ -56,4 +56,17 @@ public class Parameters {
         }
         return arguments.stream();
     }
+
+    /**
+     * size of 10 list.
+     *
+     * @return List<Integer>
+     */
+    public static Stream<Arguments> argumentsForTotalStatus() {
+        return Stream.of(
+                Arguments.of(List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)),
+                Arguments.of(List.of(1L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L)),
+                Arguments.of(List.of(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 100L))
+        );
+    }
 }

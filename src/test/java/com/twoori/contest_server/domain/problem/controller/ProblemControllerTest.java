@@ -36,9 +36,9 @@ import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -160,5 +160,22 @@ class ProblemControllerTest {
         verify(problemService, times(1)).updateMaxScoreAboutProblem(
                 new SolvedProblemDto(contestId, studentId, solvedProblemVO.problemId(), solvedProblemVO.contentId(), solvedProblemVO.score())
         );
+    }
+
+    @DisplayName("GET /v1/contest/{contest_id}/total_status | 10명이 1문제를 풀고있는 상황 조회 | Success | 1문제에 10명이 존재")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsForTotalStatus")
+    @ParameterizedTest
+    void givenRequestTotalStatusApiWhenGetStatusThenReturnOfList(List<Long> countOfProblems) throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(trackingStudentService.getTotalStatus()).willReturn(countOfProblems);
+
+        // when
+        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/total_status", contestId)
+                .header("Authorization", mockToken));
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }

@@ -3,12 +3,10 @@ package com.twoori.contest_server.domain.student.service;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.dto.UpdateProblemCountDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
-import com.twoori.contest_server.global.config.TestRedisContainerConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +15,15 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@ExtendWith(TestRedisContainerConfig.class)
+//@ExtendWith(TestRedisContainerConfig.class)
 @ActiveProfiles("test")
 @SpringBootTest
 class TrackingStudentServiceTest {
@@ -125,6 +125,33 @@ class TrackingStudentServiceTest {
         // then
         assertThat(hashOp.get("student_count", dto.problemIdDto())).isZero();
         assertThat(hashOp.get("student_count", new ProblemIdDto(1L, 0L))).isEqualTo(1);
+    }
 
+    @DisplayName("선두 주자가 n번째 문제를 풀고 있다|Success|선두주자까지 redis에서 조회하고 이후의 데이터는 0으로 반환")
+    @ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
+    @ParameterizedTest(name = "문제번호: {0}")
+    void givenFistStudentProblemIdWhenGetTotalStatusThenREturnSizeOf10(int lastProblemId) {
+        // given
+        UUID contestId = UUID.randomUUID();
+        for (int i = 0; i <= lastProblemId; i++) {
+            UUID studentId = UUID.randomUUID();
+            for (int j = 0; j <= i; j++) {
+                trackingStudentService.updateProblemCountAboutStudent(
+                        new UpdateProblemCountDto(new StudentInContestIdDto(contestId, studentId),
+                                new ProblemIdDto(j, 0L)));
+            }
+        }
+
+        // when
+        List<Long> result = trackingStudentService.getTotalStatus();
+
+        // then
+        assertThat(result).hasSize(10)
+                .isEqualTo(IntStream.range(0, 10).mapToObj(v -> {
+                    if (v <= lastProblemId) {
+                        return 1L;
+                    }
+                    return 0L;
+                }).toList());
     }
 }
