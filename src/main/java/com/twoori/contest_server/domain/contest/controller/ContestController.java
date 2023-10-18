@@ -9,6 +9,8 @@ import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.APIOkMessageVO;
 import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
@@ -32,11 +34,14 @@ public class ContestController {
     private final ContestControllerVOMapper mapper;
     private final ProblemService problemService;
 
-    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper, ProblemService problemService) {
+    private final TrackingStudentService trackingStudentService;
+
+    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper, ProblemService problemService, TrackingStudentService trackingStudentService) {
         this.contestService = contestService;
         this.securityUtil = securityUtil;
         this.mapper = mapper;
         this.problemService = problemService;
+        this.trackingStudentService = trackingStudentService;
     }
 
     @GetMapping("/v1/contest/{contest_id}/enter")
@@ -120,7 +125,8 @@ public class ContestController {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
         log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
         contestService.resignContest(contestId, studentDto.id());
-        log.info("resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
+        log.info("trackingStudentService will remove log contest, contestId: {}, studentId: {}", contestId, studentDto.id());
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
@@ -142,6 +148,7 @@ public class ContestController {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
         long diffTime = contestService.endingContest(contestId, studentDto.id(), endDateTime);
         double average = problemService.createAverageScore(contestId, studentDto.id());
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
         return ResponseEntity.ok(new EndContestVO(average, diffTime));
     }
 }

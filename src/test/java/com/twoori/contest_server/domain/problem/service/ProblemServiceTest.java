@@ -54,7 +54,7 @@ class ProblemServiceTest {
 
 
     @DisplayName("대회 ID와 문제 ID를 받아서 문제를 제공|Success|문제 제공 성공")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfExistsProblemId")
     @ParameterizedTest
     void giveProblemIdWhenGetProblemThenReturnProblem(UUID contestId, Long noOfProblemInContest) {
         // given
@@ -70,9 +70,9 @@ class ProblemServiceTest {
     }
 
     @DisplayName("대회 ID와 문제 ID를 받아서 문제를 제공|Fail|문제 제공 실패")
-    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
+    @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfNotExistsProblemId")
     @ParameterizedTest
-    void givenProblemIdWhenThrowNotFoundProblemExceptionThenReturnNotFoundProblemException(UUID contestId, Long noOfProblemInContest) {
+    void givenProblemId_whenThrowNotFoundProblemException_thenReturnNotFoundProblemException(UUID contestId, Long noOfProblemInContest) {
         // given
         given(problemRepository.getProblem(contestId, noOfProblemInContest)).willThrow(new NotFoundProblemException(contestId, noOfProblemInContest));
 
@@ -83,7 +83,7 @@ class ProblemServiceTest {
 
     @DisplayName("처음으로 푸는 문제|Cache Put|RDB에 저장 하고 redis에 캐싱")
     @Test
-    void givenNewSolvedProblemVOWhenUpdateScoreThenUpdateMaxScore() {
+    void givenNewSolvedProblemVO_whenUpdateScore_thenUpdateMaxScore() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -108,7 +108,7 @@ class ProblemServiceTest {
 
     @DisplayName("기존 점수보다 새로운 문제 점수가 높다|Not Cache Put|RDB에 저장하고 redis에 캐싱")
     @Test
-    void givenNewScoreWhenUpdateScoreThenUpdateMaxScore() {
+    void givenNewScore_whenUpdateScore_thenUpdateMaxScore() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -137,7 +137,7 @@ class ProblemServiceTest {
 
     @DisplayName("기존 점수보다 새로운 점수가 더 낮다|Not Cache Put|RDB에 로그만 기록하고 rediss에 캐싱하지 않는다.")
     @Test
-    void givenNewScoreWhenUpdateScoreThenNotUpdateMaxScore() {
+    void givenNewScore_whenUpdateScore_thenNotUpdateMaxScore() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -168,7 +168,7 @@ class ProblemServiceTest {
     @DisplayName("대회 평균 점수 계산|Success|대회 n개의 문제를 풀고 평균을 반환")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfMaxScoreAboutProblems")
     @ParameterizedTest(name = "점수 {1} 가 산출")
-    void givenStudentInContestIdWhenCreateAverageScoreThenReturnAverageScore(List<Double> maxProblemsScore, double expect) {
+    void givenStudentInContestId_whenCreateAverageScore_thenReturnAverageScore(List<Double> maxProblemsScore, double expect) {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -197,7 +197,7 @@ class ProblemServiceTest {
 
     @DisplayName("문제를 하나도 풀지 않고 대회 평균 점수를 계산|Success|0을 반환")
     @Test
-    void givenNotSolvedProblemWhenCreateAverageScoreThenReturnZero() {
+    void givenNotSolvedProblem_whenCreateAverageScore_thenReturnZero() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();

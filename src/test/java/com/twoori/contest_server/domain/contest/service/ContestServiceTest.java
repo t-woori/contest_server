@@ -61,7 +61,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 시작 10분전에 입장|Success|대회 입장 가능 시간 내에 입장 시도")
     @Test
-    void givenContestWhenEnterStudentInContestThenSuccess() {
+    void givenContest_whenEnterStudentInContest_thenSaveStudentInCotnestEntityOnce() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -85,7 +85,7 @@ class ContestServiceTest {
 
     @DisplayName("이미 진입한 상태에서 모종의 문재로 인해 다시 입장 시도|Success|이미 입장한 상태에서 다시 입장 시도")
     @Test
-    void givenReEnterStatusWhenEnterStudentInContestThenSuccess() {
+    void givenReEnterStatus_whenEnterStudentInContest_thenSuccessReEntered() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -111,7 +111,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 시작 1분 후 입장|Success| 최대 1분간 대회 입장 유예 시간 제공")
     @Test
-    void givenEnterContestWhenEnterStudentInContestThenSuccess() {
+    void givenEnterContest_whenEnterStudentInContest_thenSuccessEnterContest() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -134,7 +134,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 종료 후 입장 시도|Fail|대회 종료 후 입장 불가")
     @Test
-    void givenEndContestWhenEnterStudentInContestThenThrowExpiredContestException() {
+    void givenEndContest_whenEnterStudentInContest_thenThrowExpiredContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -151,7 +151,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 시작 11분전에 입장|Fail|대회 입장 시간 보다 먼저 입장")
     @Test
-    void givenNotStartContestWhenEnterStudentInContestThenThrowEarlyContestException() {
+    void givenNotStartContest_whenEnterStudentInContest_thenThrowEarlyContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -169,7 +169,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 자진 포기 후 재입장|Fail|자진 포기한 대회에 재입장 시도")
     @Test
-    void givenResignedContestWhenEnterStudentInContestThenThrowResignedContestException() {
+    void givenResignedContest_whenEnterStudentInContest_thenThrowResignedContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -188,7 +188,7 @@ class ContestServiceTest {
 
     @DisplayName("존재하지 않는 대회에 입장 시도|Fail|대회가 존재하지 않음")
     @Test
-    void givenHasNotContestWhenEnterStudentInContestThenThrowResignedContestException() {
+    void givenHasNotContest_whenEnterStudentInContest_thenThrowResignedContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime enterDateTime = LocalDateTime.now();
@@ -201,7 +201,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 최초진입을 2분뒤에 실행|Fail|대회 입장 시간 초과 후 입장 시도")
     @Test
-    void givenReEnterContestWhenReEnterStudentInContestThenThrowExpiredTimeException() {
+    void givenReEnterContest_whenReEnterStudentInContest_thenThrowExpiredTimeException() {
         // given
         UUID contestId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now();
@@ -222,7 +222,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 검색|Success|현시점부터 3개월간의 대회 데이터를 모두 조회")
     @Test
-    void givenNonParamWhenSearchContestThenGetContestsIn3Month() {
+    void givenNonParam_whenSearchContest_thenGetContestsIn3Month() {
         // given
         String parameter = "";
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
@@ -255,7 +255,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 검색|Success|현시점부터 대회 이름으로 1개월간 데이터 검색")
     @Test
-    void givenDueTo1MonthWhenSearchContestsThen70OfSortedContestIn100Contests() {
+    void givenDueToOneMonth_whenSearchContests_then70OfSortedContestIn100Contests() {
         // given
         String parameter = "search_param";
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
@@ -281,7 +281,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 검색|Success|현시점부터 1개월 이상, 2개월 미만인 모든 대회 검색")
     @Test
-    void givenDueTo1To2MonthWhenSearchContestsThen60OfSortedContests() {
+    void givenDueTo1To2Month_whenSearchContests_then60OfSortedContests() {
         //given
         String parameter = "";
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
@@ -310,7 +310,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 검색|Success|from이 to보다 큰 검색")
     @Test
-    void givenFromAfterToWhenSearchContestsThenListSizeOfZero() {
+    void givenFromAfterTo_whenSearchContests_thenListSizeOfZero() {
         // given
         String parameter = "";
         LocalDate from = LocalDate.now().plusMonths(1);
@@ -326,7 +326,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 검색|Success|from이 현재보다 작은 검색")
     @Test
-    void givenFromBeforeNowWhenSearchContestsThenListSizeOfZero() {
+    void givenFromBeforeNow_whenSearchContests_thenListSizeOfZero() {
         // given
         String parameter = "";
         LocalDate from = LocalDate.now().minusDays(1);
@@ -342,7 +342,7 @@ class ContestServiceTest {
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과가 존재")
     @Test
-    void givenStudentIdWhenGetRegisteredContestsThenSuccess() {
+    void givenStudentId_whenGetRegisteredContests_thenReturnContestAfterCurrentTime() {
         // given
         UUID studentId = UUID.randomUUID();
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
@@ -362,7 +362,7 @@ class ContestServiceTest {
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과 미존재")
     @Test
-    void givenStudentIdWhenGetRegisteredContestsThenEmptyList() {
+    void givenStudentId_whenGetRegisteredContests_thenEmptyList() {
         // given
         UUID studentId = UUID.randomUUID();
         given(contestRepository.searchRegisteredContest(isA(ContestCondition.class))).willReturn(List.of());
@@ -377,7 +377,7 @@ class ContestServiceTest {
     @DisplayName("취소 가능한 시간대에 대회 신청 취소 요청|Success| 대회 하루전까지 신청 취소 가능")
     @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForCancelTimeAndStartTime")
     @ParameterizedTest
-    void givenContestWhenCancelContestThenSuccess(LocalDateTime cancelTime, LocalDateTime startTime) {
+    void givenContest_whenCancelContest_thenExecuteCancelContest(LocalDateTime cancelTime, LocalDateTime startTime) {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -395,7 +395,7 @@ class ContestServiceTest {
     @DisplayName("취소 불가능한 시간대에 신청 취소|Fail| 대회 시작 하루 전까지만 취소 가능")
     @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForNotCancelTimeAndStartTime")
     @ParameterizedTest
-    void givenContestWhenCancelContestThenFail(LocalDateTime cancelTime, LocalDateTime startTime) {
+    void givenContest_whenCancelContest_thenThrowPermissionDenialException(LocalDateTime cancelTime, LocalDateTime startTime) {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -411,7 +411,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 중 자진 포기 요청|Success|대회 자진 포기 기록")
     @Test
-    void givenContestWhenResignContestThenSuccess() {
+    void givenContest_whenResignContest_thenExecuteResignContest() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -427,7 +427,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 중 자진 포기 요청|Fail|대회에 신청하지 않은 상태에서 자진 포기 요청")
     @Test
-    void givenContestWhenResignContestThenFail() {
+    void givenContest_whenResignContest_thenThrowNotRegisteredContestException() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -441,7 +441,7 @@ class ContestServiceTest {
 
     @DisplayName("종료된 대회 검색|Success|종료된 대회들만 검색")
     @Test
-    void givenCurrentTimeAndStudentIdWhenSearchExpiredContestThenReturnExpiredContests() {
+    void givenCurrentTimeAndStudentId_whenSearchExpiredContest_thenReturnExpiredContests() {
         // given
         UUID studentId = UUID.randomUUID();
         List<UUID> contestIds = IntStream.range(0, 100).mapToObj(i -> UUID.randomUUID()).toList();
@@ -461,7 +461,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 종료 이전에 명시적으로 종료|Success|입력한 대회 시간으로 종료 기록 후 계산")
     @Test
-    void givenEndDateTimeBeforeEndContestWhenEndingContestThenScoringEndContestTime() {
+    void givenEndDateTimeBeforeEndContest_whenEndingContest_thenScoringEndContestTime() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -488,7 +488,7 @@ class ContestServiceTest {
 
     @DisplayName("대회 시간이 초과되어 클라이언트에서 강제로 대회 종료를 요청|Success|대회 종료 시간으로 기록 후 계산")
     @Test
-    void givenEndDateTimeAfterEndContestWhenEndContestThenScoringEndContestTime() {
+    void givenEndDateTimeAfterEndContest_whenEndContest_thenScoringEndContestTime() {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -516,7 +516,7 @@ class ContestServiceTest {
     @DisplayName("대회 종료 요청을 n번 보냄|Fail|대회 종료 시간은 첫번째 보낸 것만 기록하고 이외의 요청은 기록하지 않음")
     @ValueSource(ints = {2, 3, 4, 5, 6, 7, 8, 9, 10})
     @ParameterizedTest(name = "{0} 번 대회 종료 요청을 수행")
-    void givenEndContestTimeWhenEndContestMoreThenTwiceThenOneIsRecorded(int loopCount) {
+    void givenEndContestTime_whenEndContestMore_thenTwiceThenOneIsRecorded(int loopCount) {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
