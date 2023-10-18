@@ -5,6 +5,7 @@ import com.twoori.contest_server.domain.problem.dto.ProblemDto;
 import com.twoori.contest_server.domain.problem.enums.PROBLEM_TYPE;
 import com.twoori.contest_server.domain.problem.exceptions.NotFoundProblemException;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,8 +30,9 @@ class ProblemRepositoryTest {
     @Autowired
     private ProblemRepository problemRepository;
 
+    @DisplayName("존재하는 문제 검색|Success|여러개의 contenet가 포함된 문제 단건 조회")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
-    @ParameterizedTest
+    @ParameterizedTest(name = "contestId: {0}, noOfProblemInContest: {1}")
     void givenExistProblemId_whenGetProblem_thenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
         // when
         ProblemDto actual = problemRepository.getProblem(contestId, noOfProblemIdInContest);
@@ -48,8 +50,9 @@ class ProblemRepositoryTest {
         }
     }
 
+    @DisplayName("존재하지 않는 문제 검색|Fail|NotFoundProblemException")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
-    @ParameterizedTest
+    @ParameterizedTest(name = "contestId: {0}, noOfProblemInContest: {1}")
     void givenNotExistProblemIdId_whenGetProblem_thenThrowNotFoundProblemException(UUID contestId, Long noOfProblemIdInContest) {
         // given
         ProblemCondition condition = new ProblemCondition();
