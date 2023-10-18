@@ -35,7 +35,7 @@ class LogStudentInProblemRepositoryTest {
     @DisplayName("학생이 문제 푼 기록이 count 건 있다.|Success| count를 반환한다")
     @ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11})
     @ParameterizedTest(name = "문제 푼 건수: {0}")
-    void givenExistSolvedProblemVoWhenSaveSolvedProblemThenSuccess(int count) {
+    void givenExistSolvedProblemVo_whenSaveSolvedProblem_thenReturnCount(int count) {
         // given
         UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
@@ -60,7 +60,7 @@ class LogStudentInProblemRepositoryTest {
     @DisplayName("문제를 푼 기록 중에 최고 점수 반환|Success|최고 점수 반환")
     @ValueSource(doubles = {0.8, 0.7, 0.6, 0.5})
     @ParameterizedTest(name = "최고 점수: {0}")
-    void givenMaxScoreDecs0_01WhenGetMAxScoreProblemOneThenReturnMaxScore(double maxScore) {
+    void givenMaxScoreDesc0_01_whenGetMAxScoreProblemOne_thenReturnMaxScore(double maxScore) {
         // given
         UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
@@ -83,7 +83,7 @@ class LogStudentInProblemRepositoryTest {
 
     @DisplayName("기록이 없는 상태에서 max값 조회|Success|0을 반환")
     @Test
-    void givenHasNotLogWhenGetMaxScoreProblemOneThenReturnZero() {
+    void givenHasNotLog_whenGetMaxScoreProblemOne_thenReturnZero() {
         // given
         UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");

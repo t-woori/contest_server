@@ -130,7 +130,7 @@ class TrackingStudentServiceTest {
     @DisplayName("선두 주자가 n번째 문제를 풀고 있다|Success|선두주자까지 redis에서 조회하고 이후의 데이터는 0으로 반환")
     @ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
     @ParameterizedTest(name = "문제번호: {0}")
-    void givenFistStudentProblemIdWhenGetTotalStatusThenREturnSizeOf10(int lastProblemId) {
+    void givenFistStudentProblemId_whenGetTotalStatus_thenReturnSizeOf10(int lastProblemId) {
         // given
         UUID contestId = UUID.randomUUID();
         for (int i = 0; i <= lastProblemId; i++) {

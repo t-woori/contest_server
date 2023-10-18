@@ -31,7 +31,7 @@ class ProblemRepositoryTest {
 
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
-    void givenExistProblemIdWhenGetProblemThenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
+    void givenExistProblemId_whenGetProblem_thenOneProblem(UUID contestId, Long noOfProblemIdInContest) {
         // when
         ProblemDto actual = problemRepository.getProblem(contestId, noOfProblemIdInContest);
 
@@ -50,7 +50,7 @@ class ProblemRepositoryTest {
 
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
     @ParameterizedTest
-    void givenNotExistProblemIdIdWhenGetProblemThenThrowNotFoundProblemException(UUID contestId, Long noOfProblemIdInContest) {
+    void givenNotExistProblemIdId_whenGetProblem_thenThrowNotFoundProblemException(UUID contestId, Long noOfProblemIdInContest) {
         // given
         ProblemCondition condition = new ProblemCondition();
         condition.setNoOfProblemInContest(noOfProblemIdInContest);

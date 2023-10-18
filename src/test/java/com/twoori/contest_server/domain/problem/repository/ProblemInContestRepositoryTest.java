@@ -28,7 +28,7 @@ class ProblemInContestRepositoryTest {
 
     @DisplayName("대회에 속한 모든 문제 번호 조회|Success|10건의 문제 조회 성공")
     @Test
-    void givenContestIdyWhenFindById_ContestIdThenListOfReturnProblemInContest() {
+    void givenContestId_whenFindByIdContestId_thenListOfReturnProblemInContest() {
         // given
         UUID contestId = UUID.fromString("53a70353-1f96-4b39-84f9-22704218627f");
 

@@ -68,7 +68,7 @@ class ProblemControllerTest {
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Success|문제 제공 성공")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfExistsProblemId")
     @ParameterizedTest
-    void givenProblemIdWhenGetProblemThenProblemInfo(UUID contestId, Long noOfProblemInContest) throws Exception {
+    void givenProblemId_whenGetProblem_thenProblemInfo(UUID contestId, Long noOfProblemInContest) throws Exception {
         // given
         given(problemService.getProblem(contestId, noOfProblemInContest)).willReturn(
                 new ProblemDto(
@@ -110,7 +110,7 @@ class ProblemControllerTest {
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|존재하지 문제 조회")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfNotExistsProblemId")
     @ParameterizedTest
-    void givenNotFoundExceptionWhenGetProblemThenStatus404(UUID contestId, Long noOfProblemInContest) throws Exception {
+    void givenNotFoundException_whenGetProblemThe404Status(UUID contestId, Long noOfProblemInContest) throws Exception {
         // given
         given(problemService.getProblem(contestId, noOfProblemInContest)).willThrow(
                 new NotFoundProblemException(contestId, noOfProblemInContest));
@@ -128,7 +128,7 @@ class ProblemControllerTest {
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|null 혹은 유효하지 않는 값 존제")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#parametersOfInvalidProblemId")
     @ParameterizedTest
-    void givenInvalidateParamWhenThrowInvalidateExceptionOnValidatorThenStatus400(Object contestId, Object noOfProblemInContest) throws Exception {
+    void givenInvalidateParam_whenThrowInvalidateExceptionOnValidator_then400Status(Object contestId, Object noOfProblemInContest) throws Exception {
 
         // when & then
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
@@ -142,7 +142,7 @@ class ProblemControllerTest {
 
     @DisplayName("PUT /v1/contest/{contest_id}/student/{student_id}/problem/score|Success|문제 제출 성공")
     @Test
-    void givenSolvedProblemWhenUpdateSolvedProblemThenSuccess() throws Exception {
+    void givenSolvedProblem_whenUpdateSolvedProblem_thenExecuteOnceUpdateMaxScoreAboutProblem() throws Exception {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
@@ -165,7 +165,7 @@ class ProblemControllerTest {
     @DisplayName("GET /v1/contest/{contest_id}/total_status | 10명이 1문제를 풀고있는 상황 조회 | Success | 1문제에 10명이 존재")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsForTotalStatus")
     @ParameterizedTest
-    void givenRequestTotalStatusApiWhenGetStatusThenReturnOfList(List<Long> countOfProblems) throws Exception {
+    void givenRequestTotalStatusApi_whenGetStatus_thenReturnOfList(List<Long> countOfProblems) throws Exception {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();

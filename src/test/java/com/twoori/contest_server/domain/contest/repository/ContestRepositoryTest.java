@@ -33,7 +33,7 @@ class ContestRepositoryTest {
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|2건의 대회가 존재")
     @Test
-    void givenStudentIdWhenGetRegisteredContestsInFromToThenListSizeOf2() {
+    void givenStudentId_whenGetRegisteredContestsInFromTo_thenListSizeOf2() {
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
         LocalDateTime from = LocalDateTime.now().minusMinutes(1);
         LocalDateTime to = from.plusMonths(3);
@@ -55,7 +55,7 @@ class ContestRepositoryTest {
 
     @DisplayName("신청 취소 요청|Success| SoftDelete 성공")
     @Test
-    void givenRegisteredContestWhenCancelContestThenSuccess() {
+    void givenRegisteredContest_whenCancelContest_thenSuccess() {
         // given
         UUID studentId = UUID.fromString("dba77299-9009-422c-91ab-7a976525c80a");
         UUID contestId = UUID.fromString("a3030109-b69e-417a-8b18-e2d12a3c33de");
@@ -74,7 +74,7 @@ class ContestRepositoryTest {
 
     @DisplayName("대회 포기 요청|Success| isResigned 플래그가 true로 변경")
     @Test
-    void givenStudentIdAndContestIdWhenResignedContestThenIsResignedIsTrue() {
+    void givenStudentIdAndContestId_whenResignedContest_thenIsResignedIsTrue() {
         // given
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
@@ -89,7 +89,7 @@ class ContestRepositoryTest {
 
     @DisplayName("종료된 대회 요청|Success|종료된 대회들만 조회")
     @Test
-    void givenStudentIdWhenSearchEndOfContestsThen() {
+    void givenStudentId_whenSearchEndOfContests_thenGetContestOne() {
         // given
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
         LocalDateTime from = LocalDateTime.now().minusMonths(3);
@@ -110,7 +110,7 @@ class ContestRepositoryTest {
 
     @DisplayName("대회 진입을 위한 데이터 단건 요청|Success|대회 진입을 위한 데이터 단건 조회")
     @Test
-    void givenContestAndStudentIdWhenGetRegisteredStudentAboutStudentThenReturnOneEnterContestDto() {
+    void givenContestAndStudentId_whenGetRegisteredStudentAboutStudent_thenReturnOneEnterContestDto() {
         // given
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
@@ -126,7 +126,7 @@ class ContestRepositoryTest {
 
     @DisplayName("대회 포기 여부 확인 |Success| 포기하지 않는 대회")
     @Test
-    void givenContestAndStudentIdWhenIsResignedThenReturnFalse() {
+    void givenContestAndStudentId_whenIsResigned_thenReturnFalse() {
         // given
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
@@ -140,7 +140,7 @@ class ContestRepositoryTest {
 
     @DisplayName("대회 진입 여부 확인|Success| 대회 진입한 않은 상태")
     @Test
-    void givenContestAndStudentIdWhenIsEnteredStudentInContestThenReturnFalse() {
+    void givenContestAndStudentId_whenIsEnteredStudentInContest_thenReturnFalse() {
         // given
         UUID contestId = UUID.fromString("992033a0-11c9-45b0-a643-01a2c706f118");
         UUID studentId = UUID.fromString("d7762394-592c-4e33-8d71-06fc5a94abfb");
@@ -154,7 +154,7 @@ class ContestRepositoryTest {
 
     @DisplayName("시작하지 않은 대회 조회|Success| 4건의 대회가 제공")
     @Test
-    void givenStudentIdWhenSearchNotStartedContestsThenReturn4Contests() {
+    void givenStudentId_whenSearchNotStartedContests_thenReturn4Contests() {
         // given
         LocalDateTime from = LocalDateTime.now();
         LocalDateTime to = LocalDateTime.now().plusMonths(3);
