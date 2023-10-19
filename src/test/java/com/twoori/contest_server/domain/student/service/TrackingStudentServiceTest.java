@@ -3,10 +3,12 @@ package com.twoori.contest_server.domain.student.service;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.dto.UpdateProblemCountDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.global.config.TestRedisContainerConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-//@ExtendWith(TestRedisContainerConfig.class)
+@ExtendWith(TestRedisContainerConfig.class)
 @ActiveProfiles("test")
 @SpringBootTest
 class TrackingStudentServiceTest {
