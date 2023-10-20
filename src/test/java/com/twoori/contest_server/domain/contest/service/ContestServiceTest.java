@@ -230,13 +230,12 @@ class ContestServiceTest {
         LocalDate to = from.plusMonths(3);
         ContestCondition condition = new ContestCondition();
         condition.setFrom(from.atStartOfDay());
-        condition.setTo(to.atStartOfDay());
+        condition.setTo(to.atTime(23, 59, 59));
         condition.setParameter(parameter);
         given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
                         contestIds.get(i), "test" + i, "hostName" + i,
-                        from.atStartOfDay().plusDays(1), from.atStartOfDay().plusDays(2)
-                        )
+                        from.atStartOfDay().plusDays(1), from.atTime(23, 59, 59).plusDays(2))
                 ).toList()
         );
 
@@ -263,7 +262,7 @@ class ContestServiceTest {
         LocalDate to = from.plusMonths(1);
         ContestCondition condition = new ContestCondition();
         condition.setFrom(from.atStartOfDay());
-        condition.setTo(to.atStartOfDay());
+        condition.setTo(to.atTime(23, 59, 59));
         condition.setParameter(parameter);
         given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> new SearchContestDto(
@@ -289,7 +288,7 @@ class ContestServiceTest {
         LocalDate to = from.plusMonths(2);
         ContestCondition condition = new ContestCondition();
         condition.setFrom(from.atStartOfDay());
-        condition.setTo(to.atStartOfDay());
+        condition.setTo(to.atTime(23, 59, 59));
         condition.setParameter(parameter);
         given(contestRepository.searchNotStartedContests(condition)).willReturn(
                 IntStream.range(0, 100).mapToObj(i -> {
@@ -338,6 +337,29 @@ class ContestServiceTest {
         // then
         verify(contestRepository, never()).searchEndOfContests(isA(ContestCondition.class));
         assertThat(contests).isNotNull().isEmpty();
+    }
+
+    @DisplayName("기간 범위를 하루로 결정하고 대회를 검색|Success|그날에 진행되는 대회 검색")
+    @Test
+    void givenFromDayOfOne_whenSearchContests_thenList() {
+        // given
+        String parameter = "";
+        LocalDate now = LocalDate.now();
+        ContestCondition condition = new ContestCondition();
+        condition.setParameter(parameter);
+        condition.setFrom(now.atStartOfDay());
+        condition.setTo(now.atTime(23, 59, 59));
+        given(contestRepository.searchNotStartedContests(condition)).willReturn(List.of(
+                new SearchContestDto(
+                        UUID.randomUUID(), "contest", "host",
+                        now.atStartOfDay(), now.atStartOfDay().plusMinutes(15))));
+
+        // when
+        List<SearchContestDtoForController> contests = contestService.searchContests(parameter, now, now);
+
+        // then
+        verify(contestRepository, times(1)).searchNotStartedContests(condition);
+        assertThat(contests).isNotNull().isNotEmpty();
     }
 
     @DisplayName("신청한 대회 중 시작하지 않은 대회 조회|Success|대회 검색 결과가 존재")
