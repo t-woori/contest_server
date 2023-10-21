@@ -71,7 +71,7 @@ public class ContestService {
         ContestCondition condition = new ContestCondition();
         condition.setParameter(parameter);
         condition.setFrom(from.atStartOfDay());
-        condition.setTo(to.atStartOfDay());
+        condition.setTo(to.atTime(23, 59, 59));
         List<SearchContestDto> result = contestRepository.searchNotStartedContests(condition);
         return mapper.toSearchDtoForControllerList(result);
 
