@@ -196,7 +196,7 @@ class ContestServiceTest {
         // when & then
         UUID studentId = student.getId();
         assertThatThrownBy(() -> contestService.enterStudentInContest(studentId, contestId, enterDateTime))
-                .isInstanceOf(NotFoundContestException.class);
+                .isInstanceOf(NotFoundRegisteredContestException.class);
     }
 
     @DisplayName("대회 최초진입을 2분뒤에 실행|Fail|대회 입장 시간 초과 후 입장 시도")
@@ -565,4 +565,39 @@ class ContestServiceTest {
         verify(studentInContestRepository, times(1)).save(isA(StudentInContest.class));
     }
 
+    @DisplayName("시작한 대회중에 진입 가능한 대회 조회|Success|대회 종료 후 재진입을 위한 데이터 제공")
+    @Test
+    void givenRunningWhenFindContestIdAboutEnterableContestThenReturnContestId() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);
+        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+                studentId, runningEndDateTime)).willReturn(Optional.of(StudentInContest.builder()
+                .id(new StudentInContestID(studentId, contestId))
+                .contest(new Contest(contestId, "code", "name", "hostName",
+                        LocalDateTime.now().minusMinutes(15), runningEndDateTime,
+                        0.5, 0.5))
+                .isEntered(true).isResigned(false).build()));
+
+        // when
+        UUID actual = contestService.findContestIdAboutEnterableContest(studentId, runningEndDateTime);
+
+        // then
+        assertThat(actual).isEqualTo(contestId);
+    }
+
+    @DisplayName("시작한 대회중에 진입 가능한 대회 조회|Fail|진입 가능한 대회가 없음")
+    @Test
+    void givenRunningWhenFindContestIdAboutEnterableContestThenThroeNotFoundRegisteredContestException() {
+        // given
+        UUID studentId = UUID.randomUUID();
+        LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);
+        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+                studentId, runningEndDateTime)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> contestService.findContestIdAboutEnterableContest(studentId, runningEndDateTime))
+                .isInstanceOf(NotFoundRegisteredContestException.class);
+    }
 }

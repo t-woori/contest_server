@@ -3,12 +3,14 @@ package com.twoori.contest_server.domain.problem.service;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblem;
 import com.twoori.contest_server.domain.problem.dao.LogStudentInProblemID;
 import com.twoori.contest_server.domain.problem.dto.ProblemDto;
+import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.dto.ProblemInContestDto;
 import com.twoori.contest_server.domain.problem.dto.SolvedProblemDto;
 import com.twoori.contest_server.domain.problem.mapper.ProblemInContestMapper;
 import com.twoori.contest_server.domain.problem.repository.LogStudentInProblemRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemInContestRepository;
 import com.twoori.contest_server.domain.problem.repository.ProblemRepository;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -89,5 +91,14 @@ public class ProblemService {
                                 contestId, studentId, v.getProblemId(), v.getContentId())))
                 .average().orElse(0) * 10000
         ) / 10000;
+    }
+
+    public int getCountOfTry(StudentInContestIdDto studentInContestID, ProblemIdDto status) {
+        return logStudentInProblemRepository.getMaxCountOfTryAboutId(
+                LogStudentInProblemID.ofExcludeCountOfTry(
+                        studentInContestID.contestId(),
+                        studentInContestID.studentId(),
+                        status.problemId(),
+                        status.contentId()));
     }
 }

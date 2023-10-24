@@ -70,6 +70,17 @@ public class TrackingStudentService {
         hashOperations.increment(STUDENT_COUNT_KEY, problemIdDto, -1L);
     }
 
+    public ProblemIdDto getStudentStatusInContest(StudentInContestIdDto dto) {
+        try {
+            return studentRedisTemplate.opsForValue().get(dto);
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("bytes is null")) {
+                return new ProblemIdDto(0L, 0L);
+            }
+            throw e;
+        }
+    }
+
     public List<Long> getTotalStatus() {
         HashOperations<String, ProblemIdDto, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
         List<ProblemIdDto> problemIdDtos = new LinkedList<>();

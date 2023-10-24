@@ -41,7 +41,7 @@ public class ContestService {
 
     public EnterContestDtoForController enterStudentInContest(UUID studentId, UUID contestId, LocalDateTime enterDateTime) {
         EnterContestDto contest = contestRepository.getRegisteredStudentAboutStudent(contestId, studentId)
-                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, contestId));
         checkEnterTimeInContest(studentId, enterDateTime, contest);
         if (contestRepository.isResigned(contestId, studentId)) {
             throw new ResignedContestException(studentId, contest);
@@ -115,7 +115,7 @@ public class ContestService {
 
     public void cancelContest(UUID contestId, UUID studentId, LocalDateTime cancelTime) {
         CancelContestDto contestDto = contestRepository.getTimesAboutContest(contestId)
-                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, contestId));
         LocalDateTime expiredTime = contestDto.startDateTime().toLocalDate().atStartOfDay();
         if (cancelTime.isBefore(expiredTime) || cancelTime.isEqual(expiredTime)) {
             contestRepository.cancelContest(contestId, studentId);
@@ -145,7 +145,7 @@ public class ContestService {
 
     public long endingContest(UUID contestId, UUID studentId, LocalDateTime endDateTime) {
         StudentInContest studentInContest = studentInContestRepository.findById(new StudentInContestID(studentId, contestId))
-                .orElseThrow(() -> new NotFoundContestException(studentId, contestId));
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, contestId));
         StudentInContestDto studentInContestDto = repositoryMapper.toStudentInContestDto(studentInContest);
         if (studentInContestDto.endContestAt() != null) {
             return Duration.between(studentInContestDto.startedAt(),
@@ -160,4 +160,9 @@ public class ContestService {
         return Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds();
     }
 
+    public UUID findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
+        return studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(studentId, now)
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null))
+                .getId().getContestID();
+    }
 }

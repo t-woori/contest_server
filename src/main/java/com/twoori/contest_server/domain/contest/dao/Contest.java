@@ -25,7 +25,6 @@ import java.util.UUID;
 @Table(name = "contest")
 public class Contest {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private UUID id;
     @CreatedDate
