@@ -572,7 +572,7 @@ class ContestServiceTest {
         UUID studentId = UUID.randomUUID();
         UUID contestId = UUID.randomUUID();
         LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);
-        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTime(
+        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
                 studentId, runningEndDateTime)).willReturn(Optional.of(StudentInContest.builder()
                 .id(new StudentInContestID(studentId, contestId))
                 .contest(new Contest(contestId, "code", "name", "hostName",
@@ -593,7 +593,7 @@ class ContestServiceTest {
         // given
         UUID studentId = UUID.randomUUID();
         LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);
-        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTime(
+        given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
                 studentId, runningEndDateTime)).willReturn(Optional.empty());
 
         // when & then

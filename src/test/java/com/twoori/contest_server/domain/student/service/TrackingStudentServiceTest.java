@@ -156,4 +156,36 @@ class TrackingStudentServiceTest {
                     return 0L;
                 }).toList());
     }
+
+    @DisplayName("학생이 대회에서 가장 최근에 푼 문제 조회|Success|문제 기록이 존재")
+    @Test
+    void givenStudentInContestIdDto_whenGetStudentStatusInContest_thenReturnProblemIdDto() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(studentId, contestId);
+        ProblemIdDto problemIdDto = new ProblemIdDto(2, 0);
+        studentRedisTemplate.opsForValue().setIfAbsent(studentInContestIdDto, problemIdDto);
+
+        // when
+        ProblemIdDto actual = trackingStudentService.getStudentStatusInContest(studentInContestIdDto);
+
+        // then
+        assertThat(actual).isEqualTo(problemIdDto);
+    }
+
+    @DisplayName("학생이 대회에서 가장 최근에 푼 문제 조회|Fail|문제 기록이 없어 첫번째 문제를 반환")
+    @Test
+    void givenStudentInContestIdDto_whenGetStudentStatusInContest_thenReturnFirstId() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(studentId, contestId);
+
+        // when
+        ProblemIdDto actual = trackingStudentService.getStudentStatusInContest(studentInContestIdDto);
+
+        // then
+        assertThat(actual).isEqualTo(new ProblemIdDto(0, 0));
+    }
 }
