@@ -1,8 +1,11 @@
 package com.twoori.contest_server.domain.student.controller;
 
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
+import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
-import com.twoori.contest_server.domain.student.service.StudentService;
+import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.domain.student.vo.ContestStatus;
 import com.twoori.contest_server.domain.student.vo.ProblemStatus;
 import com.twoori.contest_server.domain.student.vo.StudentStatusVO;
@@ -20,12 +23,18 @@ import java.util.UUID;
 public class StudentController {
 
     private final StudentJwtProvider studentJwtProvider;
-    private final StudentService studentService;
-    private ContestService contestService;
+    private final ContestService contestService;
+    private final TrackingStudentService trackingStudentService;
+    private final ProblemService problemService;
 
-    public StudentController(StudentJwtProvider studentJwtProvider, StudentService studentService) {
+    public StudentController(StudentJwtProvider studentJwtProvider,
+                             ContestService contestService,
+                             TrackingStudentService trackingStudentService,
+                             ProblemService problemService) {
         this.studentJwtProvider = studentJwtProvider;
-        this.studentService = studentService;
+        this.contestService = contestService;
+        this.trackingStudentService = trackingStudentService;
+        this.problemService = problemService;
     }
 
     @GetMapping("/v1/student/{student_id}/mock_token")
@@ -36,13 +45,14 @@ public class StudentController {
                 .build());
     }
 
-    @GetMapping("/v1/student/status")
+    @GetMapping("/v1/contest/student/status")
     public StudentStatusVO getStudentStatus(@RequestHeader("Authorization") String rawToken) {
         StudentDto studentDto = studentJwtProvider.validateAccessToken(rawToken);
-        LocalDateTime now = LocalDateTime.now();
-        UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.id(), now);
-        System.out.println("test");
+        UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.id(), LocalDateTime.now());
+        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.id(), contestId);
+        ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
+        int countOfTry = problemService.getCountOfTry(studentInContestID, status);
         return new StudentStatusVO(new ContestStatus(
-                contestId, new ProblemStatus(0L, 0L, 0L)));
+                contestId, new ProblemStatus(status.problemId(), status.contentId(), countOfTry)));
     }
 }
