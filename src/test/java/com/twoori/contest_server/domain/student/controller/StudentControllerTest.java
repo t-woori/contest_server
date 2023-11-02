@@ -52,7 +52,7 @@ class StudentControllerTest {
     @BeforeEach
     public void setupStudent() {
         given(studentJwtProvider.validateAccessToken(mockToken)).willReturn(new StudentDto(studentId,
-                "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
+                "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 
     @DisplayName("진행중인 대회 검색|Success|진입가능한 대회 및 문제 기록 정보 제공")

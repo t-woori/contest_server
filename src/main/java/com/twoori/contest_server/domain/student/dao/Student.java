@@ -23,7 +23,7 @@ import java.util.UUID;
 @Table(name = "student")
 public class Student {
     @Id
-    private UUID id;
+    private UUID studentId;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -35,12 +35,10 @@ public class Student {
     private LocalDateTime deletedAt;
 
     @Column(nullable = false)
-    private String name;
-    @Column(nullable = false)
-    private String email;
+    private String nickname;
 
-    @Column(nullable = false)
-    private String phoneNumber;
+    private Long kakaoId;
+
     private String accessToken;
 
     private String refreshToken;
@@ -50,11 +48,11 @@ public class Student {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Objects.equals(id, student.id);
+        return Objects.equals(studentId, student.studentId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(studentId);
     }
 }

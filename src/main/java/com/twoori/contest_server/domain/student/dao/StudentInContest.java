@@ -31,7 +31,6 @@ public class StudentInContest {
     @ManyToOne(fetch = FetchType.LAZY)
     private Contest contest;
 
-    @MapsId("student_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Student student;
 

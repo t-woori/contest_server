@@ -33,8 +33,7 @@ class StudentInContestRepositoryTest {
     private TestEntityManager testEntityManager;
 
     private final Student student = Student.builder()
-            .id(UUID.randomUUID()).phoneNumber("phoneNumber")
-            .email("email").accessToken("accessToken").refreshToken("refreshToken").name("name").build();
+            .studentId(UUID.randomUUID()).accessToken("accessToken").refreshToken("refreshToken").nickname("name").build();
 
     @BeforeEach
     void setUpContestAndStudent() {
@@ -49,7 +48,7 @@ class StudentInContestRepositoryTest {
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
         StudentInContest studentInContest = StudentInContest.builder()
-                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
                 .isEntered(true).isResigned(false)
                 .build();
         testEntityManager.persist(contest);
@@ -57,7 +56,7 @@ class StudentInContestRepositoryTest {
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getId(), now);
+                student.getStudentId(), now);
 
         // then
         assertThat(optionalEntity).isNotEmpty()
@@ -73,13 +72,13 @@ class StudentInContestRepositoryTest {
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
         testEntityManager.persist(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
                 .isEntered(true).isResigned(true)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getId(), now);
+                student.getStudentId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
@@ -95,13 +94,13 @@ class StudentInContestRepositoryTest {
                 0.5, 0.5);
         testEntityManager.persist(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
                 .isEntered(true).isResigned(false)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getId(), now);
+                student.getStudentId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
@@ -117,13 +116,13 @@ class StudentInContestRepositoryTest {
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
         testEntityManager.persist(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
                 .isEntered(false).isResigned(false)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getId(), now);
+                student.getStudentId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();

@@ -40,9 +40,9 @@ public class ProblemController {
     public ResponseEntity<ResponseTotalStatusVO> getTotalStatus(@RequestHeader(name = "Authorization") String accessTokenHeader,
                                                                 @PathVariable("contest_id") UUID contestId) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
-        log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.id());
+        log.info("[Controller] request total status. contest : {}, student: {}", contestId, studentDto.studentId());
         List<Long> statues = trackingStudentService.getTotalStatus();
-        log.info("[Controller] response total status. contest : {}, student: {}", contestId, studentDto.id());
+        log.info("[Controller] response total status. contest : {}, student: {}", contestId, studentDto.studentId());
         return ResponseEntity.ok(new ResponseTotalStatusVO(statues));
     }
 
@@ -51,14 +51,14 @@ public class ProblemController {
                                                 @PathVariable("problem_id") Long problemId,
                                                 @RequestHeader(name = "Authorization") String accessTokenHeader) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
-        log.info("[Controller] request student status. contest : {}, student: {}", contestId, studentDto.id());
+        log.info("[Controller] request student status. contest : {}, student: {}", contestId, studentDto.studentId());
         ProblemDto problem = problemService.getProblem(contestId, problemId);
-        log.info("[Controller] tracking student status. contest : {}, student: {}, problemDto: {}", contestId, studentDto.id(), problem);
+        log.info("[Controller] tracking student status. contest : {}, student: {}, problemDto: {}", contestId, studentDto.studentId(), problem);
         trackingStudentService.updateProblemCountAboutStudent(new UpdateProblemCountDto(
-                new StudentInContestIdDto(contestId, studentDto.id()),
+                new StudentInContestIdDto(contestId, studentDto.studentId()),
                 new ProblemIdDto(problemId, 0L)
         ));
-        log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.id());
+        log.info("[Controller] response student status. contest : {}, student: {}", contestId, studentDto.studentId());
         return ResponseEntity.ok(mapper.dtoToVo(problem));
     }
 

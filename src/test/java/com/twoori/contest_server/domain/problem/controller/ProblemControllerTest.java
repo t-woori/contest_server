@@ -62,7 +62,10 @@ class ProblemControllerTest {
 
     @BeforeEach
     void beforeAll() {
-        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(UUID.randomUUID(), "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
+        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(UUID.randomUUID(),
+                "mockName",
+                "mockKakaoAccToken",
+                "mockKakaoRefToken"));
     }
 
     @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Success|문제 제공 성공")
