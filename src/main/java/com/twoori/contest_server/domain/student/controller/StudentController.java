@@ -41,15 +41,15 @@ public class StudentController {
     public AuthToken getMockTokens(@PathVariable("student_id") String rawStudentID) {
         UUID studentID = UUID.fromString(rawStudentID);
         return studentJwtProvider.createAuthToken(StudentDto.builder()
-                .id(studentID)
+                .studentId(studentID)
                 .build());
     }
 
     @GetMapping("/v1/contest/student/status")
     public StudentStatusVO getStudentStatus(@RequestHeader("Authorization") String rawToken) {
         StudentDto studentDto = studentJwtProvider.validateAccessToken(rawToken);
-        UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.id(), LocalDateTime.now());
-        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.id(), contestId);
+        UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.studentId(), LocalDateTime.now());
+        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.studentId(), contestId);
         ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
         int countOfTry = problemService.getCountOfTry(studentInContestID, status);
         return new StudentStatusVO(new ContestStatus(

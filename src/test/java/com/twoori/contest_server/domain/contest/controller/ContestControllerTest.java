@@ -73,7 +73,7 @@ class ContestControllerTest {
 
     @BeforeEach
     void beforeAll() {
-        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId, "mockName", "mockEmail", "mockPhoneNumber", "mockKakaoAccToken", "mockKakaoRefToken"));
+        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId, "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 
     @DisplayName("대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
@@ -125,11 +125,7 @@ class ContestControllerTest {
         UUID studentId = UUID.randomUUID();
         String mockHeader = "";
         given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
-                "name",
-                "email",
-                "phoneNumber",
-                "accessToken",
-                "refreshToken"));
+                "name", "accessToken", "refreshToken"));
         given(contestService.searchContestForEnterContest(studentId)).willReturn(
                 IntStream.range(0, 20).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
                         "contest name" + i,
@@ -193,7 +189,7 @@ class ContestControllerTest {
         // given
         String mockHeader = "";
         given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
-                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+                "name", "accessToken", "refreshToken"));
 
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
@@ -213,7 +209,7 @@ class ContestControllerTest {
         UUID studentId = UUID.randomUUID();
         String mockHeader = "";
         given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
-                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+                "name", "accessToken", "refreshToken"));
         doThrow(new NotFoundRegisteredContestException(studentId, contestId))
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
@@ -255,7 +251,7 @@ class ContestControllerTest {
         // given
         String mockHeader = "";
         given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
-                "name", "email", "phoneNumber", "accessToken", "refreshToken"));
+                "name", "accessToken", "refreshToken"));
 
         // when
         ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)

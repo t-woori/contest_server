@@ -6,6 +6,7 @@ import java.util.UUID;
 public record SearchContestVO(
         UUID contestId,
         String name,
+
         LocalDateTime startedAt,
         LocalDateTime endedAt,
         Boolean isRegistered

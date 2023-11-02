@@ -50,7 +50,7 @@ public class ContestController {
             @PathVariable("contest_id") UUID contestId) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         LocalDateTime now = LocalDateTime.now();
-        EnterContestDtoForController result = contestService.enterStudentInContest(studentDto.id(), contestId, now);
+        EnterContestDtoForController result = contestService.enterStudentInContest(studentDto.studentId(), contestId, now);
         return ResponseEntity.ok(
                 new EnterContestVOAPI(
                         result.runningStartDateTime(),
@@ -65,7 +65,7 @@ public class ContestController {
             @RequestParam(value = "search", required = false) String parameter,
             @RequestParam("from") LocalDate from,
             @RequestParam("to") LocalDate to) {
-        UUID studentId = securityUtil.validateAuthorization(accessTokenHeader).id();
+        UUID studentId = securityUtil.validateAuthorization(accessTokenHeader).studentId();
         if (parameter == null) {
             parameter = "";
         }
@@ -103,7 +103,7 @@ public class ContestController {
     @GetMapping("/v1/contest/registered")
     public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentDto.id());
+        List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentDto.studentId());
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
     }
 
@@ -113,7 +113,7 @@ public class ContestController {
             @PathVariable("contest_id") UUID contestId
     ) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        contestService.cancelContest(contestId, studentDto.id(), LocalDateTime.now());
+        contestService.cancelContest(contestId, studentDto.studentId(), LocalDateTime.now());
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
@@ -123,10 +123,10 @@ public class ContestController {
             @PathVariable("contest_id") UUID contestId
     ) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
-        contestService.resignContest(contestId, studentDto.id());
-        log.info("trackingStudentService will remove log contest, contestId: {}, studentId: {}", contestId, studentDto.id());
-        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
+        log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentDto.studentId());
+        contestService.resignContest(contestId, studentDto.studentId());
+        log.info("trackingStudentService will remove log contest, contestId: {}, studentId: {}", contestId, studentDto.studentId());
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.studentId()));
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
@@ -135,7 +135,7 @@ public class ContestController {
             @RequestHeader(name = "Authorization") String accessToken
     ) {
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<SearchContestDto> contests = contestService.searchEndOfContests(studentDto.id());
+        List<SearchContestDto> contests = contestService.searchEndOfContests(studentDto.studentId());
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 
@@ -146,9 +146,9 @@ public class ContestController {
     ) {
         LocalDateTime endDateTime = LocalDateTime.now();
         StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        long diffTime = contestService.endingContest(contestId, studentDto.id(), endDateTime);
-        double average = problemService.createAverageScore(contestId, studentDto.id());
-        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
+        long diffTime = contestService.endingContest(contestId, studentDto.studentId(), endDateTime);
+        double average = problemService.createAverageScore(contestId, studentDto.studentId());
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.studentId()));
         return ResponseEntity.ok(new EndContestVO(average, diffTime));
     }
 }
