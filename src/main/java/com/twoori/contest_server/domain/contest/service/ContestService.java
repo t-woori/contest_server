@@ -161,6 +161,7 @@ public class ContestService {
     }
 
     public UUID findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
+        log.info("find contest id about enterable contest, studentId: {}", studentId);
         return studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(studentId, now)
                 .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null))
                 .getId().getContestID();

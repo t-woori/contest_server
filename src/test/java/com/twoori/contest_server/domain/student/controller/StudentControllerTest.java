@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.student.controller;
 
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundRegisteredContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
@@ -64,7 +65,8 @@ class StudentControllerTest {
         StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(studentId, contestId);
         ProblemIdDto problemIdDto = new ProblemIdDto(0, 0);
         int countOfTry = 0;
-        given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willReturn(contestId);
+        given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willReturn(
+                new EnterContestDto(contestId, "mockName", "mockHostName", now, now.plusMinutes(10)));
         given(trackingStudentService.getStudentStatusInContest(studentInContestIdDto)).willReturn(problemIdDto);
         given(problemService.getCountOfTry(studentInContestIdDto, problemIdDto)).willReturn(countOfTry);
 
@@ -78,6 +80,8 @@ class StudentControllerTest {
                 .andExpect(content().json("{" +
                         "\"running_contest\":{" +
                         "    \"contest_id\": " + contestId + "," +
+                        "    \"started_at\": \"" + now + "\"," +
+                        "    \"ended_at\": \"" + now.plusMinutes(10) + "\"," +
                         "    \"status\":{" +
                         "      \"problem_id\":" + problemIdDto.problemId() + "," +
                         "      \"content_id\":" + problemIdDto.contentId() + "," +
