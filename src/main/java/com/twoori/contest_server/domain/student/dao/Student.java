@@ -1,6 +1,9 @@
 package com.twoori.contest_server.domain.student.dao;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Id;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -17,10 +20,9 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE student SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE students SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
-@Table(name = "student")
 public class Student {
     @Id
     private UUID studentId;
