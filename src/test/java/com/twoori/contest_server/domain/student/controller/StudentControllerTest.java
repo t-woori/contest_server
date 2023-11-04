@@ -7,7 +7,7 @@ import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.global.security.StudentJwtProvider;
+import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,13 +45,13 @@ class StudentControllerTest {
     @MockBean
     private ProblemService problemService;
     @MockBean
-    private StudentJwtProvider studentJwtProvider;
+    private SecurityUtil securityUtil;
     @Autowired
     private MockMvc mvc;
 
     @BeforeEach
     public void setupStudent() {
-        given(studentJwtProvider.validateAccessToken(mockToken)).willReturn(new StudentDto(studentId,
+        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId,
                 "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 

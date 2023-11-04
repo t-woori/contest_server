@@ -9,6 +9,7 @@ import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.domain.student.vo.ContestStatus;
 import com.twoori.contest_server.domain.student.vo.ProblemStatus;
 import com.twoori.contest_server.domain.student.vo.StudentStatusVO;
+import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.security.StudentJwtProvider;
 import com.twoori.contest_server.global.vo.AuthToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,15 +27,17 @@ public class StudentController {
     private final ContestService contestService;
     private final TrackingStudentService trackingStudentService;
     private final ProblemService problemService;
+    private final SecurityUtil securityUtil;
 
     public StudentController(StudentJwtProvider studentJwtProvider,
                              ContestService contestService,
                              TrackingStudentService trackingStudentService,
-                             ProblemService problemService) {
+                             ProblemService problemService, SecurityUtil securityUtil) {
         this.studentJwtProvider = studentJwtProvider;
         this.contestService = contestService;
         this.trackingStudentService = trackingStudentService;
         this.problemService = problemService;
+        this.securityUtil = securityUtil;
     }
 
     @GetMapping("/v1/student/{student_id}/mock_token")
@@ -47,7 +50,7 @@ public class StudentController {
 
     @GetMapping("/v1/contest/student/status")
     public StudentStatusVO getStudentStatus(@RequestHeader("Authorization") String rawToken) {
-        StudentDto studentDto = studentJwtProvider.validateAccessToken(rawToken);
+        StudentDto studentDto = securityUtil.validateAuthorization(rawToken);
         UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.studentId(), LocalDateTime.now());
         StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.studentId(), contestId);
         ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
