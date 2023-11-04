@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.student.controller;
 
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
@@ -51,11 +52,12 @@ public class StudentController {
     @GetMapping("/v1/contest/student/status")
     public StudentStatusVO getStudentStatus(@RequestHeader("Authorization") String rawToken) {
         StudentDto studentDto = securityUtil.validateAuthorization(rawToken);
-        UUID contestId = contestService.findContestIdAboutEnterableContest(studentDto.studentId(), LocalDateTime.now());
-        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.studentId(), contestId);
+        EnterContestDto contestDto = contestService.findContestIdAboutEnterableContest(studentDto.studentId(), LocalDateTime.now());
+        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.studentId(), contestDto.contestId());
         ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
         int countOfTry = problemService.getCountOfTry(studentInContestID, status);
         return new StudentStatusVO(new ContestStatus(
-                contestId, new ProblemStatus(status.problemId(), status.contentId(), countOfTry)));
+                contestDto.contestId(), contestDto.startDateTime(), contestDto.endDateTime()
+                , new ProblemStatus(status.problemId(), status.contentId(), countOfTry)));
     }
 }
