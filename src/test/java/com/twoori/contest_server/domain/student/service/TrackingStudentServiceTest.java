@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -129,14 +130,16 @@ class TrackingStudentServiceTest {
         assertThat(hashOp.get("student_count", new ProblemIdDto(1L, 0L))).isEqualTo(1);
     }
 
-    @DisplayName("선두 주자가 n번째 문제를 풀고 있다|Success|선두주자까지 redis에서 조회하고 이후의 데이터는 0으로 반환")
+    @DisplayName("10명의 학생들이 순서대로 최대 n번째까지 문제를 품|Success|대회 상태는 n까지는 1이고 나머지는 0, 학생상태는 n번째학생까지는 n의 문제를 풀고 있고 나머지 학생들은 0")
     @ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
     @ParameterizedTest(name = "문제번호: {0}")
     void givenFistStudentProblemId_whenGetTotalStatus_thenReturnSizeOf10(int lastProblemId) {
         // given
+        int maxStudentCount = 10;
         UUID contestId = UUID.randomUUID();
+        List<UUID> studentIds = Stream.generate(UUID::randomUUID).limit(maxStudentCount).toList();
         for (int i = 0; i <= lastProblemId; i++) {
-            UUID studentId = UUID.randomUUID();
+            UUID studentId = studentIds.get(i);
             for (int j = 0; j <= i; j++) {
                 trackingStudentService.updateProblemCountAboutStudent(
                         new UpdateProblemCountDto(new StudentInContestIdDto(contestId, studentId),
@@ -148,13 +151,22 @@ class TrackingStudentServiceTest {
         List<Long> result = trackingStudentService.getTotalStatus();
 
         // then
-        assertThat(result).hasSize(10)
-                .isEqualTo(IntStream.range(0, 10).mapToObj(v -> {
+        assertThat(result).hasSize(maxStudentCount)
+                .isEqualTo(IntStream.range(0, maxStudentCount).mapToObj(v -> {
                     if (v <= lastProblemId) {
                         return 1L;
                     }
                     return 0L;
                 }).toList());
+        for (int i = 0; i < maxStudentCount; i++) {
+            ProblemIdDto expectProblemIdDto = new ProblemIdDto(i, 0L);
+            if (i > lastProblemId) {
+                expectProblemIdDto = new ProblemIdDto(0L, 0L);
+            }
+            assertThat(trackingStudentService.getStudentStatusInContest(new StudentInContestIdDto(contestId, studentIds.get(i))))
+                    .describedAs("studentCount: %d, studentId: %s", i, studentIds.get(i))
+                    .isEqualTo(expectProblemIdDto);
+        }
     }
 
     @DisplayName("학생이 대회에서 가장 최근에 푼 문제 조회|Success|문제 기록이 존재")
