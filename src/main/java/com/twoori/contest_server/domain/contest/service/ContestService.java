@@ -160,9 +160,15 @@ public class ContestService {
         return Duration.between(studentInContestDto.startedAt(), loggedEndDateTime).toSeconds();
     }
 
-    public UUID findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
-        return studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(studentId, now)
-                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null))
-                .getId().getContestID();
+    public EnterContestDto findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
+        log.info("find contest id about enterable contest, studentId: {}", studentId);
+        Contest contest = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(studentId, now)
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null)).getContest();
+        return new EnterContestDto(
+                contest.getId(),
+                contest.getName(),
+                contest.getHostName(),
+                contest.getRunningStartDateTime(),
+                contest.getRunningEndDateTime());
     }
 }

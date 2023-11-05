@@ -1,5 +1,6 @@
 package com.twoori.contest_server.domain.student.controller;
 
+import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundRegisteredContestException;
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
@@ -7,7 +8,7 @@ import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.global.security.StudentJwtProvider;
+import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,13 +46,13 @@ class StudentControllerTest {
     @MockBean
     private ProblemService problemService;
     @MockBean
-    private StudentJwtProvider studentJwtProvider;
+    private SecurityUtil securityUtil;
     @Autowired
     private MockMvc mvc;
 
     @BeforeEach
     public void setupStudent() {
-        given(studentJwtProvider.validateAccessToken(mockToken)).willReturn(new StudentDto(studentId,
+        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId,
                 "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
     }
 
@@ -61,10 +62,11 @@ class StudentControllerTest {
         // given
         LocalDateTime now = LocalDateTime.now();
         UUID contestId = UUID.randomUUID();
-        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(studentId, contestId);
+        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(contestId, studentId);
         ProblemIdDto problemIdDto = new ProblemIdDto(0, 0);
         int countOfTry = 0;
-        given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willReturn(contestId);
+        given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willReturn(
+                new EnterContestDto(contestId, "mockName", "mockHostName", now, now.plusMinutes(10)));
         given(trackingStudentService.getStudentStatusInContest(studentInContestIdDto)).willReturn(problemIdDto);
         given(problemService.getCountOfTry(studentInContestIdDto, problemIdDto)).willReturn(countOfTry);
 
@@ -78,6 +80,8 @@ class StudentControllerTest {
                 .andExpect(content().json("{" +
                         "\"running_contest\":{" +
                         "    \"contest_id\": " + contestId + "," +
+                        "    \"started_at\": \"" + now + "\"," +
+                        "    \"ended_at\": \"" + now.plusMinutes(10) + "\"," +
                         "    \"status\":{" +
                         "      \"problem_id\":" + problemIdDto.problemId() + "," +
                         "      \"content_id\":" + problemIdDto.contentId() + "," +

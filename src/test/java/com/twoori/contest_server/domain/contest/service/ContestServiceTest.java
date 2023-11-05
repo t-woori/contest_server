@@ -571,20 +571,22 @@ class ContestServiceTest {
         // given
         UUID studentId = UUID.randomUUID();
         UUID contestId = UUID.randomUUID();
+        LocalDateTime runningStartDateTime = LocalDateTime.now().minusMinutes(15);
         LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);
         given(studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
                 studentId, runningEndDateTime)).willReturn(Optional.of(StudentInContest.builder()
                 .id(new StudentInContestID(studentId, contestId))
                 .contest(new Contest(contestId, "code", "name", "hostName",
-                        LocalDateTime.now().minusMinutes(15), runningEndDateTime,
+                        runningStartDateTime, runningEndDateTime,
                         0.5, 0.5))
                 .isEntered(true).isResigned(false).build()));
 
         // when
-        UUID actual = contestService.findContestIdAboutEnterableContest(studentId, runningEndDateTime);
+        EnterContestDto actual = contestService.findContestIdAboutEnterableContest(studentId, runningEndDateTime);
 
         // then
-        assertThat(actual).isEqualTo(contestId);
+        assertThat(actual).isEqualTo(new EnterContestDto(contestId, "name", "hostName",
+                runningStartDateTime, runningEndDateTime));
     }
 
     @DisplayName("시작한 대회중에 진입 가능한 대회 조회|Fail|진입 가능한 대회가 없음")
