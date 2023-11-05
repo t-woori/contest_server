@@ -62,7 +62,7 @@ class StudentControllerTest {
         // given
         LocalDateTime now = LocalDateTime.now();
         UUID contestId = UUID.randomUUID();
-        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(studentId, contestId);
+        StudentInContestIdDto studentInContestIdDto = new StudentInContestIdDto(contestId, studentId);
         ProblemIdDto problemIdDto = new ProblemIdDto(0, 0);
         int countOfTry = 0;
         given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willReturn(
