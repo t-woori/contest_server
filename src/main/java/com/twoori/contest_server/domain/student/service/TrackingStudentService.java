@@ -67,6 +67,10 @@ public class TrackingStudentService {
 
     private void decreaseStudentCountOnce(ProblemIdDto problemIdDto) {
         HashOperations<String, ProblemIdDto, Long> hashOperations = totalStatusRedisTemplate.opsForHash();
+        Long count = hashOperations.get(STUDENT_COUNT_KEY, problemIdDto);
+        if (count != null && count == 0) {
+            return;
+        }
         hashOperations.increment(STUDENT_COUNT_KEY, problemIdDto, -1L);
     }
 
