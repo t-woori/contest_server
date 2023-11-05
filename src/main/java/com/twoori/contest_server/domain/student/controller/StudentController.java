@@ -53,7 +53,7 @@ public class StudentController {
     public StudentStatusVO getStudentStatus(@RequestHeader("Authorization") String rawToken) {
         StudentDto studentDto = securityUtil.validateAuthorization(rawToken);
         EnterContestDto contestDto = contestService.findContestIdAboutEnterableContest(studentDto.studentId(), LocalDateTime.now());
-        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(studentDto.studentId(), contestDto.contestId());
+        StudentInContestIdDto studentInContestID = new StudentInContestIdDto(contestDto.contestId(), studentDto.studentId());
         ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
         int countOfTry = problemService.getCountOfTry(studentInContestID, status);
         return new StudentStatusVO(new ContestStatus(
