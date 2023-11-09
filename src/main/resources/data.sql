@@ -23,18 +23,21 @@ VALUES (0xd45fa47fb1de42b29b5982b6cacb1614, now(), now(), null,
         TIMESTAMPADD(DAY, 1, now()), TIMESTAMPADD(DAY, 2, now()),
         '000005', '00 다문화 센터', '00 다문화 센터 6차 대회/하루 뒤에 시작',
         0.5, 0.5);
-INSERT INTO student(student_id, created_at, updated_at, deleted_at, nickname, access_token, refresh_token, kakao_id)
+INSERT INTO student(id, created_at, updated_at, deleted_at, nickname, access_token, refresh_token, kakao_id)
 VALUES (0xd7762394592c4e338d7106fc5a94abfb, now(), now(), null, 'mockuser1', 'mockAccessToken', 'mockRefreshToken', 1),
        (0xDBA772999009422C91AB7A976525C80A, now(), now(), null, 'mockuser2', 'mockAccessToken', 'mockRefreshToken', 2);
-INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, deleted_at, is_resigned, is_entered)
+INSERT INTO student_in_contest(student_id, contest_id, created_at, updated_at, deleted_at, is_resigned, is_entered,
+                               student_score, student_rank)
 VALUES (0xd7762394592c4e338d7106fc5a94abfb, 0x53A703531F964B3984F922704218627F,
-        now(), now(), null, false, false),
+        now(), now(), null, false, false, 0, 0),
        (0xd7762394592c4e338d7106fc5a94abfb, 0xd45fa47fb1de42b29b5982b6cacb1614,
-        now(), now(), null, false, false),
+        now(), now(), null, false, false, 0.9, 1),
+       (0xDBA772999009422C91AB7A976525C80A, 0xd45fa47fb1de42b29b5982b6cacb1614,
+        now(), now(), null, false, false, 0.8, 2),
        (0xd7762394592c4e338d7106fc5a94abfb, 0x992033a011c945b0a64301a2c706f118,
-        now(), now(), null, false, false),
+        now(), now(), null, false, false, 0, 0),
        (0xDBA772999009422C91AB7A976525C80A, 0xA3030109B69E417A8B18E2D12A3C33DE,
-        now(), now(), null, false, false);
+        now(), now(), null, false, false, 0, 0);
 
 INSERT INTO problem(id, created_at, updated_at, deleted_at, image_url, grade, problem_type, chapter_type)
 VALUES (0, now(), now(), null,

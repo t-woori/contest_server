@@ -14,8 +14,10 @@ import java.util.UUID;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @Embeddable
 public class StudentInContestID implements Serializable {
+
     @Column(name = "student_id")
     private UUID studentID;
+
     @Column(name = "contest_id")
     private UUID contestID;
 
