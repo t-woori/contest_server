@@ -23,7 +23,7 @@ pipeline {
         stage('Build Codes by Gradle') {
             steps {
                 sh('cd $mainDir')
-                sh('./gradlew clean build')
+                sh('./gradlew build')
             }
         }
         stage('SonarQube Analysis') {
