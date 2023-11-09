@@ -71,7 +71,7 @@ public class StudentController {
         ResultContestDto result = studentService.getScoreAndRank(contestId, studentId);
         long totalGrade = contestService.countTotalStudents(contestId);
         if (result.rank() == 0 || result.score() == null) {
-            throw new BadRequestException("grading score");
+            throw new BadRequestException("scoring score");
         }
         return new ResultScoreVo(result.score(), result.rank(), totalGrade);
     }

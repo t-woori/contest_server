@@ -178,6 +178,6 @@ class StudentControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{" +
                         "\"status\":400," +
-                        "\"message\":\"grading score\"" + "}"));
+                        "\"message\":\"scoring score\"" + "}"));
     }
 }
