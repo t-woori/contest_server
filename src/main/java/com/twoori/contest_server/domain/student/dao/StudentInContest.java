@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE student_in_contest SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE student_in_contest SET deleted_at = NOW() WHERE studend_id = ? and contest_id=?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
 @Table(name = "student_in_contest")
@@ -31,12 +31,14 @@ public class StudentInContest {
     @ManyToOne(fetch = FetchType.LAZY)
     private Contest contest;
 
+    @MapsId("student_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Student student;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedAt;
@@ -54,6 +56,11 @@ public class StudentInContest {
     @Setter
     private LocalDateTime endContestAt;
 
+    @Setter
+    private Double studentScore;
+
+    @Setter
+    private Long studentRank;
 
     @Override
     public boolean equals(Object o) {
