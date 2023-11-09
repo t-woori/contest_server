@@ -3,8 +3,6 @@ package com.twoori.contest_server.domain.student.service;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import com.twoori.contest_server.domain.student.dto.ResultContestDto;
-import com.twoori.contest_server.domain.student.mapper.StudentInContestMapper;
-import com.twoori.contest_server.domain.student.mapper.StudentInContestMapperImpl;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.domain.student.repository.StudentRepository;
 import com.twoori.contest_server.global.exception.NotFoundException;
@@ -13,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -34,9 +31,6 @@ class StudentServiceTest {
 
     @Mock
     private StudentInContestRepository studentInContestRepository;
-
-    @Spy
-    private StudentInContestMapper studentInContestMapper = new StudentInContestMapperImpl();
 
 
     @DisplayName("학생의 대회 점수 조회|Success|학생 등수와 점수 조회")
