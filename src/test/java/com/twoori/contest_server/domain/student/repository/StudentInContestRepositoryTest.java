@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +36,7 @@ class StudentInContestRepositoryTest {
     private TestEntityManager testEntityManager;
 
     private final Student student = Student.builder()
-            .studentId(UUID.randomUUID()).accessToken("accessToken").refreshToken("refreshToken").nickname("name").build();
+            .id(UUID.randomUUID()).accessToken("accessToken").refreshToken("refreshToken").nickname("name").build();
 
     @BeforeEach
     void setUpContestAndStudent() {
@@ -48,7 +51,7 @@ class StudentInContestRepositoryTest {
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
         StudentInContest studentInContest = StudentInContest.builder()
-                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
+                .id(new StudentInContestID(student.getId(), contest.getId()))
                 .isEntered(true).isResigned(false)
                 .build();
         testEntityManager.persist(contest);
@@ -56,7 +59,7 @@ class StudentInContestRepositoryTest {
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getStudentId(), now);
+                student.getId(), now);
 
         // then
         assertThat(optionalEntity).isNotEmpty()
@@ -70,15 +73,15 @@ class StudentInContestRepositoryTest {
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
-        testEntityManager.persist(contest);
+        testEntityManager.persistAndFlush(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
+                .id(new StudentInContestID(student.getId(), contest.getId()))
                 .isEntered(true).isResigned(true)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getStudentId(), now);
+                student.getId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
@@ -94,13 +97,13 @@ class StudentInContestRepositoryTest {
                 0.5, 0.5);
         testEntityManager.persist(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
+                .id(new StudentInContestID(student.getId(), contest.getId()))
                 .isEntered(true).isResigned(false)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getStudentId(), now);
+                student.getId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
@@ -116,15 +119,48 @@ class StudentInContestRepositoryTest {
                 now.minusMinutes(2), now.plusMinutes(CONTEST_TIME), 0.5, 0.5);
         testEntityManager.persist(contest);
         testEntityManager.persist(StudentInContest.builder()
-                .id(new StudentInContestID(student.getStudentId(), contest.getId()))
+                .id(new StudentInContestID(student.getId(), contest.getId()))
                 .isEntered(false).isResigned(false)
                 .build());
 
         // when
         Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
-                student.getStudentId(), now);
+                student.getId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
+    }
+
+    @DisplayName("대회 참가자 수 조회|Success|참가자 수가 n명")
+    @ValueSource(ints = {0, 1, 2, 3, 4, 5})
+    @ParameterizedTest(name = "참가자수: {0}")
+    void givenContestId_whenCountByID_ContestID_thenCountOfN(int n) {
+        // given
+        Contest contest = new Contest(
+                UUID.randomUUID(), "test", "test", "test",
+                LocalDateTime.now().minusMinutes(2), LocalDateTime.now().plusMinutes(CONTEST_TIME),
+                0.5, 0.5
+        );
+        testEntityManager.persist(contest);
+        Stream.generate(UUID::randomUUID)
+                .limit(n)
+                .peek(studentId -> {
+                    Student mockStudent = Student.builder().id(studentId).nickname("nickname").build();
+                    testEntityManager.persist(mockStudent);
+                })
+                .forEach(studentId -> {
+                    StudentInContest studentInContest = StudentInContest.builder()
+                            .id(new StudentInContestID(studentId, contest.getId()))
+                            .isEntered(true).isResigned(false)
+                            .build();
+                    testEntityManager.persist(studentInContest);
+                });
+
+
+        // when
+        long count = studentInContestRepository.countById_ContestID(contest.getId());
+
+        // then
+        assertThat(count).isEqualTo(n);
     }
 }
