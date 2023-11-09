@@ -7,13 +7,13 @@ import java.util.UUID;
 
 
 @Builder
-public record StudentDto(UUID studentId,
+public record StudentDto(UUID id,
                          String nickname,
                          String accessToken,
                          String refreshToken) {
     public static StudentDto daoToDto(Student dao) {
         return new StudentDto(
-                dao.getStudentId(),
+                dao.getId(),
                 dao.getNickname(),
                 dao.getAccessToken(),
                 dao.getRefreshToken()

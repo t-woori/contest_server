@@ -15,6 +15,7 @@ import com.twoori.contest_server.domain.student.repository.StudentInContestRepos
 import com.twoori.contest_server.global.exception.BadRequestException;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -93,7 +94,7 @@ public class ContestService {
         }
         studentInContestRepository.save(
                 StudentInContest.builder()
-                        .id(new StudentInContestID(studentDto.studentId(), contestId))
+                        .id(new StudentInContestID(studentDto.id(), contestId))
                         .isResigned(false)
                         .isEntered(false)
                         .build()
@@ -170,5 +171,10 @@ public class ContestService {
                 contest.getHostName(),
                 contest.getRunningStartDateTime(),
                 contest.getRunningEndDateTime());
+    }
+
+    @Cacheable(value = "contest_count", key = "#contestId")
+    public long countTotalStudents(UUID contestId) {
+        return studentInContestRepository.countById_ContestID(contestId);
     }
 }

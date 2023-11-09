@@ -41,7 +41,7 @@ public class StudentJwtProvider {
 
     private String createAccessToken(StudentDto studentDto) {
         return JWT.create()
-                .withClaim(CLAIM_STUDENT_ID, studentDto.studentId().toString())
+                .withClaim(CLAIM_STUDENT_ID, studentDto.id().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXP))
                 .sign(jwtAlgorithm);
@@ -49,7 +49,7 @@ public class StudentJwtProvider {
 
     private String createRefreshToken(StudentDto studentDto, String accessToken) {
         return JWT.create()
-                .withClaim(CLAIM_STUDENT_ID, studentDto.studentId().toString())
+                .withClaim(CLAIM_STUDENT_ID, studentDto.id().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXP))
                 .withClaim(CLAIM_ACCESS_TOKEN, accessToken)

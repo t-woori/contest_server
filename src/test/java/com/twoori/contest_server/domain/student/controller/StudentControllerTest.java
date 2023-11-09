@@ -5,8 +5,10 @@ import com.twoori.contest_server.domain.contest.excpetion.NotFoundRegisteredCont
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
+import com.twoori.contest_server.domain.student.dto.ResultContestDto;
 import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
+import com.twoori.contest_server.domain.student.service.StudentService;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
 import com.twoori.contest_server.global.security.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,8 @@ class StudentControllerTest {
     private ProblemService problemService;
     @MockBean
     private SecurityUtil securityUtil;
+    @MockBean
+    private StudentService studentService;
     @Autowired
     private MockMvc mvc;
 
@@ -106,5 +110,74 @@ class StudentControllerTest {
                         "\"status\":404," +
                         "\"message\": \"not found contest\"" +
                         "}"));
+    }
+
+    @DisplayName("대회 결과 조회|Success| 대회 결과 조회")
+    @Test
+    void givenStudentAndContestId_whenGetScoreAndRank_henReturn200() throws Exception {
+        //given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        ResultContestDto resultScoreVo = new ResultContestDto(1.0, 1L);
+        long countStudents = 200L;
+        given(studentService.getScoreAndRank(contestId, studentId)).willReturn(resultScoreVo);
+        given(contestService.countTotalStudents(contestId)).willReturn(countStudents);
+
+        //when
+        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+                .param("student_id", studentId.toString()));
+
+        //then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{" +
+                        "\"score\":" + resultScoreVo.score() + "," +
+                        "\"rank\":" + resultScoreVo.rank() + "," +
+                        "\"total_students\":" + countStudents + "}"));
+    }
+
+    @DisplayName("대회 결과 조회|Fail|참여기록이 없는 상태")
+    @Test
+    void givenStudentAndContestId_whenGetScoreAndRank_thenStatus404() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        given(studentService.getScoreAndRank(contestId, studentId)).willThrow(new NotFoundRegisteredContestException(studentId, contestId));
+
+        // when
+        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+                .param("student_id", studentId.toString()));
+
+        // then
+        actual.andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{" +
+                        "\"status\":404," +
+                        "\"message\": \"not found contest\"" +
+                        "}"));
+    }
+
+    @DisplayName("대회 결과 조회|Success|문제 기록이 없을 경우")
+    @Test
+    void givenStudentAndContestId_whenGetScoreAndRank_thenReturnInitValue() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        long totalStudents = 100L;
+        given(studentService.getScoreAndRank(contestId, studentId)).willReturn(new ResultContestDto(
+                0.0, 0L
+        ));
+        given(contestService.countTotalStudents(contestId)).willReturn(totalStudents);
+
+        // when
+        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+                .param("student_id", studentId.toString()));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{" +
+                        "\"status\":400," +
+                        "\"message\":\"scoring score\"" + "}"));
     }
 }

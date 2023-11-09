@@ -25,7 +25,7 @@ import java.util.UUID;
 @Entity
 public class Student {
     @Id
-    private UUID studentId;
+    private UUID id;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -50,11 +50,11 @@ public class Student {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Objects.equals(studentId, student.studentId);
+        return Objects.equals(id, student.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(studentId);
+        return Objects.hash(id);
     }
 }
