@@ -4,7 +4,6 @@ import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import com.twoori.contest_server.domain.student.dto.ResultContestDto;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
-import com.twoori.contest_server.domain.student.repository.StudentRepository;
 import com.twoori.contest_server.global.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,8 +25,6 @@ class StudentServiceTest {
     @InjectMocks
     private StudentService studentService;
 
-    @Mock
-    private StudentRepository studentRepository;
 
     @Mock
     private StudentInContestRepository studentInContestRepository;

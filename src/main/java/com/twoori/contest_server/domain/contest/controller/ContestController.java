@@ -8,10 +8,8 @@ import com.twoori.contest_server.domain.contest.mapper.ContestControllerVOMapper
 import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.*;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
-import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.global.security.SecurityUtil;
 import com.twoori.contest_server.global.vo.APIOkMessageVO;
 import com.twoori.contest_server.global.vo.CommonAPIResponseVO;
 import lombok.extern.slf4j.Slf4j;
@@ -30,15 +28,13 @@ import java.util.UUID;
 public class ContestController {
 
     private final ContestService contestService;
-    private final SecurityUtil securityUtil;
     private final ContestControllerVOMapper mapper;
     private final ProblemService problemService;
 
     private final TrackingStudentService trackingStudentService;
 
-    public ContestController(ContestService contestService, SecurityUtil securityUtil, ContestControllerVOMapper mapper, ProblemService problemService, TrackingStudentService trackingStudentService) {
+    public ContestController(ContestService contestService, ContestControllerVOMapper mapper, ProblemService problemService, TrackingStudentService trackingStudentService) {
         this.contestService = contestService;
-        this.securityUtil = securityUtil;
         this.mapper = mapper;
         this.problemService = problemService;
         this.trackingStudentService = trackingStudentService;
@@ -46,11 +42,10 @@ public class ContestController {
 
     @GetMapping("/v1/contest/{contest_id}/enter")
     public ResponseEntity<EnterContestVOAPI> requestEnterContest(
-            @RequestHeader(name = "Authorization") String accessTokenHeader,
+            @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessTokenHeader);
         LocalDateTime now = LocalDateTime.now();
-        EnterContestDtoForController result = contestService.enterStudentInContest(studentDto.id(), contestId, now);
+        EnterContestDtoForController result = contestService.enterStudentInContest(studentId, contestId, now);
         return ResponseEntity.ok(
                 new EnterContestVOAPI(
                         result.runningStartDateTime(),
@@ -61,11 +56,10 @@ public class ContestController {
 
     @GetMapping("/v1/contest")
     public ResponseEntity<SearchContestsVO> searchContests(
-            @RequestHeader(name = "Authorization") String accessTokenHeader,
+            @RequestParam("student_id") UUID studentId,
             @RequestParam(value = "search", required = false) String parameter,
             @RequestParam("from") LocalDate from,
             @RequestParam("to") LocalDate to) {
-        UUID studentId = securityUtil.validateAuthorization(accessTokenHeader).id();
         if (parameter == null) {
             parameter = "";
         }
@@ -88,12 +82,11 @@ public class ContestController {
 
     @PostMapping("/v1/contest/{contest_id}/register")
     public ResponseEntity<CommonAPIResponseVO> registerContest(
-            @RequestHeader(name = "Authorization") String accessToken,
+            @RequestParam("student_id") UUID studentId,
             @RequestBody RegisterContestVO registerContestVo,
             @PathVariable("contest_id") UUID contestId
     ) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        contestService.registerContestByUser(contestId, studentDto, registerContestVo.authCode());
+        contestService.registerContestByUser(contestId, studentId, registerContestVo.authCode());
         return ResponseEntity.ok(new CommonAPIResponseVO(
                 HttpStatus.OK.value(),
                 "ok"
@@ -101,54 +94,50 @@ public class ContestController {
     }
 
     @GetMapping("/v1/contest/registered")
-    public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(@RequestHeader(name = "Authorization") String accessToken) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentDto.id());
+    public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(
+            @RequestParam("student_id") UUID studentId) {
+        List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentId);
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
     }
 
     @PutMapping("/v1/contest/{contest_id}/cancel")
     public ResponseEntity<APIOkMessageVO> cancelContest(
-            @RequestHeader(name = "Authorization") String accessToken,
+            @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
     ) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        contestService.cancelContest(contestId, studentDto.id(), LocalDateTime.now());
+        contestService.cancelContest(contestId, studentId, LocalDateTime.now());
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
     @PutMapping("/v1/contest/{contest_id}/resign")
     public ResponseEntity<APIOkMessageVO> resignContest(
-            @RequestHeader(name = "Authorization") String accessToken,
+            @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
     ) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentDto.id());
-        contestService.resignContest(contestId, studentDto.id());
-        log.info("trackingStudentService will remove log contest, contestId: {}, studentId: {}", contestId, studentDto.id());
-        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
+        log.info("request resign contest, contestId: {}, studentId: {}", contestId, studentId);
+        contestService.resignContest(contestId, studentId);
+        log.info("trackingStudentService will remove log contest, contestId: {}, studentId: {}", contestId, studentId);
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentId));
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
     @GetMapping("/v1/contests/end")
     public ResponseEntity<ContestsVO> getEndOfContests(
-            @RequestHeader(name = "Authorization") String accessToken
+            @RequestParam("student_id") UUID studentId
     ) {
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        List<SearchContestDto> contests = contestService.searchEndOfContests(studentDto.id());
+        List<SearchContestDto> contests = contestService.searchEndOfContests(studentId);
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 
     @PutMapping("/v1/contest/{contest_id}/end")
     public ResponseEntity<EndContestVO> endContest(
-            @RequestHeader(name = "Authorization") String accessToken,
+            @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
     ) {
         LocalDateTime endDateTime = LocalDateTime.now();
-        StudentDto studentDto = securityUtil.validateAuthorization(accessToken);
-        long diffTime = contestService.endingContest(contestId, studentDto.id(), endDateTime);
-        double average = problemService.createAverageScore(contestId, studentDto.id());
-        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentDto.id()));
+        long diffTime = contestService.endingContest(contestId, studentId, endDateTime);
+        double average = problemService.createAverageScore(contestId, studentId);
+        trackingStudentService.quitContest(new StudentInContestIdDto(contestId, studentId));
         return ResponseEntity.ok(new EndContestVO(average, diffTime));
     }
 }
