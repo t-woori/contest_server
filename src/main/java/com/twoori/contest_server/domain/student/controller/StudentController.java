@@ -38,7 +38,7 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @GetMapping("/v1/contest/student/status")
+    @GetMapping("/contest/student/status")
     public StudentStatusVO getStudentStatus(@RequestParam("student_id") UUID studentId) {
         EnterContestDto contestDto = contestService.findContestIdAboutEnterableContest(studentId, LocalDateTime.now());
         StudentInContestIdDto studentInContestID = new StudentInContestIdDto(contestDto.contestId(), studentId);
@@ -49,7 +49,7 @@ public class StudentController {
                 , new ProblemStatus(status.problemId(), status.contentId(), countOfTry)));
     }
 
-    @GetMapping("/v1/contest/{contest_id}/student/score")
+    @GetMapping("/contest/{contest_id}/student/score")
     public ResultScoreVo getScore(
             @PathVariable("contest_id") UUID contestId,
             @RequestParam("student_id") UUID studentId) {

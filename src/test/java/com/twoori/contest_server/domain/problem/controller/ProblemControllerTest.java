@@ -56,7 +56,7 @@ class ProblemControllerTest {
 
     private final UUID studentId = UUID.randomUUID();
 
-    @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Success|문제 제공 성공")
+    @DisplayName("GET /contest/{contest_id}/problem/{problem_id}|Success|문제 제공 성공")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfExistsProblemId")
     @ParameterizedTest
     void givenProblemId_whenGetProblem_thenProblemInfo(UUID contestId, Long noOfProblemInContest) throws Exception {
@@ -79,7 +79,7 @@ class ProblemControllerTest {
         // when & then
 
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
-                "/v1/contest/{contest_id}/problem/{problem_id}"
+                "/contest/{contest_id}/problem/{problem_id}"
                 , contestId.toString(), noOfProblemInContest.toString()
         ).param("student_id", String.valueOf(studentId)));
         actual.andExpect(status().isOk())
@@ -98,7 +98,7 @@ class ProblemControllerTest {
 
     }
 
-    @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|존재하지 문제 조회")
+    @DisplayName("GET /contest/{contest_id}/problem/{problem_id}|Fail|존재하지 문제 조회")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfNotExistsProblemId")
     @ParameterizedTest
     void givenNotFoundException_whenGetProblemThe404Status(UUID contestId, Long noOfProblemInContest) throws Exception {
@@ -108,28 +108,28 @@ class ProblemControllerTest {
 
         // when & then
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
-                        "/v1/contest/{contest_id}/problem/{problem_id}"
+                "/contest/{contest_id}/problem/{problem_id}"
                         , contestId.toString(), noOfProblemInContest.toString()
         ).param("student_id", String.valueOf(studentId)));
         actual.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("not found problem"));
     }
 
-    @DisplayName("GET /v1/contest/{contest_id}/problem/{problem_id}|Fail|null 혹은 유효하지 않는 값 존제")
+    @DisplayName("GET /contest/{contest_id}/problem/{problem_id}|Fail|null 혹은 유효하지 않는 값 존제")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfInvalidProblemId")
     @ParameterizedTest
     void givenInvalidateParam_whenThrowInvalidateExceptionOnValidator_then400Status(Object contestId, Object noOfProblemInContest) throws Exception {
 
         // when & then
         ResultActions actual = mvc.perform(MockMvcRequestBuilders.get(
-                        "/v1/contest/{contest_id}/problem/{problem_id}"
+                "/contest/{contest_id}/problem/{problem_id}"
                         , contestId, noOfProblemInContest
         ).param("student_id", String.valueOf(studentId)));
         actual.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("invalid parameter"));
     }
 
-    @DisplayName("PUT /v1/contest/{contest_id}/student/{student_id}/problem/score|Success|문제 제출 성공")
+    @DisplayName("PUT /contest/{contest_id}/student/{student_id}/problem/score|Success|문제 제출 성공")
     @Test
     void givenSolvedProblem_whenUpdateSolvedProblem_thenExecuteOnceUpdateMaxScoreAboutProblem() throws Exception {
         // given
@@ -137,7 +137,7 @@ class ProblemControllerTest {
         UUID studentId = UUID.randomUUID();
         SolvedProblemVO solvedProblemVO = new SolvedProblemVO(0L, 0L, 0.70);
         // when & then
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/student/{student_id}/problem/score",
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/student/{student_id}/problem/score",
                 contestId,
                 studentId).param("student_id", String.valueOf(studentId))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +149,7 @@ class ProblemControllerTest {
                 new SolvedProblemDto(contestId, studentId, solvedProblemVO.problemId(), solvedProblemVO.contentId(), solvedProblemVO.score()));
     }
 
-    @DisplayName("GET /v1/contest/{contest_id}/total_status | 10명이 1문제를 풀고있는 상황 조회 | Success | 1문제에 10명이 존재")
+    @DisplayName("GET /contest/{contest_id}/total_status | 10명이 1문제를 풀고있는 상황 조회 | Success | 1문제에 10명이 존재")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsForTotalStatus")
     @ParameterizedTest
     void givenRequestTotalStatusApi_whenGetStatus_thenReturnOfList(List<Long> countOfProblems) throws Exception {
@@ -158,7 +158,7 @@ class ProblemControllerTest {
         given(trackingStudentService.getTotalStatus()).willReturn(countOfProblems);
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/total_status", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/total_status", contestId)
                 .param("student_id", String.valueOf(studentId)));
         // then
         actual.andExpect(status().isOk())

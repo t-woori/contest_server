@@ -32,7 +32,7 @@ public class ProblemController {
         this.trackingStudentService = trackingStudentService;
     }
 
-    @GetMapping("/v1/contest/{contest_id}/total_status")
+    @GetMapping("/contest/{contest_id}/total_status")
     public ResponseEntity<ResponseTotalStatusVO> getTotalStatus(
             @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId) {
@@ -42,7 +42,7 @@ public class ProblemController {
         return ResponseEntity.ok(new ResponseTotalStatusVO(statues));
     }
 
-    @GetMapping("/v1/contest/{contest_id}/problem/{problem_id}")
+    @GetMapping("/contest/{contest_id}/problem/{problem_id}")
     public ResponseEntity<ProblemVO> getProblem(@PathVariable("contest_id") UUID contestId,
                                                 @PathVariable("problem_id") Long problemId,
                                                 @RequestParam("student_id") UUID studentId) {
@@ -57,7 +57,7 @@ public class ProblemController {
         return ResponseEntity.ok(mapper.dtoToVo(problem));
     }
 
-    @PutMapping("/v1/contest/{contest_id}/student/{student_id}/problem/score")
+    @PutMapping("/contest/{contest_id}/student/{student_id}/problem/score")
     public ResponseEntity<APIOkMessageVO> updateQuizStatus(@PathVariable("contest_id") UUID contestId, @PathVariable("student_id") UUID studentId,
                                                            @RequestBody SolvedProblemVO problemVO) {
         log.info("[Controller] request update quiz status : {}, contest_id: {}, student_id: {}", problemVO, contestId, studentId);

@@ -90,7 +90,7 @@ class ContestControllerTest {
         );
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest")
+        ResultActions actual = mvc.perform(get("/contest")
                 .param("from", from.toString())
                 .param("to", to.toString())
                 .param("search", parameter)
@@ -123,7 +123,7 @@ class ContestControllerTest {
                         LocalDateTime.now().plusMinutes(10))).toList());
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/registered")
+        ResultActions actual = mvc.perform(get("/contest/registered")
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -146,7 +146,7 @@ class ContestControllerTest {
         doNothing().when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -163,7 +163,7 @@ class ContestControllerTest {
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -180,7 +180,7 @@ class ContestControllerTest {
 
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -200,7 +200,7 @@ class ContestControllerTest {
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -218,7 +218,7 @@ class ContestControllerTest {
         doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
                 .param("student_id", String.valueOf(studentId))
                 .param("contest_id", contestId.toString()));
 
@@ -238,7 +238,7 @@ class ContestControllerTest {
 
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -256,7 +256,7 @@ class ContestControllerTest {
                 .when(contestService).resignContest(contestId, studentId);
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -274,7 +274,7 @@ class ContestControllerTest {
                         "contest name" + i, "host" + i,
                         LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2).plusMinutes(15))).toList());
         // when
-        ResultActions actual = mvc.perform(get("/v1/contests/end")
+        ResultActions actual = mvc.perform(get("/contests/end")
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -288,7 +288,7 @@ class ContestControllerTest {
     }
 
 
-    @DisplayName("PUT /v1/contest/{contest_id}/end|명시적 대회 종료 요청| 걸린 시간 제공")
+    @DisplayName("PUT /contest/{contest_id}/end|명시적 대회 종료 요청| 걸린 시간 제공")
     @Test
     void givenRequestEndContest_whenEndContest_thenReturnScoreAndTime() throws Exception {
         // given
@@ -302,7 +302,7 @@ class ContestControllerTest {
         doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/end", contestId)
                 .param("student_id", String.valueOf(studentId)));
 
 

@@ -65,7 +65,7 @@ class StudentControllerTest {
         given(problemService.getCountOfTry(studentInContestIdDto, problemIdDto)).willReturn(countOfTry);
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/student/status")
+        ResultActions actual = mvc.perform(get("/contest/student/status")
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -90,7 +90,7 @@ class StudentControllerTest {
         given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willThrow(new NotFoundRegisteredContestException(studentId, null));
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/student/status")
+        ResultActions actual = mvc.perform(get("/contest/student/status")
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -114,7 +114,7 @@ class StudentControllerTest {
         given(contestService.countTotalStudents(contestId)).willReturn(countStudents);
 
         //when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         //then
@@ -135,7 +135,7 @@ class StudentControllerTest {
         given(studentService.getScoreAndRank(contestId, studentId)).willThrow(new NotFoundRegisteredContestException(studentId, contestId));
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         // then
@@ -160,7 +160,7 @@ class StudentControllerTest {
         given(contestService.countTotalStudents(contestId)).willReturn(totalStudents);
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         // then

@@ -40,7 +40,7 @@ public class ContestController {
         this.trackingStudentService = trackingStudentService;
     }
 
-    @GetMapping("/v1/contest/{contest_id}/enter")
+    @GetMapping("/contest/{contest_id}/enter")
     public ResponseEntity<EnterContestVOAPI> requestEnterContest(
             @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId) {
@@ -54,7 +54,7 @@ public class ContestController {
         );
     }
 
-    @GetMapping("/v1/contest")
+    @GetMapping("/contest")
     public ResponseEntity<SearchContestsVO> searchContests(
             @RequestParam("student_id") UUID studentId,
             @RequestParam(value = "search", required = false) String parameter,
@@ -80,7 +80,7 @@ public class ContestController {
         );
     }
 
-    @PostMapping("/v1/contest/{contest_id}/register")
+    @PostMapping("/contest/{contest_id}/register")
     public ResponseEntity<CommonAPIResponseVO> registerContest(
             @RequestParam("student_id") UUID studentId,
             @RequestBody RegisterContestVO registerContestVo,
@@ -93,14 +93,14 @@ public class ContestController {
         ));
     }
 
-    @GetMapping("/v1/contest/registered")
+    @GetMapping("/contest/registered")
     public ResponseEntity<RegisteredContestsVO> getRegisteredContestsAboutStudent(
             @RequestParam("student_id") UUID studentId) {
         List<RegisteredContestDto> contests = contestService.searchContestForEnterContest(studentId);
         return ResponseEntity.ok(new RegisteredContestsVO(mapper.mapToVOList(contests)));
     }
 
-    @PutMapping("/v1/contest/{contest_id}/cancel")
+    @PutMapping("/contest/{contest_id}/cancel")
     public ResponseEntity<APIOkMessageVO> cancelContest(
             @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
@@ -109,7 +109,7 @@ public class ContestController {
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
-    @PutMapping("/v1/contest/{contest_id}/resign")
+    @PutMapping("/contest/{contest_id}/resign")
     public ResponseEntity<APIOkMessageVO> resignContest(
             @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
@@ -121,7 +121,7 @@ public class ContestController {
         return ResponseEntity.ok(new APIOkMessageVO());
     }
 
-    @GetMapping("/v1/contests/end")
+    @GetMapping("/contests/end")
     public ResponseEntity<ContestsVO> getEndOfContests(
             @RequestParam("student_id") UUID studentId
     ) {
@@ -129,7 +129,7 @@ public class ContestController {
         return ResponseEntity.ok(new ContestsVO(mapper.mapToListContestVO(contests)));
     }
 
-    @PutMapping("/v1/contest/{contest_id}/end")
+    @PutMapping("/contest/{contest_id}/end")
     public ResponseEntity<EndContestVO> endContest(
             @RequestParam("student_id") UUID studentId,
             @PathVariable("contest_id") UUID contestId
