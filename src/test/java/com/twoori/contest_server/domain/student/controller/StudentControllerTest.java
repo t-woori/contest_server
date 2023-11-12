@@ -65,7 +65,7 @@ class StudentControllerTest {
         given(problemService.getCountOfTry(studentInContestIdDto, problemIdDto)).willReturn(countOfTry);
 
         // when
-        ResultActions actual = mvc.perform(get("/contest/student/status")
+        ResultActions actual = mvc.perform(get("/student/contest/status")
                 .param("student_id", String.valueOf(studentId)));
 
         // then
@@ -90,7 +90,7 @@ class StudentControllerTest {
         given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willThrow(new NotFoundRegisteredContestException(studentId, null));
 
         // when
-        ResultActions actual = mvc.perform(get("/contest/student/status")
+        ResultActions actual = mvc.perform(get("/student/contest/status")
                 .param("student_id", String.valueOf(studentId)));
 
         // then

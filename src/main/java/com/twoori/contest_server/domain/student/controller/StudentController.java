@@ -38,7 +38,7 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @GetMapping("/contest/student/status")
+    @GetMapping("/student/contest/status")
     public StudentStatusVO getStudentStatus(@RequestParam("student_id") UUID studentId) {
         EnterContestDto contestDto = contestService.findContestIdAboutEnterableContest(studentId, LocalDateTime.now());
         StudentInContestIdDto studentInContestID = new StudentInContestIdDto(contestDto.contestId(), studentId);
