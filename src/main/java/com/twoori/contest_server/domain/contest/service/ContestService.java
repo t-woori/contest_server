@@ -9,7 +9,6 @@ import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
-import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestDto;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
 import com.twoori.contest_server.global.exception.BadRequestException;
@@ -86,7 +85,7 @@ public class ContestService {
         return contestRepository.getContestIdSetAboutRegisteredStudent(condition);
     }
 
-    public void registerContestByUser(UUID contestId, StudentDto studentDto, String authCode) {
+    public void registerContestByUser(UUID contestId, UUID studentId, String authCode) {
         Contest contest = contestRepository.findById(contestId)
                 .orElseThrow(() -> new NotFoundException("not found contest"));
         if (!contest.getAuthCode().equals(authCode)) {
@@ -94,7 +93,7 @@ public class ContestService {
         }
         studentInContestRepository.save(
                 StudentInContest.builder()
-                        .id(new StudentInContestID(studentDto.id(), contestId))
+                        .id(new StudentInContestID(studentId, contestId))
                         .isResigned(false)
                         .isEntered(false)
                         .build()

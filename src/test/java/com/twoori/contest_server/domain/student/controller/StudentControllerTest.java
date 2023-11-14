@@ -6,12 +6,9 @@ import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.ResultContestDto;
-import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.StudentService;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.global.security.SecurityUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +44,11 @@ class StudentControllerTest {
     private ContestService contestService;
     @MockBean
     private ProblemService problemService;
-    @MockBean
-    private SecurityUtil securityUtil;
+
     @MockBean
     private StudentService studentService;
     @Autowired
     private MockMvc mvc;
-
-    @BeforeEach
-    public void setupStudent() {
-        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId,
-                "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
-    }
 
     @DisplayName("진행중인 대회 검색|Success|진입가능한 대회 및 문제 기록 정보 제공")
     @Test
@@ -75,8 +65,8 @@ class StudentControllerTest {
         given(problemService.getCountOfTry(studentInContestIdDto, problemIdDto)).willReturn(countOfTry);
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/student/status")
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(get("/student/contest/status")
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isOk())
@@ -100,8 +90,8 @@ class StudentControllerTest {
         given(contestService.findContestIdAboutEnterableContest(eq(studentId), isA(LocalDateTime.class))).willThrow(new NotFoundRegisteredContestException(studentId, null));
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/student/status")
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(get("/student/contest/status")
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isNotFound())
@@ -124,7 +114,7 @@ class StudentControllerTest {
         given(contestService.countTotalStudents(contestId)).willReturn(countStudents);
 
         //when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         //then
@@ -145,7 +135,7 @@ class StudentControllerTest {
         given(studentService.getScoreAndRank(contestId, studentId)).willThrow(new NotFoundRegisteredContestException(studentId, contestId));
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         // then
@@ -170,7 +160,7 @@ class StudentControllerTest {
         given(contestService.countTotalStudents(contestId)).willReturn(totalStudents);
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/{contest_id}/student/score", contestId)
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
                 .param("student_id", studentId.toString()));
 
         // then

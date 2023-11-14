@@ -13,11 +13,8 @@ import com.twoori.contest_server.domain.contest.service.ContestService;
 import com.twoori.contest_server.domain.contest.vo.RegisteredContestVO;
 import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
-import com.twoori.contest_server.domain.student.dto.StudentDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.global.security.SecurityUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,24 +54,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class ContestControllerTest {
-    private final String mockToken = "Bearer MockToken";
     private final UUID studentId = UUID.randomUUID();
     private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     @MockBean
     private ContestService contestService;
     @MockBean
     private ProblemService problemService;
-    @MockBean
-    private SecurityUtil securityUtil;
+
     @MockBean
     private TrackingStudentService trackingStudentService;
     @Autowired
     private MockMvc mvc;
 
-    @BeforeEach
-    void beforeAll() {
-        given(securityUtil.validateAuthorization(mockToken)).willReturn(new StudentDto(studentId, "mockName", "mockKakaoAccToken", "mockKakaoRefToken"));
-    }
+
 
     @DisplayName("대회 검색|Success|검색 결과 totalContestCount 중 registeredContestCount 건이 신청한 대회")
     @MethodSource("com.twoori.contest_server.domain.contest.testsources.Parameters#argumentsForSearchContest")
@@ -98,11 +90,11 @@ class ContestControllerTest {
         );
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest")
+        ResultActions actual = mvc.perform(get("/contest")
                 .param("from", from.toString())
                 .param("to", to.toString())
                 .param("search", parameter)
-                .header("Authorization", mockToken));
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isOk())
@@ -122,10 +114,8 @@ class ContestControllerTest {
     void givenNonParameter_whenGetRegisteredContest_thenList20() throws Exception {
         // given
         List<UUID> contestIds = IntStream.range(0, 20).mapToObj(i -> UUID.randomUUID()).toList();
-        UUID studentId = UUID.randomUUID();
-        String mockHeader = "";
-        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
-                "name", "accessToken", "refreshToken"));
+
+
         given(contestService.searchContestForEnterContest(studentId)).willReturn(
                 IntStream.range(0, 20).mapToObj(i -> new RegisteredContestDto(contestIds.get(i),
                         "contest name" + i,
@@ -133,8 +123,8 @@ class ContestControllerTest {
                         LocalDateTime.now().plusMinutes(10))).toList());
 
         // when
-        ResultActions actual = mvc.perform(get("/v1/contest/registered")
-                .header("Authorization", mockHeader));
+        ResultActions actual = mvc.perform(get("/contest/registered")
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isOk())
@@ -156,8 +146,8 @@ class ContestControllerTest {
         doNothing().when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isOk())
@@ -173,8 +163,8 @@ class ContestControllerTest {
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isForbidden())
@@ -187,13 +177,11 @@ class ContestControllerTest {
     @ParameterizedTest
     void givenWrongParameter_whenCancelContest_thenFail(Object contestId) throws Exception {
         // given
-        String mockHeader = "";
-        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
-                "name", "accessToken", "refreshToken"));
+
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
-                .header("Authorization", mockHeader));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isBadRequest())
@@ -207,15 +195,13 @@ class ContestControllerTest {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
-        String mockHeader = "";
-        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(studentId,
-                "name", "accessToken", "refreshToken"));
+
         doThrow(new NotFoundRegisteredContestException(studentId, contestId))
                 .when(contestService).cancelContest(eq(contestId), eq(studentId), isA(LocalDateTime.class));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/cancel", contestId)
-                .header("Authorization", mockHeader));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/cancel", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isNotFound())
@@ -232,8 +218,8 @@ class ContestControllerTest {
         doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
-                .header("Authorization", mockToken)
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
+                .param("student_id", String.valueOf(studentId))
                 .param("contest_id", contestId.toString()));
 
         // then
@@ -249,13 +235,11 @@ class ContestControllerTest {
     @ParameterizedTest
     void givenWrongParameter_whenResignContest_then400Status(Object contestId) throws Exception {
         // given
-        String mockHeader = "";
-        given(securityUtil.validateAuthorization(mockHeader)).willReturn(new StudentDto(UUID.randomUUID(),
-                "name", "accessToken", "refreshToken"));
+
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
-                .header("Authorization", mockHeader));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isBadRequest())
@@ -272,8 +256,8 @@ class ContestControllerTest {
                 .when(contestService).resignContest(contestId, studentId);
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/resign", contestId)
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/resign", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         actual.andExpect(status().isBadRequest())
@@ -290,8 +274,8 @@ class ContestControllerTest {
                         "contest name" + i, "host" + i,
                         LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(2).plusMinutes(15))).toList());
         // when
-        ResultActions actual = mvc.perform(get("/v1/contests/end")
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(get("/contests/end")
+                .param("student_id", String.valueOf(studentId)));
 
         // then
         byte[] rawJson = actual.andReturn().getResponse().getContentAsByteArray();
@@ -304,7 +288,7 @@ class ContestControllerTest {
     }
 
 
-    @DisplayName("PUT /v1/contest/{contest_id}/end|명시적 대회 종료 요청| 걸린 시간 제공")
+    @DisplayName("PUT /contest/{contest_id}/end|명시적 대회 종료 요청| 걸린 시간 제공")
     @Test
     void givenRequestEndContest_whenEndContest_thenReturnScoreAndTime() throws Exception {
         // given
@@ -318,8 +302,8 @@ class ContestControllerTest {
         doNothing().when(trackingStudentService).quitContest(new StudentInContestIdDto(contestId, studentId));
 
         // when
-        ResultActions actual = mvc.perform(put("/v1/contest/{contest_id}/end", contestId)
-                .header("Authorization", mockToken));
+        ResultActions actual = mvc.perform(put("/contest/{contest_id}/end", contestId)
+                .param("student_id", String.valueOf(studentId)));
 
 
         // then

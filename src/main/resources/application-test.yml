@@ -15,7 +15,6 @@ spring:
     defer-datasource-initialization: true
   jackson.property-naming-strategy: SNAKE_CASE
 
-jwt.secret: test
 logging.level:
   org.hibernate.SQL: debug
   org.hibernate.type: trace
