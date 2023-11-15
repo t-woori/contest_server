@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.twoori.contest_server.domain.contest.dto.RegisteredContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDto;
 import com.twoori.contest_server.domain.contest.dto.SearchContestDtoForController;
+import com.twoori.contest_server.domain.contest.excpetion.ForbiddenRegisterContestException;
 import com.twoori.contest_server.domain.contest.excpetion.NotCancelRegisterContest;
 import com.twoori.contest_server.domain.contest.excpetion.NotFoundRegisteredContestException;
 import com.twoori.contest_server.domain.contest.excpetion.NotRegisteredContestException;
@@ -15,6 +16,7 @@ import com.twoori.contest_server.domain.contest.vo.SearchContestVO;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
+import com.twoori.contest_server.global.exception.BadRequestException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,9 +45,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -313,5 +315,89 @@ class ContestControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("{\"status\":200,\"message\":\"ok\"," +
                         "\"average\":" + average + ",\"diff_time\": " + diffTime + "}"));
+    }
+
+    @DisplayName("POST /contest/{contest_id}/register|Success|대회 신청 성공")
+    @Test
+    void givenRequestRegisterContest_whenRegisterContest_then200Status() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        willDoNothing().given(contestService).registerContestByUser(eq(contestId), eq(studentId), eq(authCode), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/contest/{contest_id}/register", contestId)
+                .param("student_id", String.valueOf(studentId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"auth_code\":\"" + authCode + "\"}"));
+
+        // then
+        actual.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":200,\"message\":\"ok\"}"));
+    }
+
+
+    @DisplayName("POST /contest/{contest_id}/register|Fail|올바르지 않은 인증 코드")
+    @Test
+    void givenInvalidateAuthCode_whenRegisterContest_then400Status() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        doThrow(new BadRequestException("not match auth code"))
+                .when(contestService).registerContestByUser(eq(contestId), eq(studentId), eq(authCode), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/contest/{contest_id}/register", contestId)
+                .param("student_id", String.valueOf(studentId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"auth_code\":\"" + authCode + "\"}"));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":400,\"message\":\"not match auth code\"}"));
+    }
+
+    @DisplayName("POST /contest/{contest_id}/register|Fail|시간이 지난 대회 신청")
+    @Test
+    void givenExpiredContest_whenRegisterContest_then403Status() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        doThrow(new ForbiddenRegisterContestException("expired register date"))
+                .when(contestService).registerContestByUser(eq(contestId), eq(studentId), eq(authCode), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/contest/{contest_id}/register", contestId)
+                .param("student_id", String.valueOf(studentId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"auth_code\":\"" + authCode + "\"}"));
+
+        // then
+        actual.andExpect(status().isForbidden())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":403,\"message\":\"expired register date\"}"));
+    }
+
+    @DisplayName("POST /contest/{contest_id}/register|Fail|취소한 대회 재신청")
+    @Test
+    void givenCancelContest_whenRegisterContest_then403Status() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        doThrow(new ForbiddenRegisterContestException("registered contest"))
+                .when(contestService).registerContestByUser(eq(contestId), eq(studentId), eq(authCode), isA(LocalDateTime.class));
+
+        // when
+        ResultActions actual = mvc.perform(post("/contest/{contest_id}/register", contestId)
+                .param("student_id", String.valueOf(studentId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"auth_code\":\"" + authCode + "\"}"));
+
+        // then
+        actual.andExpect(status().isForbidden())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"status\":403,\"message\":\"registered contest\"}"));
     }
 }

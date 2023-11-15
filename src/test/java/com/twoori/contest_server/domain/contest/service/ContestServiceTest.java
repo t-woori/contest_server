@@ -6,13 +6,14 @@ import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
 import com.twoori.contest_server.domain.contest.mapper.RepositoryMapper;
-import com.twoori.contest_server.domain.contest.mapper.RepositoryMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
 import com.twoori.contest_server.domain.student.repository.StudentInContestRepository;
+import com.twoori.contest_server.global.exception.BadRequestException;
+import com.twoori.contest_server.global.exception.NotFoundException;
 import com.twoori.contest_server.global.exception.PermissionDenialException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class ContestServiceTest {
     @Mock
     private StudentInContestRepository studentInContestRepository;
     @Spy
-    private RepositoryMapper repositoryMapper = new RepositoryMapperImpl();
+    private RepositoryMapper repositoryMapper;
 
     @DisplayName("대회 시작 10분전에 입장|Success|대회 입장 가능 시간 내에 입장 시도")
     @Test
@@ -602,4 +603,128 @@ class ContestServiceTest {
         assertThatThrownBy(() -> contestService.findContestIdAboutEnterableContest(studentId, runningEndDateTime))
                 .isInstanceOf(NotFoundRegisteredContestException.class);
     }
+
+
+    @DisplayName("대회 신청|Success|대회 시작 하루전에 신청")
+    @Test
+    void givenYesterday_whenRegisterContestByUser_thenSuccess() {
+        // given
+        LocalDateTime today = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        LocalDateTime runningStartDateTime = today.plusDays(1);
+        LocalDateTime runningEndDateTime = runningStartDateTime.plusMinutes(15);
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        Contest dao = new Contest(contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+        given(repositoryMapper.toContestDto(dao)).willReturn(new ContestDto(
+                contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5
+        ));
+        given(studentInContestRepository.findByIdIncludeSoftDelete(contestId, studentId))
+                .willReturn(Optional.empty());
+
+        // when
+        contestService.registerContestByUser(contestId, studentId, authCode, today);
+
+        // then
+        verify(studentInContestRepository, times(1)).save(
+                StudentInContest.builder()
+                        .id(new StudentInContestID(studentId, contestId))
+                        .isResigned(false).isEntered(false).build());
+    }
+
+    @DisplayName("대회 신청|Fail|올바르지 않은 인증 코드")
+    @Test
+    void givenInvalidateAuthCode_whenRegisterContestByUser_thenDenialOfRegisterException() {
+        // given
+        LocalDateTime today = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        LocalDateTime runningStartDateTime = today.plusDays(1);
+        LocalDateTime runningEndDateTime = runningStartDateTime.plusMinutes(15);
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        Contest dao = new Contest(contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+        given(repositoryMapper.toContestDto(dao)).willReturn(new ContestDto(
+                contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5
+        ));
+        String invalidateAuthCode = "invalidateCode";
+
+        // when & then
+        assertThatThrownBy(() -> contestService.registerContestByUser(contestId, studentId, invalidateAuthCode, today))
+                .isInstanceOf(BadRequestException.class);
+        verify(studentInContestRepository, never()).save(isA(StudentInContest.class));
+    }
+
+    @DisplayName("대회 신청|Fail|취소한 대회를 재신청")
+    @Test
+    void givenCancelContest_whenRegisterContest_ThenThrowDenialOfRegisterException() {
+        // given
+        LocalDateTime today = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        LocalDateTime runningStartDateTime = today.plusDays(1);
+        LocalDateTime runningEndDateTime = runningStartDateTime.plusMinutes(15);
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        Contest dao = new Contest(contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+        given(repositoryMapper.toContestDto(dao)).willReturn(new ContestDto(
+                contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5));
+        given(studentInContestRepository.findByIdIncludeSoftDelete(contestId, studentId))
+                .willReturn(Optional.of(StudentInContest.builder()
+                        .id(new StudentInContestID(studentId, contestId))
+                        .isResigned(true).isEntered(false).build()));
+
+        // when & then
+        assertThatThrownBy(() -> contestService.registerContestByUser(contestId, studentId, authCode, today))
+                .isInstanceOf(ForbiddenRegisterContestException.class);
+        verify(studentInContestRepository, never()).save(isA(StudentInContest.class));
+
+    }
+
+    @DisplayName("대회 신청|Fail|대회 시작 당일에 대회 신청")
+    @Test
+    void giveTodayStartContest_whenRegisterContestByUser_thenDenialOfRegisterException() {
+        // given
+        LocalDateTime runningStartDateTime = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        LocalDateTime today = runningStartDateTime.toLocalDate().atStartOfDay();
+        LocalDateTime runningEndDateTime = runningStartDateTime.plusMinutes(15);
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        Contest dao = new Contest(contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+        given(repositoryMapper.toContestDto(dao)).willReturn(new ContestDto(
+                contestId, authCode, "name", "hostName",
+                runningStartDateTime, runningEndDateTime, 0.5, 0.5));
+
+        // when & then
+        assertThatThrownBy(() -> contestService.registerContestByUser(contestId, studentId, authCode, today))
+                .isInstanceOf(ForbiddenRegisterContestException.class);
+        verify(studentInContestRepository, never()).save(isA(StudentInContest.class));
+    }
+
+    @DisplayName("대회 신청|Fail|존재하지 않은 대회 신청")
+    @Test
+    void giveNotExistContest_whenRegisterContestByUser_thenNotFoundContestException() {
+        // given
+        LocalDateTime today = LocalDateTime.of(2023, 10, 10, 15, 30, 0);
+        UUID studentId = UUID.randomUUID();
+        UUID contestId = UUID.randomUUID();
+        String authCode = "authCode";
+        given(contestRepository.findById(contestId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> contestService.registerContestByUser(contestId, studentId, authCode, today))
+                .isInstanceOf(NotFoundException.class);
+        verify(studentInContestRepository, never()).save(isA(StudentInContest.class));
+    }
+
 }
