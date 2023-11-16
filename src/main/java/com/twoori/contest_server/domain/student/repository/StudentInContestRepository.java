@@ -15,4 +15,6 @@ public interface StudentInContestRepository extends JpaRepository<StudentInConte
 
     Optional<StudentInContest> findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(UUID studentID, LocalDateTime runningEndDateTime);
 
+    @Query(value = "select * from student_in_contest s where s.contest_id = ?1  and s.student_id = ?2", nativeQuery = true)
+    Optional<StudentInContest> findByIdIncludeSoftDelete(UUID contestID, UUID studentId);
 }

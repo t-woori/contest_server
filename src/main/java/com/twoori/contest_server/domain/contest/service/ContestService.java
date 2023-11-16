@@ -85,12 +85,20 @@ public class ContestService {
         return contestRepository.getContestIdSetAboutRegisteredStudent(condition);
     }
 
-    public void registerContestByUser(UUID contestId, UUID studentId, String authCode) {
-        Contest contest = contestRepository.findById(contestId)
-                .orElseThrow(() -> new NotFoundException("not found contest"));
-        if (!contest.getAuthCode().equals(authCode)) {
+    public void registerContestByUser(UUID contestId, UUID studentId, String authCode, LocalDateTime registerDate) {
+        ContestDto contest = repositoryMapper.toContestDto(contestRepository.findById(contestId)
+                .orElseThrow(() -> new NotFoundException("not found contest")));
+        LocalDate runningStartDate = contest.runningStartDateTime().toLocalDate();
+        if (runningStartDate.isBefore(registerDate.toLocalDate()) || runningStartDate.isEqual(registerDate.toLocalDate())) {
+            throw new ForbiddenRegisterContestException("expired register date");
+        }
+        if (!contest.authCode().equals(authCode)) {
             throw new BadRequestException("not match auth code");
         }
+        studentInContestRepository.findByIdIncludeSoftDelete(contestId, studentId)
+                .ifPresent(studentInContest -> {
+                    throw new ForbiddenRegisterContestException("registered contest");
+                });
         studentInContestRepository.save(
                 StudentInContest.builder()
                         .id(new StudentInContestID(studentId, contestId))
