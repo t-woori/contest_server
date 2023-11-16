@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-@SQLDelete(sql = "UPDATE student_in_contest SET deleted_at = NOW() WHERE studend_id = ? and contest_id=?")
+@SQLDelete(sql = "UPDATE student_in_contest SET deleted_at = NOW() WHERE student_id =? and contest_id=?")
 @Where(clause = "deleted_at IS NULL")
 @Entity
 @Table(name = "student_in_contest")

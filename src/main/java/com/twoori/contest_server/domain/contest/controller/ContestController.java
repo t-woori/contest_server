@@ -86,7 +86,7 @@ public class ContestController {
             @RequestBody RegisterContestVO registerContestVo,
             @PathVariable("contest_id") UUID contestId
     ) {
-        contestService.registerContestByUser(contestId, studentId, registerContestVo.authCode());
+        contestService.registerContestByUser(contestId, studentId, registerContestVo.authCode(), LocalDateTime.now());
         return ResponseEntity.ok(new CommonAPIResponseVO(
                 HttpStatus.OK.value(),
                 "ok"

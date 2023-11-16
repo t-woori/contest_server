@@ -163,4 +163,33 @@ class StudentInContestRepositoryTest {
         // then
         assertThat(count).isEqualTo(n);
     }
+
+    @DisplayName("대회 신청 기록 조회|Success|Soft delete 포함한 검색")
+    @Test
+    void givenIncludeSoftDelete_whenFindByIdIncludeSoftDelete_thenFind() {
+        // given
+        Contest contest = new Contest(
+                UUID.randomUUID(), "test", "test", "test",
+                LocalDateTime.now().minusMinutes(2), LocalDateTime.now().plusMinutes(CONTEST_TIME),
+                0.5, 0.5
+        );
+        Student student = Student.builder().id(UUID.randomUUID()).nickname("nickname").build();
+        StudentInContest studentInContest = StudentInContest.builder()
+                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .contest(contest).student(student)
+                .deletedAt(LocalDateTime.now())
+                .isEntered(true).isResigned(false)
+                .build();
+        testEntityManager.persist(contest);
+        testEntityManager.persist(student);
+        testEntityManager.persist(studentInContest);
+
+        // when
+        Optional<StudentInContest> result = studentInContestRepository.findByIdIncludeSoftDelete(contest.getId(), student.getId());
+
+        // then
+        assertThat(result).isNotEmpty()
+                .map(StudentInContest::getDeletedAt)
+                .isNotEmpty();
+    }
 }
