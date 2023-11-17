@@ -1,6 +1,5 @@
 package com.twoori.contest_server.domain.contest.service;
 
-import com.twoori.contest_server.domain.contest.dao.Contest;
 import com.twoori.contest_server.domain.contest.dto.*;
 import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
@@ -170,14 +169,8 @@ public class ContestService {
 
     public EnterContestDto findContestIdAboutEnterableContest(UUID studentId, LocalDateTime now) {
         log.info("find contest id about enterable contest, studentId: {}", studentId);
-        Contest contest = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(studentId, now)
-                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null)).getContest();
-        return new EnterContestDto(
-                contest.getId(),
-                contest.getName(),
-                contest.getHostName(),
-                contest.getRunningStartDateTime(),
-                contest.getRunningEndDateTime());
+        return repositoryMapper.toEnterContestDto(studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(studentId, now)
+                .orElseThrow(() -> new NotFoundRegisteredContestException(studentId, null)).getContest());
     }
 
     @Cacheable(value = "contest_count", key = "#contestId")

@@ -2,6 +2,7 @@ package com.twoori.contest_server.domain.student.repository;
 
 import com.twoori.contest_server.domain.student.dao.StudentInContest;
 import com.twoori.contest_server.domain.student.dao.StudentInContestID;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,7 +14,10 @@ public interface StudentInContestRepository extends JpaRepository<StudentInConte
     @Query("select count(s) from StudentInContest s where s.id.contestID = ?1")
     long countById_ContestID(UUID contestID);
 
-    Optional<StudentInContest> findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(UUID studentID, LocalDateTime runningEndDateTime);
+    @EntityGraph(attributePaths = {"contest"})
+    Optional<StudentInContest> findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(UUID studentID, LocalDateTime runningEndDateTime);
+
+
 
     @Query(value = "select * from student_in_contest s where s.contest_id = ?1  and s.student_id = ?2", nativeQuery = true)
     Optional<StudentInContest> findByIdIncludeSoftDelete(UUID contestID, UUID studentId);
