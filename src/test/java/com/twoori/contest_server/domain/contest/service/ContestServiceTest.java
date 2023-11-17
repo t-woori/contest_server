@@ -6,6 +6,7 @@ import com.twoori.contest_server.domain.contest.excpetion.*;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapper;
 import com.twoori.contest_server.domain.contest.mapper.ContestDtoForControllerMapperImpl;
 import com.twoori.contest_server.domain.contest.mapper.RepositoryMapper;
+import com.twoori.contest_server.domain.contest.mapper.RepositoryMapperImpl;
 import com.twoori.contest_server.domain.contest.repository.ContestCondition;
 import com.twoori.contest_server.domain.contest.repository.ContestRepository;
 import com.twoori.contest_server.domain.student.dao.Student;
@@ -58,7 +59,7 @@ class ContestServiceTest {
     @Mock
     private StudentInContestRepository studentInContestRepository;
     @Spy
-    private RepositoryMapper repositoryMapper;
+    private RepositoryMapper repositoryMapper = new RepositoryMapperImpl();
 
     @DisplayName("대회 시작 10분전에 입장|Success|대회 입장 가능 시간 내에 입장 시도")
     @Test
@@ -727,4 +728,58 @@ class ContestServiceTest {
         verify(studentInContestRepository, never()).save(isA(StudentInContest.class));
     }
 
+
+    @DisplayName("대회 종료시간 체크|Success|대회 종료시간+1분에 요청")
+    @Test
+    void givenEndContestTimePlusOneMinute_whenCheckEndContestTime_thenFalse() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime endContestTime = LocalDateTime.of(2021, 10, 10, 15, 30, 0);
+        Contest dao = new Contest(contestId, "code", "name", "hostName",
+                endContestTime.minusMinutes(15), endContestTime,
+                0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+
+        // when
+        LocalDateTime requestTime = endContestTime.plusMinutes(1);
+        boolean actual = contestService.isAfterCompareDateTimeAboutEndContestTime(
+                contestId, requestTime, 60);
+
+        // then
+        assertThat(actual).isFalse();
+    }
+
+    @DisplayName("대회 종료시간 체크|Success|대회 종료시간+61분에 요청")
+    @Test
+    void givenEndContestTimePlusOneHour_whenCheckEndContestTime_thenTrue() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        LocalDateTime endContestTime = LocalDateTime.of(2021, 10, 10, 15, 30, 0);
+        Contest dao = new Contest(contestId, "code", "name", "hostName",
+                endContestTime.minusMinutes(15), endContestTime,
+                0.5, 0.5);
+        given(contestRepository.findById(contestId)).willReturn(Optional.of(dao));
+
+        // when
+        LocalDateTime requestTime = endContestTime.plusMinutes(61);
+        boolean actual = contestService.isAfterCompareDateTimeAboutEndContestTime(
+                contestId, requestTime, 60);
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @DisplayName("대회 종료시간 체크|Fail|존재하지 않은 대회")
+    @Test
+    void givenNotExistsContest_whenCheckEndContestTime_thenThrowNotFoundException() {
+        // given
+        UUID contestId = UUID.randomUUID();
+        given(contestRepository.findById(contestId)).willReturn(Optional.empty());
+
+        // when & then
+        LocalDateTime requestTime = LocalDateTime.of(2021, 10, 10, 15, 30, 0);
+        assertThatThrownBy(() -> contestService.isAfterCompareDateTimeAboutEndContestTime(
+                contestId, requestTime, 60))
+                .isInstanceOf(NotFoundException.class);
+    }
 }

@@ -23,8 +23,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -110,6 +109,7 @@ class StudentControllerTest {
         UUID studentId = UUID.randomUUID();
         ResultContestDto resultScoreVo = new ResultContestDto(1.0, 1L);
         long countStudents = 200L;
+        given(contestService.isAfterCompareDateTimeAboutEndContestTime(eq(contestId), isA(LocalDateTime.class), anyLong())).willReturn(true);
         given(studentService.getScoreAndRank(contestId, studentId)).willReturn(resultScoreVo);
         given(contestService.countTotalStudents(contestId)).willReturn(countStudents);
 
@@ -132,6 +132,7 @@ class StudentControllerTest {
         // given
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
+        given(contestService.isAfterCompareDateTimeAboutEndContestTime(eq(contestId), isA(LocalDateTime.class), anyLong())).willReturn(true);
         given(studentService.getScoreAndRank(contestId, studentId)).willThrow(new NotFoundRegisteredContestException(studentId, contestId));
 
         // when
@@ -154,9 +155,33 @@ class StudentControllerTest {
         UUID contestId = UUID.randomUUID();
         UUID studentId = UUID.randomUUID();
         long totalStudents = 100L;
+        given(contestService.isAfterCompareDateTimeAboutEndContestTime(eq(contestId), isA(LocalDateTime.class), anyLong())).willReturn(true);
         given(studentService.getScoreAndRank(contestId, studentId)).willReturn(new ResultContestDto(
-                0.0, 0L
-        ));
+                0.0, 0L));
+        given(contestService.countTotalStudents(contestId)).willReturn(totalStudents);
+
+        // when
+        ResultActions actual = mvc.perform(get("/contest/{contest_id}/student/score", contestId)
+                .param("student_id", studentId.toString()));
+
+        // then
+        actual.andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{" +
+                        "\"status\":400," +
+                        "\"message\":\"scoring score\"" + "}"));
+    }
+
+    @DisplayName("대회 결과 조회|Fail|문제 채점시간 1시간이 지나지 않은 경우")
+    @Test
+    void givenEndContestUnderOneHour_whenGetScoreAndRank_thenReturnInitValue() throws Exception {
+        // given
+        UUID contestId = UUID.randomUUID();
+        UUID studentId = UUID.randomUUID();
+        long totalStudents = 100L;
+        given(contestService.isAfterCompareDateTimeAboutEndContestTime(contestId, LocalDateTime.now(), 60)).willReturn(true);
+        given(studentService.getScoreAndRank(contestId, studentId)).willReturn(new ResultContestDto(
+                0.0, 0L));
         given(contestService.countTotalStudents(contestId)).willReturn(totalStudents);
 
         // when

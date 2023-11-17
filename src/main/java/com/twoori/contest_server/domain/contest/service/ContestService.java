@@ -184,4 +184,10 @@ public class ContestService {
     public long countTotalStudents(UUID contestId) {
         return studentInContestRepository.countById_ContestID(contestId);
     }
+
+    public boolean isAfterCompareDateTimeAboutEndContestTime(UUID contestId, LocalDateTime compareDateTime, long minute) {
+        ContestDto contestDto = repositoryMapper.toContestDto(contestRepository.findById(contestId)
+                .orElseThrow(() -> new NotFoundException("not found contest")));
+        return contestDto.runningEndDateTime().plusMinutes(minute).isBefore(compareDateTime);
+    }
 }
