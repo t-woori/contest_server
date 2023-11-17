@@ -53,11 +53,14 @@ public class StudentController {
     public ResultScoreVo getScore(
             @PathVariable("contest_id") UUID contestId,
             @RequestParam("student_id") UUID studentId) {
-        ResultContestDto result = studentService.getScoreAndRank(contestId, studentId);
-        long totalGrade = contestService.countTotalStudents(contestId);
-        if (result.rank() == 0 || result.score() == null) {
+        if (!contestService.isAfterCompareDateTimeAboutEndContestTime(contestId, LocalDateTime.now(), 60)) {
             throw new BadRequestException("scoring score");
         }
+        ResultContestDto result = studentService.getScoreAndRank(contestId, studentId);
+        if (result.rank() == null || result.rank() == 0 || result.score() == null) {
+            throw new BadRequestException("scoring score");
+        }
+        long totalGrade = contestService.countTotalStudents(contestId);
         return new ResultScoreVo(result.score(), result.rank(), totalGrade);
     }
 
