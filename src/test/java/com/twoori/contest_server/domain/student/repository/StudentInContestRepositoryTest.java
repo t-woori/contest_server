@@ -45,7 +45,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Success|진입 가능한 대회가 존재")
     @Test
-    void givenAccessibleContestWhenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeThenReturnStudentInContestThenReturnEntityOne() {
+    void givenAccessibleContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEntityOne() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -58,7 +58,7 @@ class StudentInContestRepositoryTest {
         testEntityManager.persist(studentInContest);
 
         // when
-        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(
                 student.getId(), now);
 
         // then
@@ -68,7 +68,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Fail|포기한 대회")
     @Test
-    void givenResignContestWhenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeThenReturnStudentInContestThenReturnEmpty() {
+    void givenResignContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -80,16 +80,16 @@ class StudentInContestRepositoryTest {
                 .build());
 
         // when
-        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(
                 student.getId(), now);
 
         // then
         assertThat(optionalEntity).isEmpty();
     }
 
-    @DisplayName("진입 가능한 대회 조회|Fail|종료된 대회")
+    @DisplayName("진입 가능한 대회 조회|Fail|시간이 초과된 대회")
     @Test
-    void givenExpiredContestWhenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeThenReturnStudentInContestThenReturnEmpty() {
+    void givenExpiredContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -102,7 +102,32 @@ class StudentInContestRepositoryTest {
                 .build());
 
         // when
-        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(
+                student.getId(), now);
+
+        // then
+        assertThat(optionalEntity).isEmpty();
+    }
+
+    @DisplayName("진입 가능한 대회 조회|Fail|명시적으로 종료한 대회")
+    @Test
+    void givenEndContestEarly_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startContestTime = now.minusMinutes(2);
+        LocalDateTime endContestTime = now.plusMinutes(CONTEST_TIME);
+        Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
+                startContestTime, endContestTime,
+                0.5, 0.5);
+        testEntityManager.persist(contest);
+        testEntityManager.persist(StudentInContest.builder()
+                .id(new StudentInContestID(student.getId(), contest.getId()))
+                .isEntered(true).isResigned(false)
+                .endContestAt(endContestTime.minusMinutes(2))
+                .build());
+
+        // when
+        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(
                 student.getId(), now);
 
         // then
@@ -112,7 +137,7 @@ class StudentInContestRepositoryTest {
     @DisplayName("진입 가능한 대회 조회|Fail|진입하지 않은 대회")
     @Transactional
     @Test
-    void givenNotEnteredContestWhenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeThenReturnStudentInContestThenReturnEmpty() {
+    void givenNotEnteredContest_whenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTime_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -124,7 +149,7 @@ class StudentInContestRepositoryTest {
                 .build());
 
         // when
-        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeAfter(
+        Optional<StudentInContest> optionalEntity = studentInContestRepository.findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull(
                 student.getId(), now);
 
         // then

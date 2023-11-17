@@ -2,14 +2,14 @@ package com.twoori.contest_server.domain.student.controller;
 
 import com.twoori.contest_server.domain.contest.dto.EnterContestDto;
 import com.twoori.contest_server.domain.contest.service.ContestService;
+import com.twoori.contest_server.domain.contest.vo.ContestStatusVo;
 import com.twoori.contest_server.domain.problem.dto.ProblemIdDto;
 import com.twoori.contest_server.domain.problem.service.ProblemService;
+import com.twoori.contest_server.domain.problem.vo.ProblemStatusVo;
 import com.twoori.contest_server.domain.student.dto.ResultContestDto;
 import com.twoori.contest_server.domain.student.dto.StudentInContestIdDto;
 import com.twoori.contest_server.domain.student.service.StudentService;
 import com.twoori.contest_server.domain.student.service.TrackingStudentService;
-import com.twoori.contest_server.domain.student.vo.ContestStatus;
-import com.twoori.contest_server.domain.student.vo.ProblemStatus;
 import com.twoori.contest_server.domain.student.vo.ResultScoreVo;
 import com.twoori.contest_server.domain.student.vo.StudentStatusVO;
 import com.twoori.contest_server.global.exception.BadRequestException;
@@ -44,9 +44,9 @@ public class StudentController {
         StudentInContestIdDto studentInContestID = new StudentInContestIdDto(contestDto.contestId(), studentId);
         ProblemIdDto status = trackingStudentService.getStudentStatusInContest(studentInContestID);
         int countOfTry = problemService.getCountOfTry(studentInContestID, status);
-        return new StudentStatusVO(new ContestStatus(
+        return new StudentStatusVO(new ContestStatusVo(
                 contestDto.contestId(), contestDto.startDateTime(), contestDto.endDateTime()
-                , new ProblemStatus(status.problemId(), status.contentId(), countOfTry)));
+                , new ProblemStatusVo(status.problemId(), status.contentId(), countOfTry)));
     }
 
     @GetMapping("/contest/{contest_id}/student/score")
