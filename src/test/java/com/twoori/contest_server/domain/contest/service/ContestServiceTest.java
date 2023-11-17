@@ -569,7 +569,7 @@ class ContestServiceTest {
 
     @DisplayName("시작한 대회중에 진입 가능한 대회 조회|Success|대회 종료 후 재진입을 위한 데이터 제공")
     @Test
-    void givenRunningWhenFindContestIdAboutEnterableContestThenReturnContestId() {
+    void givenRunning_henFindContestIdAboutEnterableContest_thenReturnContestId() {
         // given
         UUID studentId = UUID.randomUUID();
         UUID contestId = UUID.randomUUID();
@@ -593,7 +593,7 @@ class ContestServiceTest {
 
     @DisplayName("시작한 대회중에 진입 가능한 대회 조회|Fail|진입 가능한 대회가 없음")
     @Test
-    void givenRunningWhenFindContestIdAboutEnterableContestThenThroeNotFoundRegisteredContestException() {
+    void givenRunning_whenFindContestIdAboutEnterableContest_thenThroeNotFoundRegisteredContestException() {
         // given
         UUID studentId = UUID.randomUUID();
         LocalDateTime runningEndDateTime = LocalDateTime.now().plusMinutes(1);

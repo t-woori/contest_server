@@ -56,7 +56,7 @@ class ProblemServiceTest {
     @DisplayName("대회 ID와 문제 ID를 받아서 문제를 제공|Success|문제 제공 성공")
     @MethodSource("com.twoori.contest_server.domain.problem.testsources.Parameters#argumentsOfExistsProblemId")
     @ParameterizedTest
-    void giveProblemIdWhenGetProblemThenReturnProblem(UUID contestId, Long noOfProblemInContest) {
+    void giveProblemId_whenGetProblem_thenReturnProblem(UUID contestId, Long noOfProblemInContest) {
         // given
         ProblemDto expect = new ProblemDto(0L, PROBLEM_TYPE.BLANK, CHAPTER_TYPE.CAFFEE, GRADE.ELEMENTARY, "imageURL", List.of(
                 new ContentDto(0L, "answer", "preScript", "question", "postScript", "hint")));

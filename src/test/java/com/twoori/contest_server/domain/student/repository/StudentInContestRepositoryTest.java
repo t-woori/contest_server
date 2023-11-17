@@ -137,7 +137,7 @@ class StudentInContestRepositoryTest {
     @DisplayName("진입 가능한 대회 조회|Fail|진입하지 않은 대회")
     @Transactional
     @Test
-    void givenNotEnteredContestWhenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTimeThenReturnStudentInContestThenReturnEmpty() {
+    void givenNotEnteredContest_whenFindById_StudentIDAndIsEnteredTrueAndIsResignedFalseAndContest_RunningEndDateTime_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
