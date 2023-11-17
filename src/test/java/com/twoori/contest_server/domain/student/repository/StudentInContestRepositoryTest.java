@@ -45,7 +45,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Success|진입 가능한 대회가 존재")
     @Test
-    void givenAccessibleContest_whenFindById_StudentIDAndContest_RunningEndDateTimeBeforeAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEntityOne() {
+    void givenAccessibleContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEntityOne() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -68,7 +68,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Fail|포기한 대회")
     @Test
-    void givenResignContest_whenfindById_StudentIDAndContest_RunningEndDateTimeBeforeAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
+    void givenResignContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -89,7 +89,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Fail|시간이 초과된 대회")
     @Test
-    void givenExpiredContest_whenFindById_StudentIDAndContest_RunningEndDateTimeBeforeAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
+    void givenExpiredContest_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         Contest contest = new Contest(UUID.randomUUID(), "test", "test", "test",
@@ -111,7 +111,7 @@ class StudentInContestRepositoryTest {
 
     @DisplayName("진입 가능한 대회 조회|Fail|명시적으로 종료한 대회")
     @Test
-    void givenEndContestEarly_whenFindById_StudentIDAndContest_RunningEndDateTimeBeforeAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
+    void givenEndContestEarly_findById_StudentIDAndContest_RunningEndDateTimeAfterAndIsEnteredTrueAndIsResignedFalseAndEndContestAtNull_thenReturnStudentInContestThenReturnEmpty() {
         // given
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startContestTime = now.minusMinutes(2);
