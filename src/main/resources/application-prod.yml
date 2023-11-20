@@ -37,3 +37,10 @@ management:
     web:
       exposure:
         include: health
+
+server:
+  tomcat:
+    threads:
+      max: ${TOMCAT_THREAD_MAX}
+      min-space: ${TOMCAT_MIN_SPACE}
+    accept-count: 100
