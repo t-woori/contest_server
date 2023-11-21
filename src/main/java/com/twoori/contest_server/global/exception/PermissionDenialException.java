@@ -7,7 +7,4 @@ public class PermissionDenialException extends APIException {
         super(HttpStatus.FORBIDDEN, message);
     }
 
-    public PermissionDenialException(Throwable cause, String message) {
-        super(cause, HttpStatus.FORBIDDEN, message);
-    }
 }

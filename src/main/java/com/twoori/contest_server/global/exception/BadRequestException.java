@@ -7,7 +7,4 @@ public class BadRequestException extends APIException {
         super(HttpStatus.BAD_REQUEST, message);
     }
 
-    public BadRequestException(String message, Throwable cause) {
-        super(cause, HttpStatus.BAD_REQUEST, message);
-    }
 }

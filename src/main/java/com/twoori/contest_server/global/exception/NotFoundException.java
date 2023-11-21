@@ -7,8 +7,5 @@ public class NotFoundException extends APIException {
         super(HttpStatus.NOT_FOUND, message);
     }
 
-    public NotFoundException(String message, Throwable cause) {
-        super(cause, HttpStatus.NOT_FOUND, message);
-    }
 
 }

@@ -13,11 +13,6 @@ public class APIException extends RuntimeException {
         this.message = message;
     }
 
-    public APIException(Throwable cause, HttpStatus httpStatus, String message) {
-        super(cause);
-        this.httpStatus = httpStatus;
-        this.message = message;
-    }
 
     public String getParamsInfo() {
         return "APIException{" +
