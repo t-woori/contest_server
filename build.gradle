@@ -46,6 +46,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     testImplementation "org.testcontainers:testcontainers:1.19.1"
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
 
 }
 
@@ -53,12 +54,17 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+var coverageExcludeList = [
+        '**/dao/*'
+]
+
 sonar {
     properties {
         property "sonar.projectKey", "contest-server"
         property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
         property "sonar.sources", "src/main/java"
         property "sonar.tests.url", "src/test/java"
+        property "sonar.coverage.exclusions", coverageExcludeList
     }
 }
 
