@@ -38,3 +38,7 @@ out/
 
 ### tmp ###
 tmp
+
+### K8S Secrets ###
+
+infra/secrets/**
