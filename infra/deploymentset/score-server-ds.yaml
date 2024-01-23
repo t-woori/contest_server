@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: score-ds
+  labels:
+    name: tiwoori
+    service: deploymentset
+    domain: score
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tiwoori
+      service: server
+      domain: score
+  template:
+    metadata:
+      labels:
+        name: tiwoori
+        service: server
+        domain: score
+    spec:
+      containers:
+        - name: score-server
+          image: 020759504372.dkr.ecr.ap-northeast-2.amazonaws.com/t-woori-contest-score:latest
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 50
+            periodSeconds: 10
+          env:
+            - name: T_WOORI_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-score-secret
+                  key: host
+            - name: T_WOORI_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-score-secret
+                  key: user
+            - name: T_WOORI_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-score-secret
+                  key: password
+            - name: T_WOORI_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-score-secret
+                  key: name
+            - name: T_WOORI_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: host
+            - name: T_WOORI_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: port
+            - name: T_WOORI_CONTEST_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: score-configmap
+                  key: contest.url
+            - name: T_WOORI_CONTEST_SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: score-configmap
+                  key: contest.port
+            - name: T_WOORI_CONTEST_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: score-configmap
+                  key: contest_id
+              

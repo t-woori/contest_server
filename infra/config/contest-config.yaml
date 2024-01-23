@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contest-configmap
+  namespace: prod
+  labels:
+    name: tiwoori
+    service: config
+    domain: contest
+data:
+  rdb.cp.max_pool_size: "30"
+  rdb.cp.min_idle: "10"
+  rdb.cp.idle_timeout: "1800"
+  rdb.cp.max_lifetime: "3600"
+  rdb.cp.connection_timeout: "1800"
+  server.cp.tomcat_thread_max: "100"
+  server.cp.tomcat_accept_count: "200"
+  server.cp.tomcat_max_connections: "10000"

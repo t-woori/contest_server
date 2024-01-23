@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contest-ds
+  labels:
+    name: tiwoori
+    service: deploymentset
+    domain: contest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tiwoori
+      service: server
+      domain: contest
+  template:
+    metadata:
+      labels:
+        name: tiwoori
+        service: server
+        domain: contest
+    spec:
+      containers:
+        - name: contest-server
+          image: 020759504372.dkr.ecr.ap-northeast-2.amazonaws.com/contest-server:200
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 50
+            periodSeconds: 10
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-contest-secret
+                  key: user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-contest-secret
+                  key: password
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-contest-secret
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-contest-secret
+                  key: port
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: rdb-contest-secret
+                  key: name
+            - name: DB_MAX_POOL_SIZE
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: rdb.cp.max_pool_size
+            - name: DB_MIN_IDLE
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: rdb.cp.min_idle
+            - name: DB_IDLE_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: rdb.cp.idle_timeout
+            - name: DB_MAX_LIFETIME
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: rdb.cp.max_lifetime
+            - name: DB_CONNECTION_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: rdb.cp.connection_timeout
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: host
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-configmap
+                  key: port
+            - name: TOMCAT_THREAD_MAX
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: server.cp.tomcat_thread_max
+            - name: TOMCAT_ACCEPT_COUNT
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: server.cp.tomcat_accept_count
+            - name: TOMCAT_MAX_CONNECTIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: contest-configmap
+                  key: server.cp.tomcat_max_connections

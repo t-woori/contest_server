@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-configmap
+  namespace: prod
+  labels:
+    name: tiwoori
+    service: cache
+    domain: common
+data:
+  host: "tiwoori-cache-demo.8dcesp.clustercfg.apn2.cache.amazonaws.com"
+  port: "6379"
